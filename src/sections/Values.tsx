@@ -32,7 +32,7 @@ export default function Values() {
         initial={{ opacity: 0, y: 36 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-40px' }}
-        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
         className="text-center mb-16 lg:mb-[72px]"
       >
         <div className="eye-text eye-text-center mb-3.5">What We Stand For</div>
@@ -50,8 +50,8 @@ export default function Values() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-40px' }}
             transition={{ 
-              duration: 0.9, 
-              ease: [0.16, 1, 0.3, 1],
+              duration: 1.2, 
+              ease: [0.22, 1, 0.36, 1],
               delay: index * 0.1 
             }}
             className="group p-10 lg:p-11 bg-white relative transition-all duration-400 hover:-translate-y-2 hover:shadow-[0_28px_60px_rgba(0,0,0,0.08)]"

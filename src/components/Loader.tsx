@@ -20,13 +20,13 @@ export default function Loader({ isLoading }: LoaderProps) {
               alt="Slug's Era Logo"
               initial={{ opacity: 0, y: 20, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
               className="h-24 lg:h-32 w-auto object-contain bg-transparent drop-shadow-lg"
             />
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: 120 }}
-              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
+              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
               className="h-0.5 bg-[#C0132A] rounded-sm"
             />
           </div>

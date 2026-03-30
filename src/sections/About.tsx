@@ -29,7 +29,7 @@ export default function About() {
           initial={{ opacity: 0, scale: 0.94 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, margin: '-40px' }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
           className="relative"
         >
           <img
@@ -54,7 +54,7 @@ export default function About() {
             initial={{ opacity: 0, y: 36 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-40px' }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
             className="font-display text-[clamp(48px,9vw,128px)] font-light text-transparent leading-none mb-[-14px]"
             style={{ WebkitTextStroke: '1px #E8E4E0' }}
           >
@@ -66,7 +66,7 @@ export default function About() {
             initial={{ opacity: 0, y: 36 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-40px' }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
             className="eye-text mb-3.5 uppercase"
           >
             OUR STORY
@@ -77,7 +77,7 @@ export default function About() {
             initial={{ opacity: 0, y: 36 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-40px' }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
             className="section-title mb-6"
           >
             Born from a<br />
@@ -89,7 +89,7 @@ export default function About() {
             initial={{ opacity: 0, y: 36 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-40px' }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
             className="font-display text-[21px] italic font-light text-[#1A1A1A] leading-[1.65] border-l-2 border-[#C0132A] pl-5 mb-7"
           >
             "We got tired of choosing between things that looked good and things that felt good. So we built something that didn't ask you to compromise."
@@ -100,7 +100,7 @@ export default function About() {
             initial={{ opacity: 0, y: 36 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-40px' }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.25 }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.25 }}
             className="text-[15px] font-light leading-[1.8] text-[#888880] mb-8 space-y-4"
           >
             <p>It started with the two of us just searching.</p>
@@ -115,7 +115,7 @@ export default function About() {
             initial={{ opacity: 0, y: 36 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-40px' }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
             className="font-display text-[30px] italic font-light text-[#C0132A] h-[45px]"
           >
             <TypeAnimation

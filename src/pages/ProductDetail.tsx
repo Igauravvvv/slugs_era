@@ -89,7 +89,7 @@ export default function ProductDetail() {
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           >
             {/* Main Image */}
             <div className="relative bg-[#F9F7F5] aspect-square mb-4 overflow-hidden">
@@ -155,7 +155,7 @@ export default function ProductDetail() {
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
           >
             {/* Category */}
             <div className="text-[10px] font-medium tracking-[0.24em] uppercase text-[#C0132A] mb-3">

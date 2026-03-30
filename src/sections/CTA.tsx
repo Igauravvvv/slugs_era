@@ -46,7 +46,7 @@ export default function CTA() {
         initial={{ opacity: 0, y: 36 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-40px' }}
-        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
         className="relative z-10"
       >
         <div className="text-[10px] font-medium tracking-[0.24em] uppercase text-white/70 mb-4">

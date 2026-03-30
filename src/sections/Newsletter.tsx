@@ -44,7 +44,7 @@ export default function Newsletter() {
         initial={{ opacity: 0, y: 36 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-40px' }}
-        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
       >
         <div className="eye-text eye-text-center mb-3">Stay in the Loop</div>
 

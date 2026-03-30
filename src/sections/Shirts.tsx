@@ -32,7 +32,7 @@ export default function Shirts() {
           initial={{ opacity: 0, x: -48 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: false, margin: '-20px', amount: 0.1 }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="text-[12px] font-medium tracking-[0.24em] uppercase text-[#C0132A] mb-6 flex items-center gap-4">
             <span className="w-8 h-px bg-[#C0132A]" />
@@ -74,7 +74,7 @@ export default function Shirts() {
           initial={{ opacity: 0, x: 48 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: false, margin: '-20px', amount: 0.1 }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
           className="grid grid-cols-2 gap-6"
         >
           {shirts.map((shirt, index) => {
@@ -85,7 +85,7 @@ export default function Shirts() {
                 initial={{ opacity: 0, x: initialX, filter: 'blur(10px)', scale: 0.85 }}
                 whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)', scale: 1 }}
                 viewport={{ once: false, margin: '-20px', amount: 0.1 }}
-                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: index * 0.15 }}
+                transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: index * 0.15 }}
                 onClick={() => handleProductClick(shirt)}
                 className={`bg-white/[0.04] border border-white/[0.07] overflow-hidden cursor-pointer transition-colors duration-300 hover:border-[#C0132A]/40 ${index === 0 ? 'mt-10' : ''
                   }`}
@@ -99,9 +99,9 @@ export default function Shirts() {
                       scale: 1.15,
                       rotate: [-2, 2, -1, 1, 0],
                       filter: 'brightness(1.1) contrast(1.05) drop-shadow(0 20px 30px rgba(255,255,255,0.05))',
-                      transition: { duration: 0.8, ease: "easeOut" }
+                      transition: { duration: 1.1, ease: "easeOut" }
                     }}
-                    transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
                   />
                 </div>
                 <div className="p-4 border-t border-white/[0.07] flex justify-between items-center text-[12px]">

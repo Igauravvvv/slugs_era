@@ -68,15 +68,15 @@ export default function Hero() {
           <motion.div
             initial={{ opacity: 0, x: -120 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+            transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
             className="text-[10px] font-medium tracking-[0.24em] uppercase text-white/85 mb-6 flex items-center gap-3 h-[20px]"
           >
             <span className="w-7 h-px bg-white/60 shrink-0" />
             <TypeAnimation
               sequence={[
-                'Movement. Not Merch — New Season',
-                3000,
                 'Movement. Not Merch — The Slow Club',
+                3000,
+                'Movement. Not Merch — New Season',
                 3000,
                 'Movement. Not Merch — Exclusive Drops',
                 3000,
@@ -94,7 +94,7 @@ export default function Hero() {
           <motion.h1
             initial={{ opacity: 0, x: -120 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.45 }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.45 }}
             className="font-display text-[clamp(42px,6vw,92px)] font-light leading-[1.04] text-white mb-6"
             style={{ textShadow: '0 4px 32px rgba(0,0,0,0.3)' }}
           >
@@ -107,7 +107,7 @@ export default function Hero() {
           <motion.p
             initial={{ opacity: 0, x: -120 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.6 }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.6 }}
             className="text-[15px] font-light leading-[1.85] text-white/75 max-w-[380px] mb-12"
           >
             Premium pieces for those who value intention over impulse. Crafted without compromise.
@@ -117,7 +117,7 @@ export default function Hero() {
           <motion.div
             initial={{ opacity: 0, x: -120 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.75 }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.75 }}
             className="flex gap-5 items-center mb-12"
           >
             <button onClick={scrollToProducts} className="btn-primary group">
@@ -133,10 +133,10 @@ export default function Hero() {
           <motion.div
             initial={{ opacity: 0, x: -120 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.9 }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.9 }}
             className="flex gap-2.5 flex-wrap pt-9 border-t border-white/[0.18]"
           >
-            {['100% Organic', 'Slow Fashion', '6+ Drops', 'Movement. Not Merch'].map((tag) => (
+            {['100% Organic', 'Slow Fashion', '5 Drops', 'Movement. Not Merch'].map((tag) => (
               <span
                 key={tag}
                 className="text-[10px] font-medium tracking-[0.12em] uppercase text-white/72 border border-white/[0.22] px-3.5 py-1.5 transition-all duration-200 cursor-default hover:text-white hover:border-white/50 hover:bg-white/[0.08]"
@@ -160,7 +160,7 @@ export default function Hero() {
           className="w-full h-full object-cover object-top"
           initial={{ opacity: 0, x: 120 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
         />
         {/* Gradient overlay */}
         <div

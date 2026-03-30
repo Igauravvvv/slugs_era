@@ -49,7 +49,7 @@ export default function Collections() {
 
   const item = {
     hidden: { opacity: 0, y: 30 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const } }
+    show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const } }
   };
 
   return (
@@ -91,7 +91,7 @@ export default function Collections() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
           className="mb-16 lg:mb-24 flex flex-col items-center text-center max-w-3xl mx-auto"
         >
           <div className="text-[10px] font-medium tracking-[0.24em] uppercase text-[#C0132A] mb-4">

@@ -140,27 +140,35 @@ export default function Header({ minimal = false }: HeaderProps) {
   };
 
   // Helper function to render header contents, reducing code duplication
-  const renderHeaderContent = (theme: 'red' | 'white') => {
-    const textColor = theme === 'white' ? 'text-white' : 'text-[#C0132A]';
+  const renderHeaderContent = (theme: 'red' | 'white' | 'transparent') => {
+    // If 'transparent', force invisible text to keep exact layout spacing but avoid rendering double text
+    const textColor = theme === 'transparent' ? 'text-transparent' : (theme === 'white' ? 'text-white' : 'text-[#C0132A]');
     // Use valid raw CSS filter strings
     const logoFilter = theme === 'white'
       ? 'brightness(0) invert(1)'
       : 'brightness(0) saturate(100%) invert(18%) sepia(74%) saturate(4422%) hue-rotate(343deg) brightness(85%) contrast(100%)';
 
+    const isTransparent = theme === 'transparent';
+
     return (
-      <div className="flex lg:grid lg:grid-cols-3 items-center justify-between px-6 lg:px-16 h-[76px] w-full bg-transparent">
+      <div className={`flex lg:grid lg:grid-cols-3 items-center justify-between px-6 lg:px-16 h-[76px] w-full bg-transparent ${isTransparent ? 'pointer-events-none' : ''}`}>
         {/* Left Side: Mobile Logo & Desktop Left Nav */}
         <div className="flex items-center justify-start gap-11">
-          <button onClick={goHome} className="flex items-center lg:hidden">
+          <button onClick={goHome} className={`flex items-center lg:hidden ${isTransparent ? 'opacity-0 pointer-events-none' : ''}`}>
             {theme === 'red' && currentView === 'home' && isTop ? (
-              <motion.video
+              <video
                 src="/images/logo's animated.mp4"
                 autoPlay
                 muted
                 playsInline
-                className="h-10 aspect-[1.9] object-cover object-left bg-transparent mix-blend-multiply transition-all duration-500 delay-100"
-                initial={{ opacity: 1, scale: 1.5, y: 6 }}
-                animate={{ opacity: 1, scale: 1.5, y: 6 }}
+                ref={(el) => {
+                  if (el && !el.dataset.started) {
+                    el.dataset.started = 'true';
+                    el.currentTime = 0.2;
+                    el.play().catch(() => { });
+                  }
+                }}
+                className="h-10 aspect-[1.9] object-cover object-left bg-transparent mix-blend-multiply transition-all duration-500 scale-[1.5] translate-y-1.5"
               />
             ) : (
               <motion.img
@@ -173,30 +181,34 @@ export default function Header({ minimal = false }: HeaderProps) {
           </button>
 
           {!minimal && (
-            <nav className="hidden lg:flex gap-11 items-center">
+            <nav className={`hidden lg:flex gap-11 items-center ${isTransparent ? 'pointer-events-auto' : ''}`}>
               <div className="relative group/nav">
                 <button
                   onClick={() => { setCollectionFilter(null, null); setView('collections'); }}
-                  className={`text-[11px] font-medium tracking-[0.15em] uppercase ${textColor} opacity-85 relative transition-opacity duration-200 hover:opacity-100 group/link`}
+                  className={`text-[11px] font-medium tracking-[0.15em] uppercase ${textColor} ${!isTransparent ? 'opacity-85 hover:opacity-100' : ''} relative transition-opacity duration-200 group/link`}
                 >
                   Collection
-                  <span className={`absolute -bottom-1 left-0 w-0 h-px ${theme === 'white' ? 'bg-white' : 'bg-[#C0132A]'} transition-all duration-300 group-hover/link:w-full`}
-                    style={{ transitionTimingFunction: 'var(--ease)' }} />
+                  {!isTransparent && (
+                    <span className={`absolute -bottom-1 left-0 w-0 h-px ${theme === 'white' ? 'bg-white' : 'bg-[#C0132A]'} transition-all duration-300 group-hover/link:w-full`}
+                      style={{ transitionTimingFunction: 'var(--ease)' }} />
+                  )}
                 </button>
 
-                {/* Dropdown Menu */}
-                <div className="absolute top-full left-0 pt-4 opacity-0 pointer-events-none group-hover/nav:opacity-100 group-hover/nav:pointer-events-auto transition-all duration-300 z-50">
-                  <div className="bg-white border border-[#E8E4E0] shadow-xl rounded-sm p-4 w-48 flex flex-col gap-3">
-                    <button onClick={() => { setCollectionFilter('shirts', null); setView('collections'); }} className="text-left text-xs uppercase tracking-wider text-[#1A1A1A] hover:text-[#C0132A] transition-colors">Shirts</button>
-                    <button onClick={() => { setCollectionFilter('tshirts', null); setView('collections'); }} className="text-left text-xs uppercase tracking-wider text-[#1A1A1A] hover:text-[#C0132A] transition-colors">T-Shirts</button>
-                    <div className="pt-2 border-t border-[#E8E4E0]">
-                      <button onClick={() => { setCollectionFilter('hoodies', null); setView('collections'); }} className="text-left text-xs uppercase tracking-wider text-[#1A1A1A] hover:text-[#C0132A] transition-colors mb-2 block w-full">Hoodies</button>
-                      <button onClick={() => { setCollectionFilter('hoodies', 'embroidery'); setView('collections'); }} className="text-left text-[10px] pl-3 uppercase tracking-wider text-[#1A1A1A]/70 hover:text-[#C0132A] transition-colors block w-full py-1">Embroidery</button>
-                      <button onClick={() => { setCollectionFilter('hoodies', 'patchwork'); setView('collections'); }} className="text-left text-[10px] pl-3 uppercase tracking-wider text-[#1A1A1A]/70 hover:text-[#C0132A] transition-colors block w-full py-1">Patchwork</button>
-                      <button onClick={() => { setCollectionFilter('hoodies', 'printed'); setView('collections'); }} className="text-left text-[10px] pl-3 uppercase tracking-wider text-[#1A1A1A]/70 hover:text-[#C0132A] transition-colors block w-full py-1">Printed</button>
+                {/* Dropdown Menu - ONLY render in the transparent (unclipped) layer to overcome clip-path z-index bug */}
+                {isTransparent && (
+                  <div className="absolute top-full left-0 pt-4 opacity-0 pointer-events-none group-hover/nav:opacity-100 group-hover/nav:pointer-events-auto transition-all duration-300 z-[502]">
+                    <div className="bg-white border border-[#E8E4E0] shadow-xl rounded-sm p-4 w-48 flex flex-col gap-3">
+                      <button onClick={() => { setCollectionFilter('shirts', null); setView('collections'); }} className="text-left text-xs uppercase tracking-wider text-[#1A1A1A] hover:text-[#C0132A] transition-colors">Shirts</button>
+                      <button onClick={() => { setCollectionFilter('tshirts', null); setView('collections'); }} className="text-left text-xs uppercase tracking-wider text-[#1A1A1A] hover:text-[#C0132A] transition-colors">T-Shirts</button>
+                      <div className="pt-2 border-t border-[#E8E4E0]">
+                        <button onClick={() => { setCollectionFilter('hoodies', null); setView('collections'); }} className="text-left text-xs uppercase tracking-wider text-[#1A1A1A] hover:text-[#C0132A] transition-colors mb-2 block w-full">Hoodies</button>
+                        <button onClick={() => { setCollectionFilter('hoodies', 'embroidery'); setView('collections'); }} className="text-left text-[10px] pl-3 uppercase tracking-wider text-[#1A1A1A]/70 hover:text-[#C0132A] transition-colors block w-full py-1">Embroidery</button>
+                        <button onClick={() => { setCollectionFilter('hoodies', 'patchwork'); setView('collections'); }} className="text-left text-[10px] pl-3 uppercase tracking-wider text-[#1A1A1A]/70 hover:text-[#C0132A] transition-colors block w-full py-1">Patchwork</button>
+                        <button onClick={() => { setCollectionFilter('hoodies', 'printed'); setView('collections'); }} className="text-left text-[10px] pl-3 uppercase tracking-wider text-[#1A1A1A]/70 hover:text-[#C0132A] transition-colors block w-full py-1">Printed</button>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {[
@@ -206,11 +218,13 @@ export default function Header({ minimal = false }: HeaderProps) {
                 <button
                   key={item.id}
                   onClick={() => scrollToSection(item.id)}
-                  className={`text-[11px] font-medium tracking-[0.15em] uppercase ${textColor} opacity-85 relative transition-opacity duration-200 hover:opacity-100 group`}
+                  className={`text-[11px] font-medium tracking-[0.15em] uppercase ${textColor} ${!isTransparent ? 'opacity-85 hover:opacity-100' : ''} relative transition-opacity duration-200 group`}
                 >
                   {item.label}
-                  <span className={`absolute -bottom-1 left-0 w-0 h-px ${theme === 'white' ? 'bg-white' : 'bg-[#C0132A]'} transition-all duration-300 group-hover:w-full`}
-                    style={{ transitionTimingFunction: 'var(--ease)' }} />
+                  {!isTransparent && (
+                    <span className={`absolute -bottom-1 left-0 w-0 h-px ${theme === 'white' ? 'bg-white' : 'bg-[#C0132A]'} transition-all duration-300 group-hover:w-full`}
+                      style={{ transitionTimingFunction: 'var(--ease)' }} />
+                  )}
                 </button>
               ))}
             </nav>
@@ -218,17 +232,22 @@ export default function Header({ minimal = false }: HeaderProps) {
         </div>
 
         {/* Center: Desktop Logo */}
-        <div className="hidden lg:flex items-center justify-center">
+        <div className={`hidden lg:flex items-center justify-center ${isTransparent ? 'opacity-0 pointer-events-none' : ''}`}>
           <button onClick={goHome} className="flex items-center">
             {theme === 'red' && currentView === 'home' && isTop ? (
-              <motion.video
+              <video
                 src="/images/logo's animated.mp4"
                 autoPlay
                 muted
                 playsInline
-                className="h-14 lg:h-[72px] aspect-[1.9] object-cover object-left bg-transparent mix-blend-multiply transition-all"
-                initial={{ opacity: 1, scale: 2.2, y: 10 }}
-                animate={{ opacity: 1, scale: 2.2, y: 10 }}
+                ref={(el) => {
+                  if (el && !el.dataset.started) {
+                    el.dataset.started = 'true';
+                    el.currentTime = 0.2;
+                    el.play().catch(() => { });
+                  }
+                }}
+                className="h-14 lg:h-[72px] aspect-[1.9] object-cover object-left bg-transparent mix-blend-multiply transition-transform duration-500 scale-[2.2] translate-y-2.5"
               />
             ) : (
               <motion.img
@@ -243,7 +262,7 @@ export default function Header({ minimal = false }: HeaderProps) {
         </div>
 
         {/* Right Side: Icons */}
-        <div className="flex items-center justify-end gap-4">
+        <div className={`flex items-center justify-end gap-4 ${isTransparent ? 'opacity-0 pointer-events-none' : ''}`}>
           {!minimal && (
             <button className={`ibtn hidden lg:flex ${textColor}`}>
               <Search size={17} strokeWidth={1.5} />
@@ -282,7 +301,7 @@ export default function Header({ minimal = false }: HeaderProps) {
       {/* Base Header: Red Theme for Light Backgrounds */}
       <header
         ref={redHeaderRef}
-        className="fixed top-0 left-0 right-0 z-[499] pointer-events-auto"
+        className="fixed top-0 left-0 right-0 z-[498] pointer-events-auto"
       >
         {renderHeaderContent('red')}
       </header>
@@ -290,9 +309,14 @@ export default function Header({ minimal = false }: HeaderProps) {
       {/* Overlaid Header: White Theme for Dark Backgrounds */}
       <header
         ref={whiteHeaderRef}
-        className="fixed top-0 left-0 right-0 z-[500] pointer-events-auto"
+        className="fixed top-0 left-0 right-0 z-[499] pointer-events-auto mix-blend-normal"
       >
         {renderHeaderContent('white')}
+      </header>
+
+      {/* Transparent Layer exclusively for Dropdowns so they don't get clipped by the path crop */}
+      <header className="fixed top-0 left-0 right-0 z-[501] pointer-events-none">
+        {renderHeaderContent('transparent')}
       </header>
 
       {/* Mobile Menu */}

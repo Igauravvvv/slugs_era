@@ -19,6 +19,7 @@ export default function CustomCursor() {
     let mouseY = 0;
     let followerX = 0;
     let followerY = 0;
+    let hoverScale = 1;
 
     const handleMouseMove = (e: MouseEvent) => {
       mouseX = e.clientX;
@@ -29,7 +30,7 @@ export default function CustomCursor() {
     const animateFollower = () => {
       followerX += (mouseX - followerX) * 0.1;
       followerY += (mouseY - followerY) * 0.1;
-      follower.style.transform = `translate(${followerX - 17}px, ${followerY - 17}px)`;
+      follower.style.transform = `translate(${followerX - 17}px, ${followerY - 17}px) scale(${hoverScale})`;
       requestAnimationFrame(animateFollower);
     };
 
@@ -37,14 +38,12 @@ export default function CustomCursor() {
     const interactiveElements = document.querySelectorAll('a, button, .product-card, .vc, .shi, .sf-card');
     
     const handleMouseEnter = () => {
-      follower.style.width = '50px';
-      follower.style.height = '50px';
+      hoverScale = 1.47;
       follower.style.opacity = '0.7';
     };
 
     const handleMouseLeave = () => {
-      follower.style.width = '34px';
-      follower.style.height = '34px';
+      hoverScale = 1;
       follower.style.opacity = '0.45';
     };
 
