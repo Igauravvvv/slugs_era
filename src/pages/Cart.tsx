@@ -46,7 +46,7 @@ export default function Cart() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 1.1 }}
           className="text-center"
         >
           <ShoppingBag size={64} className="mx-auto text-[#E8E4E0] mb-6" strokeWidth={1} />
@@ -200,7 +200,7 @@ export default function Cart() {
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            transition={{ duration: 1.1, delay: 0.2 }}
             className="bg-[#F9F7F5] p-6 lg:p-8 h-fit"
           >
             <h3 className="font-display text-xl font-medium text-[#1A1A1A] mb-6">

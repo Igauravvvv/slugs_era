@@ -114,7 +114,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
                   }
                 : {
                     scale: 1.05,
-                    transition: { duration: 0.6 },
+                    transition: { duration: 0.8 },
                   }
             }
           />

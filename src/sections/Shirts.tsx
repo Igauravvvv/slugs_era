@@ -101,7 +101,7 @@ export default function Shirts() {
                       filter: 'brightness(1.1) contrast(1.05) drop-shadow(0 20px 30px rgba(255,255,255,0.05))',
                       transition: { duration: 1.1, ease: "easeOut" }
                     }}
-                    transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 1.15, ease: [0.22, 1, 0.36, 1] }}
                   />
                 </div>
                 <div className="p-4 border-t border-white/[0.07] flex justify-between items-center text-[12px]">
