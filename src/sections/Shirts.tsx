@@ -18,12 +18,28 @@ export default function Shirts() {
       id="shirts"
       className="relative min-h-[100vh] flex items-center py-32 lg:py-[160px] px-6 lg:px-20 bg-[#1A1A1A] overflow-hidden"
     >
-      {/* Background text */}
-      <div
-        className="absolute right-[-40px] top-1/2 -translate-y-1/2 font-display text-[clamp(100px,20vw,280px)] font-semibold text-transparent whitespace-nowrap pointer-events-none select-none"
-        style={{ WebkitTextStroke: '1px rgba(255,255,255,0.04)' }}
-      >
-        COAST
+      {/* Background text Marquee */}
+      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full pointer-events-none select-none z-0 overflow-hidden flex">
+        <motion.div
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{
+            repeat: Infinity,
+            duration: 20, // Even faster speed
+            ease: "linear",
+          }}
+          className="flex whitespace-nowrap"
+        >
+          {[...Array(8)].map((_, i) => (
+            <span
+              key={i}
+              // Reduced size slightly per user request
+              className="font-display text-[clamp(160px,28vw,420px)] scale-y-110 origin-center font-semibold text-transparent px-8 lg:px-16"
+              style={{ WebkitTextStroke: '1.5px rgba(255,255,255,0.09)' }} // Thicker and brighter stroke for more visibility
+            >
+              COAST
+            </span>
+          ))}
+        </motion.div>
       </div>
 
       <div className="relative z-10 w-full max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">

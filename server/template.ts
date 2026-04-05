@@ -1,4 +1,4 @@
-module.exports = `<!DOCTYPE html>
+const emailTemplate = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -305,3 +305,5 @@ module.exports = `<!DOCTYPE html>
 </div>
 </body>
 </html>`;
+
+export default emailTemplate;

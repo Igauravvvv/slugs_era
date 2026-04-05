@@ -53,7 +53,7 @@ export default function Collections() {
   };
 
   return (
-    <div className="bg-[#F9F7F5] min-h-screen pb-24 pt-32 px-6 lg:px-16" id="collections">
+    <div className="bg-[#F9F7F5] min-h-screen pb-24 pt-6 px-6 lg:px-16" id="collections">
       <div className="max-w-[2000px] mx-auto">
 
         {/* Top Bar with Back Button */}
