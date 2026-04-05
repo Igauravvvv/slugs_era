@@ -80,7 +80,7 @@ export default function Products() {
           className="flex gap-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory pb-4"
         >
           {tshirts.map((product, index) => (
-            <div key={product.id} className="flex-shrink-0 w-[280px] snap-start">
+            <div key={product.id} className="flex-shrink-0 w-[220px] snap-start">
               <ProductCard product={product} index={index} />
             </div>
           ))}

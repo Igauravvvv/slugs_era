@@ -168,7 +168,7 @@ export default function Header({ minimal = false }: HeaderProps) {
                     el.play().catch(() => { });
                   }
                 }}
-                className="h-10 aspect-[1.9] object-cover object-left bg-transparent mix-blend-multiply transition-all duration-500 scale-[1.5] translate-y-1.5"
+                className="h-10 w-auto object-contain object-left bg-transparent mix-blend-multiply transition-all duration-500"
               />
             ) : (
               <motion.img
@@ -247,7 +247,7 @@ export default function Header({ minimal = false }: HeaderProps) {
                     el.play().catch(() => { });
                   }
                 }}
-                className="h-14 lg:h-[72px] aspect-[1.9] object-cover object-left bg-transparent mix-blend-multiply transition-transform duration-500 scale-[2.2] translate-y-2.5"
+                className="h-14 lg:h-[72px] w-auto object-contain object-left bg-transparent mix-blend-multiply transition-transform duration-500"
               />
             ) : (
               <motion.img

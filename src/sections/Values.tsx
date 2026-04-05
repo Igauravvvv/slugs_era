@@ -42,7 +42,7 @@ export default function Values() {
       </motion.div>
 
       {/* Values Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-7">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-7">
         {values.map((value, index) => (
           <motion.div
             key={value.title}
@@ -54,7 +54,7 @@ export default function Values() {
               ease: [0.22, 1, 0.36, 1],
               delay: index * 0.1 
             }}
-            className="group p-10 lg:p-11 bg-white relative transition-all duration-400 hover:-translate-y-2 hover:shadow-[0_28px_60px_rgba(0,0,0,0.08)]"
+            className="group p-6 lg:p-11 bg-white relative transition-all duration-400 hover:-translate-y-2 hover:shadow-[0_28px_60px_rgba(0,0,0,0.08)]"
           >
             {/* Left accent line */}
             <div className="absolute top-0 left-0 w-[3px] h-0 bg-[#C0132A] transition-all duration-500 group-hover:h-full"

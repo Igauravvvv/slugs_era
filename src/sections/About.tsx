@@ -154,7 +154,7 @@ export default function About() {
             </span>
           </motion.a>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 w-full max-w-[1400px]">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 w-full max-w-[1400px]">
             {!BEHOLD_URL ? (
               // Instruction State: What they see before pacing the link
               Array.from({ length: 4 }).map((_, idx) => (

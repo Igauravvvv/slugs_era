@@ -49,7 +49,7 @@ export default function Hero() {
   };
 
   return (
-    <section className="min-h-screen grid grid-cols-1 lg:grid-cols-2 pt-[76px] lg:pt-0">
+    <section className="min-h-0 lg:min-h-screen grid grid-cols-1 lg:grid-cols-2 pt-[76px] lg:pt-0">
       {/* Left Content */}
       <div className="relative z-[2] flex flex-col justify-center px-6 lg:px-[72px] py-16 lg:py-20 overflow-hidden"
         style={{
@@ -151,7 +151,7 @@ export default function Hero() {
       {/* Right Image */}
       <div
         ref={heroRef}
-        className="relative overflow-hidden bg-[#5a0310] min-h-[50vh] lg:min-h-screen"
+        className="relative overflow-hidden bg-[#5a0310] h-[35vh] min-h-[35vh] lg:min-h-screen lg:h-auto"
       >
         <motion.img
           ref={imageRef}
