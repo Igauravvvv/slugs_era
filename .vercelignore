@@ -1,0 +1,5 @@
+server/
+schema.sql
+render.yaml
+*.md
+fix-smooth.*

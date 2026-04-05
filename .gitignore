@@ -21,3 +21,5 @@ server/.env
 .env.local
 *.timestamp-*
 .vercel
+
+.vercel
