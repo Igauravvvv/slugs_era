@@ -1,5 +1,6 @@
 import { Instagram } from 'lucide-react';
 import { useStore } from '@/store';
+import { motion } from 'framer-motion';
 
 const footerLinks = {
   shop: [
@@ -54,15 +55,30 @@ export default function Footer() {
   };
 
   return (
-    <footer className="bg-black pt-16 lg:pt-20 pb-8 lg:pb-10 px-6 lg:px-20">
+    <footer className="bg-black pt-12 lg:pt-20 pb-6 lg:pb-10 px-5 lg:px-20 relative overflow-hidden">
+      {/* Background Text Logo */}
+      <div className="absolute top-[60%] left-0 w-full -translate-y-1/2 flex items-center pointer-events-none opacity-10 z-0 overflow-hidden">
+        <motion.div 
+          className="flex w-max"
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{ repeat: Infinity, duration: 18, ease: "linear" }}
+        >
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="px-4 lg:px-6">
+              <img src="/images/TEXT%20LOGO.png" alt="" className="w-[800px] lg:w-[1200px] max-w-none shrink-0 object-contain invert brightness-0" />
+            </div>
+          ))}
+        </motion.div>
+      </div>
+
       {/* Top Section */}
-      <div className="grid grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-8 lg:gap-14 pb-10 lg:pb-14 border-b border-white/[0.08] mb-8 lg:mb-9">
+      <div className="relative z-10 grid grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-6 lg:gap-14 pb-8 lg:pb-14 border-b border-white/[0.08] mb-6 lg:mb-9">
         {/* Brand */}
         <div>
           <div className="mb-4">
-            <img src="/images/logo.png" alt="Slug's Era Logo" className="h-12 w-auto object-contain brightness-0 invert" />
+            <img src="/images/logo.png" alt="Slug's Era Logo" className="h-9 lg:h-12 w-auto object-contain brightness-0 invert" />
           </div>
-          <p className="font-display text-[13px] italic font-light text-white mb-5">
+          <p className="font-display text-[11px] lg:text-[13px] italic font-light text-white mb-4 lg:mb-5">
             MOVEMENT. not Merch
 
           </p>
@@ -89,15 +105,15 @@ export default function Footer() {
 
         {/* Shop Links */}
         <div>
-          <h4 className="text-[10px] font-medium tracking-[0.18em] uppercase text-white mb-5">
+          <h4 className="text-[9px] lg:text-[10px] font-medium tracking-[0.18em] uppercase text-white mb-3 lg:mb-5">
             Shop
           </h4>
-          <ul className="flex flex-col gap-2.5">
+          <ul className="flex flex-col gap-2 lg:gap-2.5">
             {footerLinks.shop.map((link) => (
               <li key={link.label}>
                 <button
                   onClick={() => scrollToSection(link.href)}
-                  className="text-[13px] font-light text-white transition-colors duration-200 hover:text-gray-300"
+                  className="text-[11px] lg:text-[13px] font-light text-white transition-colors duration-200 hover:text-gray-300"
                 >
                   {link.label}
                 </button>
@@ -108,15 +124,15 @@ export default function Footer() {
 
         {/* Company Links */}
         <div>
-          <h4 className="text-[10px] font-medium tracking-[0.18em] uppercase text-white mb-5">
+          <h4 className="text-[9px] lg:text-[10px] font-medium tracking-[0.18em] uppercase text-white mb-3 lg:mb-5">
             Company
           </h4>
-          <ul className="flex flex-col gap-2.5">
+          <ul className="flex flex-col gap-2 lg:gap-2.5">
             {footerLinks.company.map((link) => (
               <li key={link.label}>
                 <button
                   onClick={() => scrollToSection(link.href)}
-                  className="text-[13px] font-light text-white transition-colors duration-200 hover:text-gray-300"
+                  className="text-[11px] lg:text-[13px] font-light text-white transition-colors duration-200 hover:text-gray-300"
                 >
                   {link.label}
                 </button>
@@ -127,15 +143,15 @@ export default function Footer() {
 
         {/* Support Links */}
         <div>
-          <h4 className="text-[10px] font-medium tracking-[0.18em] uppercase text-white mb-5">
+          <h4 className="text-[9px] lg:text-[10px] font-medium tracking-[0.18em] uppercase text-white mb-3 lg:mb-5">
             Support
           </h4>
-          <ul className="flex flex-col gap-2.5">
+          <ul className="flex flex-col gap-2 lg:gap-2.5">
             {footerLinks.support.map((link) => (
               <li key={link.label}>
                 <button
                   onClick={() => scrollToSection(link.href)}
-                  className="text-[13px] font-light text-white transition-colors duration-200 hover:text-gray-300"
+                  className="text-[11px] lg:text-[13px] font-light text-white transition-colors duration-200 hover:text-gray-300"
                 >
                   {link.label}
                 </button>
@@ -146,15 +162,15 @@ export default function Footer() {
       </div>
 
       {/* Bottom Section */}
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
-        <p className="text-xs font-light text-white">
+      <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-4">
+        <p className="text-[10px] lg:text-xs font-light text-white">
           © 2026 Slug's Era. All rights reserved.
         </p>
         <div className="flex gap-5">
-          <a href="#" className="text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">
+          <a href="#" className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">
             Privacy Policy
           </a>
-          <a href="#" className="text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">
+          <a href="#" className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">
             Terms of Service
           </a>
         </div>

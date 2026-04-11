@@ -12,6 +12,10 @@ interface AppState {
   selectedSubcategory: string | null;
   setCollectionFilter: (category: string | null, subcategory: string | null) => void;
 
+  // Mobile About Section
+  isAboutMobileVisible: boolean;
+  setAboutMobileVisible: (visible: boolean) => void;
+
   // Cart
   cart: CartItem[];
   addToCart: (item: CartItem) => void;
@@ -50,6 +54,10 @@ export const useStore = create<AppState>()(
       selectedCategory: null,
       selectedSubcategory: null,
       setCollectionFilter: (category, subcategory) => set({ selectedCategory: category, selectedSubcategory: subcategory }),
+
+      // Mobile About Section
+      isAboutMobileVisible: false,
+      setAboutMobileVisible: (visible) => set({ isAboutMobileVisible: visible }),
 
       // Cart
       cart: [],

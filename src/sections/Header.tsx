@@ -12,7 +12,7 @@ export default function Header({ minimal = false }: HeaderProps) {
   const [isTop, setIsTop] = useState(true);
   const redHeaderRef = useRef<HTMLElement>(null);
   const whiteHeaderRef = useRef<HTMLElement>(null);
-  const { getCartCount, setView, currentView, setCollectionFilter } = useStore();
+  const { getCartCount, setView, currentView, setCollectionFilter, setAboutMobileVisible } = useStore();
   const cartCount = getCartCount();
 
   useEffect(() => {
@@ -112,6 +112,10 @@ export default function Header({ minimal = false }: HeaderProps) {
   }, []);
 
   const scrollToSection = (id: string) => {
+    if (id === 'about') {
+      setAboutMobileVisible(true);
+    }
+
     if (currentView !== 'home') {
       setView('home');
       setTimeout(() => {
@@ -121,16 +125,19 @@ export default function Header({ minimal = false }: HeaderProps) {
         }
       }, 100);
     } else {
-      const element = document.getElementById(id);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 50);
     }
     setIsMobileMenuOpen(false);
   };
 
   const goHome = () => {
     setView('home');
+    setAboutMobileVisible(false);
     window.scrollTo(0, 0);
   };
 
@@ -152,33 +159,16 @@ export default function Header({ minimal = false }: HeaderProps) {
 
     return (
       <div className={`flex lg:grid lg:grid-cols-3 items-center justify-between px-6 lg:px-16 h-[76px] w-full bg-transparent ${isTransparent ? 'pointer-events-none' : ''}`}>
-        {/* Left Side: Mobile Logo & Desktop Left Nav */}
-        <div className="flex items-center justify-start gap-11">
-          <button onClick={goHome} className={`flex items-center lg:hidden ${isTransparent ? 'opacity-0 pointer-events-none' : ''}`}>
-            {theme === 'red' && currentView === 'home' && isTop ? (
-              <video
-                src="/images/logo's animated.mp4"
-                autoPlay
-                muted
-                playsInline
-                ref={(el) => {
-                  if (el && !el.dataset.started) {
-                    el.dataset.started = 'true';
-                    el.currentTime = 0.2;
-                    el.play().catch(() => { });
-                  }
-                }}
-                className="h-10 w-auto object-contain object-left scale-[2.3] origin-left translate-x-[2px] translate-y-2 bg-transparent mix-blend-multiply transition-all duration-500"
-              />
-            ) : (
-              <motion.img
-                src="/images/logo.png"
-                alt="Slug's Era Logo"
-                className="h-10 w-auto object-contain bg-transparent transition-all duration-500 delay-100"
-                style={{ filter: logoFilter }}
-              />
-            )}
-          </button>
+        {/* Left Side: Hamburger & Desktop Left Nav */}
+        <div className="flex items-center justify-start gap-3 lg:gap-11">
+          {!minimal && (
+            <button
+              className={`lg:hidden ibtn ${textColor}`}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          )}
 
           {!minimal && (
             <nav className={`hidden lg:flex gap-11 items-center ${isTransparent ? 'pointer-events-auto' : ''}`}>
@@ -231,8 +221,8 @@ export default function Header({ minimal = false }: HeaderProps) {
           )}
         </div>
 
-        {/* Center: Desktop Logo */}
-        <div className={`hidden lg:flex items-center justify-center ${isTransparent ? 'opacity-0 pointer-events-none' : ''}`}>
+        {/* Center: Desktop & Mobile Logo */}
+        <div className={`absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 flex items-center justify-center ${isTransparent ? 'opacity-0 pointer-events-none' : ''}`}>
           <button onClick={goHome} className="flex items-center">
             {theme === 'red' && currentView === 'home' && isTop ? (
               <video
@@ -247,13 +237,13 @@ export default function Header({ minimal = false }: HeaderProps) {
                     el.play().catch(() => { });
                   }
                 }}
-                className="h-14 lg:h-[72px] w-auto object-contain object-center scale-[2.3] lg:scale-[2.3] translate-x-[2px] translate-y-2 lg:translate-y-3 bg-transparent mix-blend-multiply transition-transform duration-500"
+                className="h-14 lg:h-[72px] w-auto object-contain object-center scale-[2.2] lg:scale-[2.3] translate-y-1 lg:translate-x-[2px] lg:translate-y-3 bg-transparent mix-blend-multiply transition-transform duration-500"
               />
             ) : (
               <motion.img
                 src="/images/logo.png"
                 alt="Slug's Era Logo"
-                className="h-14 lg:h-[72px] w-auto object-contain bg-transparent drop-shadow-md transition-all duration-500 delay-100"
+                className="h-[52px] lg:h-[72px] w-auto object-contain bg-transparent drop-shadow-md transition-all duration-500 delay-100"
                 style={{ filter: logoFilter }}
                 whileHover={{ scale: 1.05, y: 10 }}
               />
@@ -271,26 +261,20 @@ export default function Header({ minimal = false }: HeaderProps) {
 
           <button
             onClick={goToCart}
-            className={`cartbtn relative w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 ${theme === 'white' ? 'bg-white text-[#C0132A]' : 'bg-[#C0132A] text-white'
+            className={`cartbtn relative lg:w-9 lg:h-9 h-auto py-1.5 px-3 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 gap-1.5 ${theme === 'white' ? 'bg-white text-[#C0132A]' : 'bg-[#C0132A] text-white'
               }`}
           >
-            <ShoppingBag size={15} strokeWidth={1.5} />
+            <ShoppingBag size={15} strokeWidth={1.5} className="hidden lg:block" />
+            <span className="text-[12px] font-medium tracking-wider lg:hidden">
+              Cart ({cartCount})
+            </span>
             {cartCount > 0 && (
-              <span className={`absolute -top-1 -right-1 text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-medium ${theme === 'white' ? 'bg-[#1A1A1A] text-white' : 'bg-[#1A1A1A] text-white'
+              <span className={`absolute -top-1 -right-1 text-[9px] w-4 h-4 rounded-full hidden lg:flex items-center justify-center font-medium ${theme === 'white' ? 'bg-[#1A1A1A] text-white' : 'bg-[#1A1A1A] text-white'
                 }`}>
                 {cartCount}
               </span>
             )}
           </button>
-
-          {!minimal && (
-            <button
-              className={`lg:hidden ibtn ${textColor}`}
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-          )}
         </div>
       </div>
     );

@@ -32,7 +32,7 @@ export default function ProductDetail() {
       color: selectedColor,
     });
     setIsAdded(true);
-    
+
     // Show tote bag offer for clothing items
     if (selectedProduct.category !== 'accessories' && !hasToteBag) {
       setShowToteOffer(true);
@@ -56,13 +56,13 @@ export default function ProductDetail() {
   };
 
   const nextImage = () => {
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === selectedProduct.images.length - 1 ? 0 : prev + 1
     );
   };
 
   const prevImage = () => {
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === 0 ? selectedProduct.images.length - 1 : prev - 1
     );
   };
@@ -102,7 +102,7 @@ export default function ProductDetail() {
                 transition={{ duration: 0.4 }}
                 className="w-full h-full object-cover"
               />
-              
+
               {/* Navigation Arrows */}
               {selectedProduct.images.length > 1 && (
                 <>
@@ -136,9 +136,8 @@ export default function ProductDetail() {
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
-                    className={`w-20 h-20 bg-[#F9F7F5] overflow-hidden border-2 transition-colors ${
-                      index === currentImageIndex ? 'border-[#1A1A1A]' : 'border-transparent'
-                    }`}
+                    className={`w-20 h-20 bg-[#F9F7F5] overflow-hidden border-2 transition-colors ${index === currentImageIndex ? 'border-[#1A1A1A]' : 'border-transparent'
+                      }`}
                   >
                     <img
                       src={img}
@@ -199,11 +198,10 @@ export default function ProductDetail() {
                   <button
                     key={color}
                     onClick={() => setSelectedColor(color)}
-                    className={`w-8 h-8 rounded-full border transition-all duration-200 ${
-                      selectedColor === color
+                    className={`w-8 h-8 rounded-full border transition-all duration-200 ${selectedColor === color
                         ? 'ring-2 ring-[#1A1A1A] ring-offset-2'
                         : 'border-[#E8E4E0] hover:scale-110'
-                    }`}
+                      }`}
                     style={{ backgroundColor: color }}
                   />
                 ))}
@@ -220,11 +218,10 @@ export default function ProductDetail() {
                   <button
                     key={size}
                     onClick={() => setSelectedSize(size)}
-                    className={`w-12 h-12 border flex items-center justify-center text-sm font-medium transition-all duration-200 ${
-                      selectedSize === size
+                    className={`w-12 h-12 border flex items-center justify-center text-sm font-medium transition-all duration-200 ${selectedSize === size
                         ? 'bg-[#1A1A1A] text-white border-[#1A1A1A]'
                         : 'border-[#E8E4E0] hover:border-[#1A1A1A]'
-                    }`}
+                      }`}
                   >
                     {size}
                   </button>
@@ -248,11 +245,10 @@ export default function ProductDetail() {
             <button
               onClick={handleAddToCart}
               disabled={isAdded}
-              className={`w-full lg:w-auto inline-flex items-center justify-center gap-3 px-10 py-4 text-[11px] font-medium tracking-[0.17em] uppercase transition-all duration-300 ${
-                isAdded
+              className={`w-full lg:w-auto inline-flex items-center justify-center gap-3 px-10 py-4 text-[11px] font-medium tracking-[0.17em] uppercase transition-all duration-300 ${isAdded
                   ? 'bg-green-600 text-white'
                   : 'bg-[#1A1A1A] text-white hover:bg-black'
-              }`}
+                }`}
             >
               {isAdded ? (
                 <>

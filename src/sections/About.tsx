@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { TypeAnimation } from 'react-type-animation';
 import { Instagram, Play } from 'lucide-react';
+import { useStore } from '@/store';
 
 export default function About() {
+  const { isAboutMobileVisible } = useStore();
   const [instaPosts, setInstaPosts] = useState<any[]>([]);
   
   // 👉 PASTE YOUR BEHOLD.SO JSON URL HERE (e.g. "https://feeds.behold.so/YOUR_ID")
@@ -21,9 +23,10 @@ export default function About() {
       })
       .catch(err => console.error("Error fetching Instagram feed:", err));
   }, []);
+
   return (
-    <section id="about" className="py-24 lg:py-[120px] px-6 lg:px-20 bg-white">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
+    <section id="about" className={`py-10 lg:py-[120px] px-5 lg:px-20 bg-white ${!isAboutMobileVisible ? 'hidden lg:block' : ''}`}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-24 items-center">
         {/* Left - Images */}
         <motion.div
           initial={{ opacity: 0, scale: 0.94 }}
@@ -90,7 +93,7 @@ export default function About() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-40px' }}
             transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
-            className="font-display text-[21px] italic font-light text-[#1A1A1A] leading-[1.65] border-l-2 border-[#C0132A] pl-5 mb-7"
+            className="font-display text-[17px] lg:text-[21px] italic font-light text-[#1A1A1A] leading-[1.5] lg:leading-[1.65] border-l-2 border-[#C0132A] pl-4 lg:pl-5 mb-5 lg:mb-7"
           >
             "We got tired of choosing between things that looked good and things that felt good. So we built something that didn't ask you to compromise."
           </motion.div>
@@ -101,7 +104,7 @@ export default function About() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-40px' }}
             transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.25 }}
-            className="text-[15px] font-light leading-[1.8] text-[#888880] mb-8 space-y-4"
+            className="text-[14px] lg:text-[15px] font-light leading-[1.6] lg:leading-[1.8] text-[#888880] mb-6 lg:mb-8 space-y-3 lg:space-y-4"
           >
             <p>It started with the two of us just searching.</p>
             <p>For that one piece — a little patchwork, a design that felt like you, fabric that moved with your body like water. We'd find something close, then see the price. &#8377;8,000. &#8377;12,000. And if it wasn't expensive, it simply didn't exist in India — or wasn't cut for us at all.</p>
@@ -116,7 +119,7 @@ export default function About() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-40px' }}
             transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
-            className="font-display text-[30px] italic font-light text-[#C0132A] h-[45px]"
+            className="font-display text-[24px] lg:text-[30px] italic font-light text-[#C0132A] h-[35px] lg:h-[45px]"
           >
             <TypeAnimation
               sequence={[
@@ -137,7 +140,7 @@ export default function About() {
       </div>
 
       {/* Instagram Live Feed */}
-      <div className="mt-32 pt-24 border-t border-[#E8E4E0] relative w-full lg:col-span-2">
+      <div className="mt-16 lg:mt-32 pt-12 lg:pt-24 border-t border-[#E8E4E0] relative w-full lg:col-span-2">
         <div className="flex flex-col items-center w-full">
           <motion.a
             href="https://www.instagram.com/slugsera/"
@@ -146,7 +149,7 @@ export default function About() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="group flex flex-col items-center gap-2 mb-12 hover:text-[#C0132A] transition-colors"
+            className="group flex flex-col items-center gap-1.5 lg:gap-2 mb-8 lg:mb-12 hover:text-[#C0132A] transition-colors"
           >
             <span className="text-[#C0132A] text-[10px] font-medium tracking-[0.24em] uppercase">Join the community</span>
             <span className="text-[#1A1A1A] text-[15px] font-display italic tracking-[0.05em] group-hover:text-[#C0132A] transition-colors">
@@ -154,7 +157,7 @@ export default function About() {
             </span>
           </motion.a>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 w-full max-w-[1400px]">
+          <div className="grid grid-cols-4 lg:grid-cols-4 gap-2 lg:gap-6 w-full max-w-[1400px]">
             {!BEHOLD_URL ? (
               // Instruction State: What they see before pacing the link
               Array.from({ length: 4 }).map((_, idx) => (
@@ -164,8 +167,8 @@ export default function About() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.7, delay: idx * 0.1 }}
-                  className={`relative w-full aspect-[4/5] lg:h-[580px] overflow-hidden bg-[#F9F7F5] rounded-xl lg:rounded-2xl border border-[#E8E4E0] shadow-sm ${
-                    idx % 2 !== 0 ? 'lg:translate-y-6' : ''
+                  className={`relative w-full aspect-[2/5] lg:aspect-[4/5] overflow-hidden bg-[#F9F7F5] rounded-full lg:rounded-2xl border border-[#E8E4E0] shadow-sm ${
+                    idx % 2 !== 0 ? 'translate-y-4 lg:translate-y-6' : ''
                   }`}
                 >
                   <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-white hover:bg-[#F9F7F5] transition-colors duration-500">
@@ -195,8 +198,8 @@ export default function About() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.7, delay: idx * 0.1 }}
-                    className={`group relative w-full aspect-[4/5] overflow-hidden bg-[#F9F7F5] rounded-xl lg:rounded-2xl border border-[#E8E4E0] shadow-sm block ${
-                      idx % 2 !== 0 ? 'lg:translate-y-6' : ''
+                    className={`group relative w-full aspect-[2/5] lg:aspect-[4/5] overflow-hidden bg-[#F9F7F5] rounded-full lg:rounded-2xl border border-[#E8E4E0] shadow-sm block ${
+                      idx % 2 !== 0 ? 'translate-y-4 lg:translate-y-6' : ''
                     }`}
                   >
                     <img 
@@ -220,8 +223,8 @@ export default function About() {
               Array.from({ length: 4 }).map((_, idx) => (
                 <div 
                   key={idx}
-                  className={`w-full aspect-[4/5] lg:h-[580px] bg-gray-100 animate-pulse rounded-xl lg:rounded-2xl ${
-                    idx % 2 !== 0 ? 'lg:translate-y-6' : ''
+                  className={`w-full aspect-[2/5] lg:aspect-[4/5] lg:h-[580px] bg-gray-100 animate-pulse rounded-full lg:rounded-2xl ${
+                    idx % 2 !== 0 ? 'translate-y-4 lg:translate-y-6' : ''
                   }`}
                 />
               ))

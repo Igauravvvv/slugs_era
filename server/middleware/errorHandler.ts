@@ -1,7 +1,7 @@
 import { ErrorRequestHandler } from 'express';
 
 // Global Error Handler Middleware
-export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
   console.error('[Error]: ', err);
 
   const statusCode = err.statusCode || 500;

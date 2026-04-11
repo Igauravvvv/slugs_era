@@ -39,7 +39,7 @@ export default function Newsletter() {
   };
 
   return (
-    <section className="py-20 lg:py-24 px-6 lg:px-20 bg-white text-center">
+    <section className="py-14 lg:py-24 px-5 lg:px-20 bg-white text-center">
       <motion.div
         initial={{ opacity: 0, y: 36 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -49,7 +49,7 @@ export default function Newsletter() {
         <div className="eye-text eye-text-center mb-3">Stay in the Loop</div>
 
         <div className="relative mx-auto w-fit mb-3">
-          <h2 className="font-display text-[clamp(28px,4vw,50px)] font-light leading-[1.22] text-center">
+          <h2 className="font-display text-[clamp(22px,4vw,50px)] font-light leading-[1.22] text-center">
             THE <em className="italic text-[#C0132A]">Slow</em> CLUB ,<br />
             Be a part of the community
           </h2>
@@ -72,7 +72,7 @@ export default function Newsletter() {
 
         <form
           onSubmit={handleSubmit}
-          className="flex max-w-[456px] mx-auto border border-[#E8E4E0] bg-white"
+          className="flex flex-col sm:flex-row max-w-[456px] mx-auto border border-[#E8E4E0] bg-white"
         >
           <input
             type="email"

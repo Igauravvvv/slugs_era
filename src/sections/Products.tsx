@@ -1,36 +1,13 @@
-import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { products } from '@/data/products';
 import ProductCard from '@/components/ProductCard';
 import { useStore } from '@/store';
 
 export default function Products() {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
   const { setCollectionFilter, setView } = useStore();
 
   const tshirts = products.filter((p) => p.category === 'tshirts');
-
-  const checkScroll = () => {
-    if (scrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-    }
-  };
-
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollRef.current) {
-      const scrollAmount = 400;
-      scrollRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth',
-      });
-      setTimeout(checkScroll, 300);
-    }
-  };
 
   const viewAll = () => {
     setCollectionFilter('tshirts', null);
@@ -39,14 +16,14 @@ export default function Products() {
   };
 
   return (
-    <section id="products" className="py-24 lg:py-[120px] px-6 lg:px-20 bg-white">
+    <section id="products" className="py-14 lg:py-[120px] px-5 lg:px-20 bg-white">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 36 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: false, margin: '-20px', amount: 0.1 }}
         transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-        className="flex items-end justify-between mb-16 lg:mb-[68px]"
+        className="flex items-end justify-between mb-8 lg:mb-[68px]"
       >
         <div>
           <div className="eye-text mb-3.5">T-Shirt Collection</div>
@@ -63,46 +40,13 @@ export default function Products() {
         </button>
       </motion.div>
 
-      {/* Products Grid - Desktop */}
-      <div className="hidden lg:flex flex-wrap justify-center gap-8">
+      {/* Products Grid - Desktop & Mobile */}
+      <div className="grid grid-cols-2 lg:flex lg:flex-wrap lg:justify-center gap-2 lg:gap-8">
         {tshirts.map((product, index) => (
-          <div key={product.id} className="w-[calc(33.333%-1.334rem)] mt-2">
+          <div key={product.id} className="w-full lg:w-[calc(33.333%-1.334rem)] lg:mt-2">
             <ProductCard product={product} index={index} />
           </div>
         ))}
-      </div>
-
-      {/* Products Scroll - Mobile */}
-      <div className="lg:hidden relative">
-        <div
-          ref={scrollRef}
-          onScroll={checkScroll}
-          className="flex gap-4 overflow-x-auto hide-scrollbar snap-x snap-mandatory pb-4"
-        >
-          {tshirts.map((product, index) => (
-            <div key={product.id} className="flex-shrink-0 w-[220px] snap-start">
-              <ProductCard product={product} index={index} />
-            </div>
-          ))}
-        </div>
-
-        {/* Scroll Buttons */}
-        {canScrollLeft && (
-          <button
-            onClick={() => scroll('left')}
-            className="absolute left-0 top-1/3 -translate-y-1/2 w-10 h-10 bg-white shadow-lg rounded-full flex items-center justify-center z-10"
-          >
-            <ChevronLeft size={20} />
-          </button>
-        )}
-        {canScrollRight && (
-          <button
-            onClick={() => scroll('right')}
-            className="absolute right-0 top-1/3 -translate-y-1/2 w-10 h-10 bg-white shadow-lg rounded-full flex items-center justify-center z-10"
-          >
-            <ChevronRight size={20} />
-          </button>
-        )}
       </div>
     </section>
   );

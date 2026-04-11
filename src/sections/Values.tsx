@@ -26,14 +26,14 @@ const values = [
 
 export default function Values() {
   return (
-    <section id="values" className="py-24 lg:py-[120px] px-6 lg:px-20 bg-[#F9F7F5]">
+    <section id="values" className="py-16 lg:py-[120px] px-5 lg:px-20 bg-[#F9F7F5]">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 36 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-40px' }}
         transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-        className="text-center mb-16 lg:mb-[72px]"
+        className="text-center mb-10 lg:mb-[72px]"
       >
         <div className="eye-text eye-text-center mb-3.5">What We Stand For</div>
         <h2 className="section-title">
@@ -54,28 +54,28 @@ export default function Values() {
               ease: [0.22, 1, 0.36, 1],
               delay: index * 0.1 
             }}
-            className="group p-6 lg:p-11 bg-white relative transition-all duration-400 hover:-translate-y-2 hover:shadow-[0_28px_60px_rgba(0,0,0,0.08)]"
+            className="group p-4 lg:p-11 bg-white relative transition-all duration-400 hover:-translate-y-2 hover:shadow-[0_28px_60px_rgba(0,0,0,0.08)]"
           >
             {/* Left accent line */}
             <div className="absolute top-0 left-0 w-[3px] h-0 bg-[#C0132A] transition-all duration-500 group-hover:h-full"
                  style={{ transitionTimingFunction: 'var(--ease)' }} />
             
             {/* Icon */}
-            <div className="w-11 h-11 mb-5 flex items-center justify-center">
+            <div className="w-8 h-8 lg:w-11 lg:h-11 mb-3 lg:mb-5 flex items-center justify-center">
               <value.icon 
-                size={26} 
+                size={20} 
                 strokeWidth={1.2} 
-                className="text-[#C0132A]" 
+                className="text-[#C0132A] lg:w-[26px] lg:h-[26px]" 
               />
             </div>
             
             {/* Title */}
-            <h3 className="font-display text-xl font-semibold text-[#1A1A1A] mb-2.5">
+            <h3 className="font-display text-[15px] lg:text-xl font-semibold text-[#1A1A1A] mb-1.5 lg:mb-2.5">
               {value.title}
             </h3>
             
             {/* Description */}
-            <p className="text-[13px] font-light text-[#888880] leading-[1.85]">
+            <p className="text-[11px] lg:text-[13px] font-light text-[#888880] leading-[1.6] lg:leading-[1.85]">
               {value.description}
             </p>
           </motion.div>

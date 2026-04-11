@@ -59,7 +59,7 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
   };
 
   let initialX = 0;
-  let initialY = 0;
+  const initialY = 0;
   let isCenter = false;
 
   if (index === 0 || index === 3) {
@@ -149,18 +149,18 @@ export default function ProductCard({ product, index = 0 }: ProductCardProps) {
         </div>
       </div>
 
-      <div className="pt-4 px-0.5">
-        <h3 className="font-display text-[21px] font-normal text-[#1A1A1A] mb-1">
+      <div className="pt-3 lg:pt-4 px-1 lg:px-0.5 text-center lg:text-left">
+        <h3 className="font-display text-[15px] lg:text-[21px] font-bold lg:font-normal text-[#1A1A1A] mb-0.5 lg:mb-1 line-clamp-1">
           {product.name}
         </h3>
-        <p className="font-display text-[13px] italic font-light text-[#888880] mb-2.5">
+        <p className="font-display text-[12px] lg:text-[13px] italic font-light text-[#888880] mb-1.5 lg:mb-2.5 line-clamp-1 leading-tight">
           {product.slogan}
         </p>
-        <div className="flex items-center justify-between">
-          <span className="text-[15px] font-medium text-[#1A1A1A]">
+        <div className="flex flex-col lg:flex-row items-center lg:justify-between gap-1 lg:gap-0">
+          <span className="text-[14px] lg:text-[15px] font-bold lg:font-medium text-[#1A1A1A]">
             ₹{product.price.toLocaleString()}
           </span>
-          <div className="flex gap-1.5">
+          <div className="flex gap-1.5 hidden lg:flex">
             {product.colors.slice(0, 3).map((color, i) => (
               <button
                 key={i}

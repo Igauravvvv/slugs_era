@@ -18,7 +18,7 @@ export const uploadToSupabase = async (file: Express.Multer.File): Promise<strin
   const fileExt = file.originalname.split('.').pop();
   const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
   
-  const { data, error } = await supabaseAdmin.storage
+  const { error } = await supabaseAdmin.storage
     .from('products')
     .upload(fileName, file.buffer, {
       contentType: file.mimetype,

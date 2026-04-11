@@ -49,9 +49,64 @@ export default function Hero() {
   };
 
   return (
-    <section className="min-h-0 lg:min-h-screen grid grid-cols-1 lg:grid-cols-2 pt-[76px] lg:pt-0">
-      {/* Left Content */}
-      <div className="relative z-[2] flex flex-col justify-center px-6 lg:px-[72px] py-16 lg:py-20 overflow-hidden"
+    <section className="min-h-0 lg:min-h-screen grid grid-cols-1 lg:grid-cols-2">
+      {/* ===== MOBILE HERO: Full-screen image with overlay ===== */}
+      <div className="relative lg:hidden h-[85vh] min-h-[500px] overflow-hidden">
+        {/* Background image */}
+        <motion.img
+          src="/images/MODEL-WITH SHIRT.png"
+          alt="Fashion Model"
+          className="absolute inset-0 w-full h-full object-cover object-top"
+          initial={{ opacity: 0, scale: 1.1 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+        />
+        {/* Dark gradient overlay from bottom */}
+        <div className="absolute inset-0 z-[1]" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 40%, transparent 70%)' }} />
+        {/* Red tint overlay */}
+        <div className="absolute inset-0 z-[1] bg-[#6B0000]/20" />
+
+        {/* Overlay content at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 z-[2] px-6 pb-10 pt-16">
+          <motion.h1
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+            className="font-display text-[38px] font-light leading-[1.08] text-white mb-3"
+            style={{ textShadow: '0 4px 24px rgba(0,0,0,0.5)' }}
+          >
+            Wear the<br />
+            <em className="italic text-white/95">Philosophy</em><br />
+            of Slow Culture
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.5 }}
+            className="text-[13px] font-light leading-[1.7] text-white/70 max-w-[300px] mb-6"
+          >
+            Premium pieces for those who value intention over impulse.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.65 }}
+          >
+            <button
+              onClick={scrollToProducts}
+              className="w-full py-4 bg-white/90 text-[#C0132A] text-[13px] font-semibold tracking-[0.2em] uppercase rounded-full backdrop-blur-sm transition-all duration-300 active:scale-95"
+            >
+              Shop Now
+            </button>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* ===== DESKTOP HERO: Original 2-column layout (unchanged) ===== */}
+      {/* Left Content - Desktop Only */}
+      <div className="relative z-[2] hidden lg:flex flex-col justify-center px-[72px] py-20 overflow-hidden"
         style={{
           background: 'linear-gradient(150deg, #6B0000 0%, #9B0015 40%, #C0132A 75%, #8B0010 100%)'
         }}>
@@ -148,10 +203,10 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Right Image */}
+      {/* Right Image - Desktop Only */}
       <div
         ref={heroRef}
-        className="relative overflow-hidden bg-[#5a0310] h-[35vh] min-h-[35vh] lg:min-h-screen lg:h-auto"
+        className="relative overflow-hidden bg-[#5a0310] hidden lg:block lg:min-h-screen"
       >
         <motion.img
           ref={imageRef}
