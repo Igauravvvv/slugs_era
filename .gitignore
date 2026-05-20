@@ -14,12 +14,17 @@ dist-ssr/
 *.sln
 *.sw?
 
-# server
-server/node_modules/
-server/.env
+# Environment
 .env
 .env.local
+server/.env
+
+# Server
+server/node_modules/
+
+# Build artifacts
 *.timestamp-*
 .vercel
 
-.vercel
+# Misc
+lint_errors.txt

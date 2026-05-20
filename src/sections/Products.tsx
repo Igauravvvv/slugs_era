@@ -1,18 +1,79 @@
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import { products } from '@/data/products';
-import ProductCard from '@/components/ProductCard';
+import { useNavigate } from 'react-router-dom';
 import { useStore } from '@/store';
+import ProductCard from '@/components/ProductCard';
 
 export default function Products() {
-  const { setCollectionFilter, setView } = useStore();
+  const { setCollectionFilter, products } = useStore();
+  const navigate = useNavigate();
 
   const tshirts = products.filter((p) => p.category === 'tshirts');
 
   const viewAll = () => {
     setCollectionFilter('tshirts', null);
-    setView('collections');
-    window.scrollTo(0, 0);
+    navigate('/collections');
+  };
+
+  const getCardVariants = (index: number) => {
+    switch(index) {
+      case 0: // Top Left
+        return {
+          hidden: { opacity: 0, x: -40, rotate: -4 },
+          visible: { 
+            opacity: 1, 
+            x: 0, 
+            rotate: 0, 
+            transition: { duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: 0.1 } 
+          }
+        };
+      case 1: // Top Center
+        return {
+          hidden: { opacity: 0, scale: 0.94 },
+          visible: { 
+            opacity: 1, 
+            scale: 1, 
+            transition: { duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: 0.25 } 
+          }
+        };
+      case 2: // Top Right
+        return {
+          hidden: { opacity: 0, x: 40, rotate: 4 },
+          visible: { 
+            opacity: 1, 
+            x: 0, 
+            rotate: 0, 
+            transition: { duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: 0.1 } 
+          }
+        };
+      case 3: // Bottom Left
+        return {
+          hidden: { opacity: 0, y: 50 },
+          visible: { 
+            opacity: 1, 
+            y: 0, 
+            transition: { duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: 0.35 } 
+          }
+        };
+      case 4: // Bottom Right
+        return {
+          hidden: { opacity: 0, y: 50 },
+          visible: { 
+            opacity: 1, 
+            y: 0, 
+            transition: { duration: 1.1, ease: [0.22, 1, 0.36, 1], delay: 0.45 } 
+          }
+        };
+      default:
+        return {
+          hidden: { opacity: 0, y: 50 },
+          visible: { 
+            opacity: 1, 
+            y: 0, 
+            transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.1 } 
+          }
+        };
+    }
   };
 
   return (
@@ -42,9 +103,9 @@ export default function Products() {
 
       {/* Products Grid - Desktop & Mobile */}
       <div className="grid grid-cols-2 lg:flex lg:flex-wrap lg:justify-center gap-2 lg:gap-8">
-        {tshirts.map((product, index) => (
-          <div key={product.id} className="w-full lg:w-[calc(33.333%-1.334rem)] lg:mt-2">
-            <ProductCard product={product} index={index} />
+        {tshirts.slice(0, 5).map((product, index) => (
+          <div key={product.id} className="w-full lg:w-[calc(33.333%-1.334rem)] lg:mt-2" style={{ willChange: 'transform, opacity' }}>
+            <ProductCard product={product} index={index} customVariants={getCardVariants(index)} />
           </div>
         ))}
       </div>

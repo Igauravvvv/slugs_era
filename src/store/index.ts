@@ -1,16 +1,22 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Product, CartItem, Address, User, View } from '@/types';
+import type { CartItem, Address, User, Product } from '@/types';
+import { calculateShipping } from '@/utils/shipping';
 
 interface AppState {
-  // Navigation
-  currentView: View;
-  selectedProduct: Product | null;
-  setView: (view: View) => void;
-  setSelectedProduct: (product: Product | null) => void;
+  // Collection filters (used by Collections page via URL params too)
   selectedCategory: string | null;
   selectedSubcategory: string | null;
   setCollectionFilter: (category: string | null, subcategory: string | null) => void;
+
+  // Products
+  products: Product[];
+  setProducts: (products: Product[]) => void;
+
+  // Wishlist
+  wishlist: string[];
+  toggleWishlist: (productId: string) => void;
+  isInWishlist: (productId: string) => boolean;
 
   // Mobile About Section
   isAboutMobileVisible: boolean;
@@ -24,6 +30,8 @@ interface AppState {
   clearCart: () => void;
   getCartTotal: () => number;
   getCartCount: () => number;
+  getShipping: () => number;
+  getOrderTotal: () => number;
   hasToteBag: boolean;
   addToteBag: () => void;
 
@@ -41,19 +49,35 @@ interface AppState {
   // Order
   orderNote: string;
   setOrderNote: (note: string) => void;
+
+  // Order completion flag (to prevent direct access to success page)
+  lastCompletedOrderId: string | null;
+  setLastCompletedOrderId: (id: string | null) => void;
 }
 
 export const useStore = create<AppState>()(
   persist(
     (set, get) => ({
-      // Navigation
-      currentView: 'home',
-      selectedProduct: null,
-      setView: (view) => set({ currentView: view }),
-      setSelectedProduct: (product) => set({ selectedProduct: product }),
+      // Collection filters
       selectedCategory: null,
       selectedSubcategory: null,
       setCollectionFilter: (category, subcategory) => set({ selectedCategory: category, selectedSubcategory: subcategory }),
+
+      // Products
+      products: [],
+      setProducts: (products) => set({ products }),
+
+      // Wishlist
+      wishlist: [],
+      toggleWishlist: (productId) => {
+        const { wishlist } = get();
+        if (wishlist.includes(productId)) {
+          set({ wishlist: wishlist.filter((id) => id !== productId) });
+        } else {
+          set({ wishlist: [...wishlist, productId] });
+        }
+      },
+      isInWishlist: (productId) => get().wishlist.includes(productId),
 
       // Mobile About Section
       isAboutMobileVisible: false,
@@ -69,7 +93,10 @@ export const useStore = create<AppState>()(
         );
         if (existingIndex >= 0) {
           const newCart = [...cart];
-          newCart[existingIndex].quantity += item.quantity;
+          newCart[existingIndex] = {
+            ...newCart[existingIndex],
+            quantity: newCart[existingIndex].quantity + item.quantity,
+          };
           set({ cart: newCart });
         } else {
           set({ cart: [...cart, item] });
@@ -93,21 +120,27 @@ export const useStore = create<AppState>()(
       getCartCount: () => {
         return get().cart.reduce((count, item) => count + item.quantity, 0);
       },
+      getShipping: () => {
+        return calculateShipping(get().getCartTotal());
+      },
+      getOrderTotal: () => {
+        return get().getCartTotal() + get().getShipping();
+      },
       addToteBag: () => set({ hasToteBag: true }),
 
       // User
       user: null,
       setUser: (user) => set({ user }),
 
-      // Addresses
+      // Addresses — fixed: no longer mutates existing objects in-place
       addresses: [],
       selectedAddress: null,
       addAddress: (address) => {
         const { addresses } = get();
-        if (address.isDefault) {
-          addresses.forEach((a) => (a.isDefault = false));
-        }
-        set({ addresses: [...addresses, address] });
+        const updated = address.isDefault
+          ? addresses.map((a) => ({ ...a, isDefault: false }))
+          : addresses;
+        set({ addresses: [...updated, address] });
       },
       selectAddress: (address) => set({ selectedAddress: address }),
       removeAddress: (id) => {
@@ -117,14 +150,30 @@ export const useStore = create<AppState>()(
       // Order
       orderNote: '',
       setOrderNote: (note) => set({ orderNote: note }),
+
+      // Order completion flag
+      lastCompletedOrderId: null,
+      setLastCompletedOrderId: (id) => set({ lastCompletedOrderId: id }),
     }),
     {
       name: 'slugs-era-store',
+      version: 2,
+      migrate: (persisted: any, version: number) => {
+        // v0/v1 → v2: no breaking changes, just return persisted state
+        return persisted;
+      },
       partialize: (state) => ({
         cart: state.cart,
         hasToteBag: state.hasToteBag,
         user: state.user,
         addresses: state.addresses,
+        wishlist: state.wishlist,
+      }),
+      merge: (persisted: any, current: AppState) => ({
+        ...current,
+        ...(persisted || {}),
+        // Always start with empty products — they're set fresh from useProducts()
+        products: [],
       }),
     }
   )

@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import { CDN } from '@/lib/cdn';
 
 interface LoaderProps {
   isLoading: boolean;
@@ -16,7 +17,7 @@ export default function Loader({ isLoading }: LoaderProps) {
         >
           <div className="flex flex-col items-center gap-5">
             <motion.img
-              src="/images/logo.png"
+              src={CDN.LOGO}
               alt="Slug's Era Logo"
               initial={{ opacity: 0, y: 20, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}

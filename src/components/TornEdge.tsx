@@ -49,7 +49,7 @@ export default function TornEdge({ fill = '#ffffff', position = 'top', className
         preserveAspectRatio="none"
         className={`w-full h-full block ${shadow && position === 'bottom' ? 'drop-shadow-[0_10px_10px_rgba(0,0,0,0.2)]' : shadow && position === 'top' ? 'drop-shadow-[0_-10px_10px_rgba(0,0,0,0.2)]' : ''}`}
       >
-        <path d={d2Offset} fill={fill} opacity="0.4" />
+        <path d={d2Offset} fill={fill} opacity="0.85" />
         <path d={pathData} fill={fill} />
       </svg>
     </div>

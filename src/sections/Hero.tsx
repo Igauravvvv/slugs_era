@@ -2,10 +2,28 @@ import { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { TypeAnimation } from 'react-type-animation';
+import { CDN } from '@/lib/cdn';
+import { useSiteSection } from '@/context/SiteContentContext';
 
 export default function Hero() {
   const heroRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
+  const { section, getMeta } = useSiteSection('hero');
+
+  const heading = section?.title || 'Wear the Philosophy of Slow Culture';
+  const subtitle = section?.subtitle || 'Premium pieces for those who value intention over impulse. Crafted without compromise.';
+  const heroImage = section?.image_url || CDN.MODEL_HERO;
+  const ctaText = section?.cta_text || 'Shop Now';
+  const ctaLink = section?.cta_link || '#products';
+  const ctaSecondaryText = (getMeta('cta_secondary_text') as string) || 'Our Story';
+  const ctaSecondaryLink = (getMeta('cta_secondary_link') as string) || '#about';
+  const eyebrowSequences = (getMeta('eyebrow_sequences') as string[]) || [
+    'Movement. Not Merch — The Slow Club',
+    'Movement. Not Merch — New Season',
+    'Movement. Not Merch — Exclusive Drops',
+    'Movement. Not Merch — Slugs Era',
+  ];
+  const tags = (getMeta('tags') as string[]) || ['100% Organic', 'Slow Fashion', '5 Drops', 'Movement. Not Merch'];
 
   useEffect(() => {
     const hero = heroRef.current;
@@ -34,17 +52,19 @@ export default function Hero() {
     };
   }, []);
 
-  const scrollToProducts = () => {
-    const element = document.getElementById('products');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const handleCtaPrimary = () => {
+    if (ctaLink.startsWith('#')) {
+      const id = ctaLink.slice(1);
+      const element = document.getElementById(id);
+      if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
-  const scrollToAbout = () => {
-    const element = document.getElementById('about');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const handleCtaSecondary = () => {
+    if (ctaSecondaryLink.startsWith('#')) {
+      const id = ctaSecondaryLink.slice(1);
+      const element = document.getElementById(id);
+      if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -53,9 +73,9 @@ export default function Hero() {
       {/* ===== MOBILE HERO: Full-screen image with overlay ===== */}
       <div className="relative lg:hidden h-[85vh] min-h-[500px] overflow-hidden">
         {/* Background image */}
-        <motion.img
-          src="/images/MODEL-WITH SHIRT.png"
-          alt="Fashion Model"
+      <motion.img
+        src={heroImage}
+        alt="Fashion Model"
           className="absolute inset-0 w-full h-full object-cover object-top"
           initial={{ opacity: 0, scale: 1.1 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -72,33 +92,36 @@ export default function Hero() {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
-            className="font-display text-[38px] font-light leading-[1.08] text-white mb-3"
-            style={{ textShadow: '0 4px 24px rgba(0,0,0,0.5)' }}
-          >
-            Wear the<br />
-            <em className="italic text-white/95">Philosophy</em><br />
-            of Slow Culture
+        className="font-display text-[38px] font-light leading-[1.08] text-white mb-3"
+          style={{ textShadow: '0 4px 24px rgba(0,0,0,0.5)' }}
+        >
+          {heading.split('\n').map((line, i, arr) => (
+            <span key={i}>
+              {i === arr.length - 2 ? <em className="italic text-white/95">{line}</em> : line}
+              {i < arr.length - 1 && <br />}
+            </span>
+          ))}
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.5 }}
-            className="text-[13px] font-light leading-[1.7] text-white/70 max-w-[300px] mb-6"
-          >
-            Premium pieces for those who value intention over impulse.
-          </motion.p>
+          className="text-[13px] font-light leading-[1.7] text-white/70 max-w-[300px] mb-6"
+        >
+          {subtitle}
+        </motion.p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.65 }}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.65 }}
+        >
+          <button
+            onClick={handleCtaPrimary}
+            className="w-full py-4 bg-white/90 text-[#C0132A] text-[13px] font-semibold tracking-[0.2em] uppercase rounded-full backdrop-blur-sm transition-all duration-300 active:scale-95"
           >
-            <button
-              onClick={scrollToProducts}
-              className="w-full py-4 bg-white/90 text-[#C0132A] text-[13px] font-semibold tracking-[0.2em] uppercase rounded-full backdrop-blur-sm transition-all duration-300 active:scale-95"
-            >
-              Shop Now
+            {ctaText}
             </button>
           </motion.div>
         </div>
@@ -128,16 +151,7 @@ export default function Hero() {
           >
             <span className="w-7 h-px bg-white/60 shrink-0" />
             <TypeAnimation
-              sequence={[
-                'Movement. Not Merch — The Slow Club',
-                3000,
-                'Movement. Not Merch — New Season',
-                3000,
-                'Movement. Not Merch — Exclusive Drops',
-                3000,
-                'Movement. Not Merch — Slugs Era',
-                3000,
-              ]}
+              sequence={eyebrowSequences.flatMap(s => [s, 3000])}
               wrapper="span"
               speed={50}
               repeat={Infinity}
@@ -150,12 +164,15 @@ export default function Hero() {
             initial={{ opacity: 0, x: -120 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.45 }}
-            className="font-display text-[clamp(42px,6vw,92px)] font-light leading-[1.04] text-white mb-6"
-            style={{ textShadow: '0 4px 32px rgba(0,0,0,0.3)' }}
-          >
-            Wear the<br />
-            <em className="italic text-white/95">Philosophy</em><br />
-            of Slow Culture
+          className="font-display text-[clamp(42px,6vw,92px)] font-light leading-[1.04] text-white mb-6"
+          style={{ textShadow: '0 4px 32px rgba(0,0,0,0.3)' }}
+        >
+          {heading.split('\n').map((line, i, arr) => (
+            <span key={i}>
+              {i === arr.length - 2 ? <em className="italic text-white/95">{line}</em> : line}
+              {i < arr.length - 1 && <br />}
+            </span>
+          ))}
           </motion.h1>
 
           {/* Subtitle */}
@@ -165,33 +182,33 @@ export default function Hero() {
             transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.6 }}
             className="text-[15px] font-light leading-[1.85] text-white/75 max-w-[380px] mb-12"
           >
-            Premium pieces for those who value intention over impulse. Crafted without compromise.
-          </motion.p>
+          {subtitle}
+        </motion.p>
 
-          {/* CTA Buttons */}
-          <motion.div
-            initial={{ opacity: 0, x: -120 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.75 }}
-            className="flex gap-5 items-center mb-12"
-          >
-            <button onClick={scrollToProducts} className="btn-primary group">
-              Shop Now
-              <ArrowRight size={13} className="transition-transform duration-300 group-hover:translate-x-1" strokeWidth={2} />
-            </button>
-            <button onClick={scrollToAbout} className="btn-outline">
-              Our Story
-            </button>
-          </motion.div>
+        {/* CTA Buttons */}
+        <motion.div
+          initial={{ opacity: 0, x: -120 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.75 }}
+          className="flex gap-5 items-center mb-12"
+        >
+          <button onClick={handleCtaPrimary} className="btn-primary group">
+            {ctaText}
+            <ArrowRight size={13} className="transition-transform duration-300 group-hover:translate-x-1" strokeWidth={2} />
+          </button>
+          <button onClick={handleCtaSecondary} className="btn-outline">
+            {ctaSecondaryText}
+          </button>
+        </motion.div>
 
-          {/* Tags */}
-          <motion.div
-            initial={{ opacity: 0, x: -120 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.9 }}
-            className="flex gap-2.5 flex-wrap pt-9 border-t border-white/[0.18]"
-          >
-            {['100% Organic', 'Slow Fashion', '5 Drops', 'Movement. Not Merch'].map((tag) => (
+        {/* Tags */}
+        <motion.div
+          initial={{ opacity: 0, x: -120 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.9 }}
+          className="flex gap-2.5 flex-wrap pt-9 border-t border-white/[0.18]"
+        >
+          {tags.map((tag: string) => (
               <span
                 key={tag}
                 className="text-[10px] font-medium tracking-[0.12em] uppercase text-white/72 border border-white/[0.22] px-3.5 py-1.5 transition-all duration-200 cursor-default hover:text-white hover:border-white/50 hover:bg-white/[0.08]"
@@ -210,7 +227,7 @@ export default function Hero() {
       >
         <motion.img
           ref={imageRef}
-          src="/images/MODEL-WITH SHIRT.png"
+          src={heroImage}
           alt="Fashion Model"
           className="w-full h-full object-cover object-top"
           initial={{ opacity: 0, x: 120 }}

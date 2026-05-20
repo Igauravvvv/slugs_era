@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '@/store';
-import { Search, ShoppingBag, X, Menu } from 'lucide-react';
+import { ShoppingBag, X, Menu, User } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { CDN } from '@/lib/cdn';
+import LogoSequence from '@/components/LogoSequence';
 
 interface HeaderProps {
   minimal?: boolean;
@@ -12,7 +16,11 @@ export default function Header({ minimal = false }: HeaderProps) {
   const [isTop, setIsTop] = useState(true);
   const redHeaderRef = useRef<HTMLElement>(null);
   const whiteHeaderRef = useRef<HTMLElement>(null);
-  const { getCartCount, setView, currentView, setCollectionFilter, setAboutMobileVisible } = useStore();
+  const { getCartCount, setCollectionFilter, setAboutMobileVisible } = useStore();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const currentView = location.pathname === '/' ? 'home' : location.pathname.slice(1);
+  const { user, signInWithGoogle } = useAuth();
   const cartCount = getCartCount();
 
   useEffect(() => {
@@ -116,8 +124,8 @@ export default function Header({ minimal = false }: HeaderProps) {
       setAboutMobileVisible(true);
     }
 
-    if (currentView !== 'home') {
-      setView('home');
+    if (location.pathname !== '/') {
+      navigate('/');
       setTimeout(() => {
         const element = document.getElementById(id);
         if (element) {
@@ -136,14 +144,12 @@ export default function Header({ minimal = false }: HeaderProps) {
   };
 
   const goHome = () => {
-    setView('home');
+    navigate('/');
     setAboutMobileVisible(false);
-    window.scrollTo(0, 0);
   };
 
   const goToCart = () => {
-    setView('cart');
-    window.scrollTo(0, 0);
+    navigate('/cart');
   };
 
   // Helper function to render header contents, reducing code duplication
@@ -174,7 +180,7 @@ export default function Header({ minimal = false }: HeaderProps) {
             <nav className={`hidden lg:flex gap-11 items-center ${isTransparent ? 'pointer-events-auto' : ''}`}>
               <div className="relative group/nav">
                 <button
-                  onClick={() => { setCollectionFilter(null, null); setView('collections'); }}
+                  onClick={() => { setCollectionFilter(null, null); navigate('/collections'); }}
                   className={`text-[11px] font-medium tracking-[0.15em] uppercase ${textColor} ${!isTransparent ? 'opacity-85 hover:opacity-100' : ''} relative transition-opacity duration-200 group/link`}
                 >
                   Collection
@@ -188,13 +194,13 @@ export default function Header({ minimal = false }: HeaderProps) {
                 {isTransparent && (
                   <div className="absolute top-full left-0 pt-4 opacity-0 pointer-events-none group-hover/nav:opacity-100 group-hover/nav:pointer-events-auto transition-all duration-300 z-[502]">
                     <div className="bg-white border border-[#E8E4E0] shadow-xl rounded-sm p-4 w-48 flex flex-col gap-3">
-                      <button onClick={() => { setCollectionFilter('shirts', null); setView('collections'); }} className="text-left text-xs uppercase tracking-wider text-[#1A1A1A] hover:text-[#C0132A] transition-colors">Shirts</button>
-                      <button onClick={() => { setCollectionFilter('tshirts', null); setView('collections'); }} className="text-left text-xs uppercase tracking-wider text-[#1A1A1A] hover:text-[#C0132A] transition-colors">T-Shirts</button>
+                      <button onClick={() => { setCollectionFilter('shirts', null); navigate('/collections'); }} className="text-left text-xs uppercase tracking-wider text-[#1A1A1A] hover:text-[#C0132A] transition-colors">Shirts</button>
+                      <button onClick={() => { setCollectionFilter('tshirts', null); navigate('/collections'); }} className="text-left text-xs uppercase tracking-wider text-[#1A1A1A] hover:text-[#C0132A] transition-colors">T-Shirts</button>
                       <div className="pt-2 border-t border-[#E8E4E0]">
-                        <button onClick={() => { setCollectionFilter('hoodies', null); setView('collections'); }} className="text-left text-xs uppercase tracking-wider text-[#1A1A1A] hover:text-[#C0132A] transition-colors mb-2 block w-full">Hoodies</button>
-                        <button onClick={() => { setCollectionFilter('hoodies', 'embroidery'); setView('collections'); }} className="text-left text-[10px] pl-3 uppercase tracking-wider text-[#1A1A1A]/70 hover:text-[#C0132A] transition-colors block w-full py-1">Embroidery</button>
-                        <button onClick={() => { setCollectionFilter('hoodies', 'patchwork'); setView('collections'); }} className="text-left text-[10px] pl-3 uppercase tracking-wider text-[#1A1A1A]/70 hover:text-[#C0132A] transition-colors block w-full py-1">Patchwork</button>
-                        <button onClick={() => { setCollectionFilter('hoodies', 'printed'); setView('collections'); }} className="text-left text-[10px] pl-3 uppercase tracking-wider text-[#1A1A1A]/70 hover:text-[#C0132A] transition-colors block w-full py-1">Printed</button>
+                        <button onClick={() => { setCollectionFilter('hoodies', null); navigate('/collections'); }} className="text-left text-xs uppercase tracking-wider text-[#1A1A1A] hover:text-[#C0132A] transition-colors mb-2 block w-full">Hoodies</button>
+                        <button onClick={() => { setCollectionFilter('hoodies', 'embroidery'); navigate('/collections'); }} className="text-left text-[10px] pl-3 uppercase tracking-wider text-[#1A1A1A]/70 hover:text-[#C0132A] transition-colors block w-full py-1">Embroidery</button>
+                        <button onClick={() => { setCollectionFilter('hoodies', 'patchwork'); navigate('/collections'); }} className="text-left text-[10px] pl-3 uppercase tracking-wider text-[#1A1A1A]/70 hover:text-[#C0132A] transition-colors block w-full py-1">Patchwork</button>
+                        <button onClick={() => { setCollectionFilter('hoodies', 'printed'); navigate('/collections'); }} className="text-left text-[10px] pl-3 uppercase tracking-wider text-[#1A1A1A]/70 hover:text-[#C0132A] transition-colors block w-full py-1">Printed</button>
                       </div>
                     </div>
                   </div>
@@ -225,23 +231,12 @@ export default function Header({ minimal = false }: HeaderProps) {
         <div className={`absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 flex items-center justify-center ${isTransparent ? 'opacity-0 pointer-events-none' : ''}`}>
           <button onClick={goHome} className="flex items-center">
             {theme === 'red' && currentView === 'home' && isTop ? (
-              <video
-                src="/images/logo's animated.mp4"
-                autoPlay
-                muted
-                playsInline
-                ref={(el) => {
-                  if (el && !el.dataset.started) {
-                    el.dataset.started = 'true';
-                    el.currentTime = 0.2;
-                    el.play().catch(() => { });
-                  }
-                }}
+              <LogoSequence
                 className="h-14 lg:h-[72px] w-auto object-contain object-center scale-[2.2] lg:scale-[2.3] translate-y-1 lg:translate-x-[2px] lg:translate-y-3 bg-transparent mix-blend-multiply transition-transform duration-500"
               />
             ) : (
               <motion.img
-                src="/images/logo.png"
+                src={CDN.LOGO}
                 alt="Slug's Era Logo"
                 className="h-[52px] lg:h-[72px] w-auto object-contain bg-transparent drop-shadow-md transition-all duration-500 delay-100"
                 style={{ filter: logoFilter }}
@@ -253,12 +248,6 @@ export default function Header({ minimal = false }: HeaderProps) {
 
         {/* Right Side: Icons */}
         <div className={`flex items-center justify-end gap-4 ${isTransparent ? 'opacity-0 pointer-events-none' : ''}`}>
-          {!minimal && (
-            <button className={`ibtn hidden lg:flex ${textColor}`}>
-              <Search size={17} strokeWidth={1.5} />
-            </button>
-          )}
-
           <button
             onClick={goToCart}
             className={`cartbtn relative lg:w-9 lg:h-9 h-auto py-1.5 px-3 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 gap-1.5 ${theme === 'white' ? 'bg-white text-[#C0132A]' : 'bg-[#C0132A] text-white'
@@ -274,6 +263,16 @@ export default function Header({ minimal = false }: HeaderProps) {
                 {cartCount}
               </span>
             )}
+          </button>
+
+          <button
+            onClick={() => {
+              if (user) { navigate('/profile'); window.scrollTo(0, 0); }
+              else signInWithGoogle();
+            }}
+            className={`ibtn hidden lg:flex w-9 h-9 rounded-full items-center justify-center transition-all duration-200 hover:scale-105 ${textColor} ${theme === 'white' ? 'bg-white/10' : 'bg-[#1A1A1A]/5'}`}
+          >
+            <User size={15} strokeWidth={1.5} />
           </button>
         </div>
       </div>
@@ -316,20 +315,20 @@ export default function Header({ minimal = false }: HeaderProps) {
             <nav className="flex flex-col gap-4">
               <div className="py-2 border-b border-[#E8E4E0]/50">
                 <button
-                  onClick={() => { setCollectionFilter(null, null); setView('collections'); setIsMobileMenuOpen(false); }}
+                  onClick={() => { setCollectionFilter(null, null); navigate('/collections'); setIsMobileMenuOpen(false); }}
                   className="text-sm font-medium tracking-[0.15em] uppercase text-[#1A1A1A] text-left w-full mb-3"
                 >
                   Collection
                 </button>
                 <div className="flex flex-col gap-3 pl-4">
-                  <button onClick={() => { setCollectionFilter('shirts', null); setView('collections'); setIsMobileMenuOpen(false); }} className="text-xs font-medium tracking-[0.1em] uppercase text-[#1A1A1A]/80 text-left">Shirts</button>
-                  <button onClick={() => { setCollectionFilter('tshirts', null); setView('collections'); setIsMobileMenuOpen(false); }} className="text-xs font-medium tracking-[0.1em] uppercase text-[#1A1A1A]/80 text-left">T-Shirts</button>
+                  <button onClick={() => { setCollectionFilter('shirts', null); navigate('/collections'); setIsMobileMenuOpen(false); }} className="text-xs font-medium tracking-[0.1em] uppercase text-[#1A1A1A]/80 text-left">Shirts</button>
+                  <button onClick={() => { setCollectionFilter('tshirts', null); navigate('/collections'); setIsMobileMenuOpen(false); }} className="text-xs font-medium tracking-[0.1em] uppercase text-[#1A1A1A]/80 text-left">T-Shirts</button>
                   <div className="pt-2">
-                    <button onClick={() => { setCollectionFilter('hoodies', null); setView('collections'); setIsMobileMenuOpen(false); }} className="text-xs font-medium tracking-[0.1em] uppercase text-[#1A1A1A]/80 text-left w-full mb-2">Hoodies</button>
+                    <button onClick={() => { setCollectionFilter('hoodies', null); navigate('/collections'); setIsMobileMenuOpen(false); }} className="text-xs font-medium tracking-[0.1em] uppercase text-[#1A1A1A]/80 text-left w-full mb-2">Hoodies</button>
                     <div className="flex flex-col gap-2 pl-3">
-                      <button onClick={() => { setCollectionFilter('hoodies', 'embroidery'); setView('collections'); setIsMobileMenuOpen(false); }} className="text-[10px] tracking-wider uppercase text-[#1A1A1A]/60 text-left">Embroidery</button>
-                      <button onClick={() => { setCollectionFilter('hoodies', 'patchwork'); setView('collections'); setIsMobileMenuOpen(false); }} className="text-[10px] tracking-wider uppercase text-[#1A1A1A]/60 text-left">Patchwork</button>
-                      <button onClick={() => { setCollectionFilter('hoodies', 'printed'); setView('collections'); setIsMobileMenuOpen(false); }} className="text-[10px] tracking-wider uppercase text-[#1A1A1A]/60 text-left">Printed</button>
+                      <button onClick={() => { setCollectionFilter('hoodies', 'embroidery'); navigate('/collections'); setIsMobileMenuOpen(false); }} className="text-[10px] tracking-wider uppercase text-[#1A1A1A]/60 text-left">Embroidery</button>
+                      <button onClick={() => { setCollectionFilter('hoodies', 'patchwork'); navigate('/collections'); setIsMobileMenuOpen(false); }} className="text-[10px] tracking-wider uppercase text-[#1A1A1A]/60 text-left">Patchwork</button>
+                      <button onClick={() => { setCollectionFilter('hoodies', 'printed'); navigate('/collections'); setIsMobileMenuOpen(false); }} className="text-[10px] tracking-wider uppercase text-[#1A1A1A]/60 text-left">Printed</button>
                     </div>
                   </div>
                 </div>

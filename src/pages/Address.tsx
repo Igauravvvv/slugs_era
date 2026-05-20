@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Plus, Check, Navigation, Loader2 } from 'lucide-react';
 import { useStore } from '@/store';
 import type { Address } from '@/types';
+import { calculateShipping } from '@/utils/shipping';
 
 export default function AddressPage() {
-  const { cart, getCartTotal, addresses, selectedAddress, addAddress, selectAddress, setView } = useStore();
+  const navigate = useNavigate();
+  const { cart, getCartTotal, addresses, selectedAddress, addAddress, selectAddress } = useStore();
   const [showForm, setShowForm] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const [formData, setFormData] = useState({
@@ -20,15 +23,15 @@ export default function AddressPage() {
   });
 
   const subtotal = getCartTotal();
-  const shipping = subtotal > 2000 ? 0 : 99;
+  const shipping = calculateShipping(subtotal);
   const total = subtotal + shipping;
 
   // Redirect if cart is empty
   useEffect(() => {
     if (cart.length === 0) {
-      setView('cart');
+      navigate('/cart');
     }
-  }, [cart, setView]);
+  }, [cart, navigate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -40,6 +43,16 @@ export default function AddressPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Validate phone
+    if (!/^[6-9]\d{9}$/.test(formData.phone)) {
+      alert('Please enter a valid 10-digit Indian mobile number');
+      return;
+    }
+    // Validate pincode
+    if (!/^\d{6}$/.test(formData.pincode)) {
+      alert('Please enter a valid 6-digit PIN code');
+      return;
+    }
     const newAddress: Address = {
       id: Date.now().toString(),
       ...formData,
@@ -101,7 +114,7 @@ export default function AddressPage() {
 
   const proceedToPayment = () => {
     if (selectedAddress) {
-      setView('payment');
+      navigate('/checkout/payment');
       window.scrollTo(0, 0);
     }
   };
@@ -112,7 +125,7 @@ export default function AddressPage() {
         {/* Back Button */}
         <button
           onClick={() => {
-            setView('cart');
+            navigate('/cart');
             window.scrollTo(0, 0);
           }}
           className="flex items-center gap-2 text-sm text-[#888880] hover:text-[#1A1A1A] transition-colors mb-8"

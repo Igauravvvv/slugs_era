@@ -1,13 +1,22 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, CreditCard, Wallet, Banknote, Shield, Check, Lock } from 'lucide-react';
 import { useStore } from '@/store';
+import { useAuth } from '@/context/AuthContext';
+import { trackPurchase } from '@/lib/analytics';
+import { calculateShipping } from '@/utils/shipping';
 
 type PaymentMethod = 'card' | 'upi' | 'cod';
 
+const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || '';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 export default function Payment() {
-  const { cart, getCartTotal, selectedAddress, setView, clearCart } = useStore();
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
+  const navigate = useNavigate();
+  const { cart, getCartTotal, selectedAddress, clearCart, setLastCompletedOrderId } = useStore();
+  const { user } = useAuth();
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('upi');
   const [isProcessing, setIsProcessing] = useState(false);
   const [cardData, setCardData] = useState({
     number: '',
@@ -18,17 +27,17 @@ export default function Payment() {
   const [upiId, setUpiId] = useState('');
 
   const subtotal = getCartTotal();
-  const shipping = subtotal > 2000 ? 0 : 99;
+  const shipping = calculateShipping(subtotal);
   const total = subtotal + shipping;
 
   // Redirect if no address or cart
   useEffect(() => {
     if (cart.length === 0) {
-      setView('cart');
+      navigate('/cart');
     } else if (!selectedAddress) {
-      setView('address');
+      navigate('/checkout/address');
     }
-  }, [cart, selectedAddress, setView]);
+  }, [cart, selectedAddress, navigate]);
 
   const handleCardInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -49,15 +58,103 @@ export default function Payment() {
     setCardData(prev => ({ ...prev, [name]: formattedValue }));
   };
 
+  // Load Razorpay script
+  const loadRazorpay = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if ((window as any).Razorpay) { resolve(true); return; }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
   const handlePayment = async () => {
     setIsProcessing(true);
     
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    clearCart();
-    setView('success');
-    window.scrollTo(0, 0);
+    try {
+      const loaded = await loadRazorpay();
+      if (!loaded) { alert('Razorpay failed to load. Check your connection.'); setIsProcessing(false); return; }
+
+      // 1. Create order on backend
+      const orderRes = await fetch(`${API_URL}/api/payment/create-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: total, currency: 'INR' }),
+      });
+      const orderData = await orderRes.json();
+      if (!orderData.success) { throw new Error('Failed to create order'); }
+
+      // 2. Open Razorpay modal
+      const options = {
+        key: RAZORPAY_KEY_ID,
+        amount: orderData.data.amount,
+        currency: 'INR',
+        name: "Slug's Era",
+        description: `Order — ${cart.length} item(s)`,
+        order_id: orderData.data.id,
+        prefill: {
+          name: selectedAddress?.fullName || user?.user_metadata?.full_name || '',
+          email: user?.email || '',
+          contact: selectedAddress?.phone || '',
+        },
+        theme: { color: '#C0132A' },
+        handler: async (response: any) => {
+          // 3. Verify payment on backend
+          const verifyRes = await fetch(`${API_URL}/api/payment/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              userId: user?.id || '',
+              customerName: selectedAddress?.fullName || user?.user_metadata?.full_name || '',
+              customerEmail: user?.email || '',
+              customerPhone: selectedAddress?.phone || '',
+              shippingAddress: selectedAddress ? {
+                street: [selectedAddress.addressLine1, selectedAddress.addressLine2].filter(Boolean).join(', '),
+                city: selectedAddress.city,
+                state: selectedAddress.state,
+                pincode: selectedAddress.pincode,
+                country: 'India',
+              } : null,
+              items: cart.map(i => ({ productId: i.product.id, name: i.product.name, size: i.size, color: i.color, quantity: i.quantity, price: i.product.price })),
+              totalAmount: total,
+              shippingFee: shipping,
+            }),
+          });
+          const verifyData = await verifyRes.json();
+
+          if (verifyData.success) {
+            const orderData = verifyData.data?.order;
+            const orderNumber = orderData?.order_number || verifyData.data?.orderNumber;
+            const orderId = orderData?.id;
+
+            trackPurchase(response.razorpay_payment_id, total, cart.map(i => ({ id: i.product.id, name: i.product.name, price: i.product.price, quantity: i.quantity })));
+            
+            // Store order ID so Success page can display it
+            if (orderId) setLastCompletedOrderId(orderId);
+            clearCart();
+            navigate('/order-success', { state: { orderNumber, orderId, total } });
+          } else {
+            alert('Payment verification failed. Contact support.');
+          }
+          setIsProcessing(false);
+        },
+        modal: {
+          ondismiss: () => { setIsProcessing(false); },
+        },
+      };
+
+      const razorpay = new (window as any).Razorpay(options);
+      razorpay.open();
+    } catch (err) {
+      console.error('Payment error:', err);
+      alert('Something went wrong. Please try again.');
+      setIsProcessing(false);
+    }
   };
 
   const isFormValid = () => {
@@ -81,10 +178,7 @@ export default function Payment() {
       <div className="max-w-6xl mx-auto px-6 lg:px-8">
         {/* Back Button */}
         <button
-          onClick={() => {
-            setView('address');
-            window.scrollTo(0, 0);
-          }}
+          onClick={() => navigate('/checkout/address')}
           className="flex items-center gap-2 text-sm text-[#888880] hover:text-[#1A1A1A] transition-colors mb-8"
         >
           <ArrowLeft size={16} />

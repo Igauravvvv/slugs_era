@@ -1,5 +1,8 @@
+import { useSiteSection } from '@/context/SiteContentContext';
+
 export default function Marquee() {
-  const items = [
+  const { section } = useSiteSection('marquee');
+  const items = (section?.meta?.items as string[]) || [
     'The Philosophy of Slow',
     'Movement. Not Merch',
     'Coastal Drift — New Drop',

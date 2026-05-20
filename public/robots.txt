@@ -1,0 +1,8 @@
+# Slug's Era — robots.txt
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /checkout
+Disallow: /api/
+
+Sitemap: https://slugsera.com/sitemap.xml

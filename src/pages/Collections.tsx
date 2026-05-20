@@ -1,12 +1,42 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useStore } from '@/store';
-import { products } from '@/data/products';
 import ProductCard from '@/components/ProductCard';
 
 export default function Collections() {
-  const { selectedCategory, selectedSubcategory, setView, setCollectionFilter } = useStore();
+  const { selectedCategory, selectedSubcategory, setCollectionFilter, products } = useStore();
+  const navigate = useNavigate();
+  const { category: urlCategory } = useParams<{ category?: string }>();
+
+  // Sync URL param → Zustand store on mount or when URL changes
+  useEffect(() => {
+    if (urlCategory) {
+      // Map user-friendly URL slugs to internal category names
+      const categoryMap: Record<string, string> = {
+        'tshirts': 'tshirts',
+        't-shirts': 'tshirts',
+        'shirts': 'shirts',
+        'hoodies': 'hoodies',
+        'accessories': 'accessories',
+      };
+      const mapped = categoryMap[urlCategory.toLowerCase()] || urlCategory.toLowerCase();
+      if (mapped !== selectedCategory) {
+        setCollectionFilter(mapped, null);
+      }
+    }
+    // Don't clear the filter when URL has no category — let user keep their manual filter
+    // unless they explicitly navigated to /collections (no param)
+  }, [urlCategory]); // intentionally exclude selectedCategory to avoid loop
+
+  // If the user navigates to /collections (without param) and there's a stale filter, clear it
+  useEffect(() => {
+    if (!urlCategory && selectedCategory) {
+      // Only clear if the component mounted without a category param
+      // (e.g., user clicked "All Collections" link)
+    }
+  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -19,8 +49,18 @@ export default function Collections() {
   });
 
   const goBack = () => {
-    setView('home');
+    navigate('/');
     window.scrollTo(0, 0);
+  };
+
+  // Handle category filter click — also update the URL
+  const handleCategoryFilter = (cat: string | null) => {
+    setCollectionFilter(cat, null);
+    if (cat) {
+      navigate(`/collections/${cat}`, { replace: true });
+    } else {
+      navigate('/collections', { replace: true });
+    }
   };
 
   // Determine Title
@@ -76,7 +116,7 @@ export default function Collections() {
               return (
                 <button
                   key={cat}
-                  onClick={() => setCollectionFilter(cat === 'All' ? null : mappedCat, null)}
+                  onClick={() => handleCategoryFilter(cat === 'All' ? null : mappedCat)}
                   className={`text-[10px] font-medium tracking-[0.15em] uppercase whitespace-nowrap transition-colors ${isActive ? 'text-[#C0132A] border-b border-[#C0132A] pb-1' : 'text-[#888880] hover:text-[#1A1A1A]'
                     }`}
                 >
@@ -133,7 +173,7 @@ export default function Collections() {
               We are currently designing and crafting new additions for this collection. Sign up for our newsletter to be notified when they drop.
             </p>
             <button
-              onClick={() => setCollectionFilter(null, null)}
+              onClick={() => handleCategoryFilter(null)}
               className="mt-8 text-[11px] font-medium tracking-[0.15em] uppercase text-[#1A1A1A] border-b border-[#1A1A1A] pb-1 hover:text-[#C0132A] hover:border-[#C0132A] transition-colors"
             >
               Clear Filters

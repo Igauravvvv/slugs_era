@@ -1,23 +1,26 @@
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag, ArrowRight, Gift } from 'lucide-react';
 import { useStore } from '@/store';
-import { products } from '@/data/products';
+import { calculateShipping } from '@/utils/shipping';
+import { getSizeStock } from '@/data/products';
 
 export default function Cart() {
+  const navigate = useNavigate();
   const { 
     cart, 
     removeFromCart, 
     updateQuantity, 
     getCartTotal, 
     getCartCount,
-    setView,
     hasToteBag,
     addToteBag,
     addToCart,
+    products,
   } = useStore();
 
   const subtotal = getCartTotal();
-  const shipping = subtotal > 2000 ? 0 : 99;
+  const shipping = calculateShipping(subtotal);
   const total = subtotal + shipping;
   const itemCount = getCartCount();
 
@@ -58,7 +61,7 @@ export default function Cart() {
           </p>
           <button
             onClick={() => {
-              setView('home');
+              navigate('/');
               window.scrollTo(0, 0);
             }}
             className="btn-primary"
@@ -78,7 +81,7 @@ export default function Cart() {
         <div className="flex items-center gap-4 mb-8">
           <button
             onClick={() => {
-              setView('home');
+              navigate('/');
               window.scrollTo(0, 0);
             }}
             className="flex items-center gap-2 text-sm text-[#888880] hover:text-[#1A1A1A] transition-colors"
@@ -131,6 +134,7 @@ export default function Cart() {
                     {/* Quantity */}
                     <div className="flex items-center border border-[#E8E4E0]">
                       <button
+                        aria-label={`Decrease quantity of ${item.product.name}`}
                         onClick={() => {
                           if (item.quantity > 1) {
                             updateQuantity(item.product.id, item.size, item.quantity - 1);
@@ -142,8 +146,24 @@ export default function Cart() {
                       </button>
                       <span className="w-10 text-center text-sm">{item.quantity}</span>
                       <button
-                        onClick={() => updateQuantity(item.product.id, item.size, item.quantity + 1)}
-                        className="w-8 h-8 flex items-center justify-center hover:bg-[#F9F7F5] transition-colors"
+                        aria-label={`Increase quantity of ${item.product.name}`}
+                        onClick={() => {
+                          const sizeStock = getSizeStock(item.product, item.size);
+                          const maxQty = sizeStock ? sizeStock.stock : 10;
+                          if (item.quantity < maxQty) {
+                            updateQuantity(item.product.id, item.size, item.quantity + 1);
+                          }
+                        }}
+                        disabled={(() => {
+                          const sizeStock = getSizeStock(item.product, item.size);
+                          return sizeStock ? item.quantity >= sizeStock.stock : false;
+                        })()}
+                        className={`w-8 h-8 flex items-center justify-center transition-colors ${(() => {
+                          const sizeStock = getSizeStock(item.product, item.size);
+                          return sizeStock && item.quantity >= sizeStock.stock
+                            ? 'text-[#E8E4E0] cursor-not-allowed'
+                            : 'hover:bg-[#F9F7F5]';
+                        })()}`}
                       >
                         <Plus size={14} />
                       </button>
@@ -235,7 +255,7 @@ export default function Cart() {
 
             <button
               onClick={() => {
-                setView('address');
+                navigate('/checkout/address');
                 window.scrollTo(0, 0);
               }}
               className="w-full bg-[#1A1A1A] text-white text-[11px] font-medium tracking-[0.17em] uppercase py-4 flex items-center justify-center gap-2 hover:bg-black transition-colors"

@@ -1,23 +1,26 @@
 import { Instagram } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '@/store';
 import { motion } from 'framer-motion';
+import { CDN } from '@/lib/cdn';
+import { useAuth } from '@/context/AuthContext';
 
 const footerLinks = {
   shop: [
-    { label: 'T-Shirts', href: '/collections/t-shirts' },
-    { label: 'Shirts', href: '/collections/shirts' },
-    { label: 'Hoodies', href: '/collections/hoodies' },
-    { label: 'New Arrivals', href: '/collections/all' },
+    { label: 'T-Shirts', href: '/collections', category: 'tshirts' },
+    { label: 'Shirts', href: '/collections', category: 'shirts' },
+    { label: 'Hoodies', href: '/collections', category: 'hoodies' },
+    { label: 'New Arrivals', href: '/collections', category: null },
   ],
   company: [
-    { label: 'Our Story', href: '#about' },
+    { label: 'Our Story', href: '/about' },
     { label: 'Values', href: '#values' },
   ],
   support: [
-    { label: 'Contact Us', href: '#' },
-    { label: 'Shipping', href: '#' },
-    { label: 'Returns', href: '#' },
-    { label: 'Size Guide', href: '#' },
+    { label: 'Contact Us', href: '/contact' },
+    { label: 'Shipping', href: '/shipping-policy' },
+    { label: 'Returns', href: '/return-policy' },
+    { label: 'Size Guide', href: '/faq' },
   ],
 };
 
@@ -26,31 +29,32 @@ const socialLinks = [
 ];
 
 export default function Footer() {
-  const { setView, setCollectionFilter, currentView } = useStore();
+  const { setCollectionFilter } = useStore();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
 
-  const scrollToSection = (href: string) => {
+  const handleLink = (href: string, category?: string | null) => {
     if (href.startsWith('#')) {
       if (href === '#') return;
-      if (currentView !== 'home') {
-        setView('home');
+      const id = href.slice(1);
+      if (location.pathname !== '/') {
+        navigate('/');
         setTimeout(() => {
-          const element = document.getElementById(href.slice(1));
+          const element = document.getElementById(id);
           if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
       } else {
-        const element = document.getElementById(href.slice(1));
+        const element = document.getElementById(id);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
       }
-    } else if (href.startsWith('/collections')) {
-      const category = href.split('/').pop();
-      const mappedCategory = category === 'all' ? null : category?.replace('-', '') || null;
-      setCollectionFilter(mappedCategory, null);
-      setView('collections');
-      window.scrollTo(0, 0);
+    } else if (href === '/collections' && category !== undefined) {
+      setCollectionFilter(category, null);
+      navigate('/collections');
     } else {
-      window.location.href = href;
+      navigate(href);
     }
   };
 
@@ -65,7 +69,7 @@ export default function Footer() {
         >
           {[...Array(6)].map((_, i) => (
             <div key={i} className="px-4 lg:px-6">
-              <img src="/images/TEXT%20LOGO.png" alt="" className="w-[800px] lg:w-[1200px] max-w-none shrink-0 object-contain invert brightness-0" />
+              <img src={CDN.TEXT_LOGO} alt="" className="w-[800px] lg:w-[1200px] max-w-none shrink-0 object-contain invert brightness-0" />
             </div>
           ))}
         </motion.div>
@@ -76,7 +80,7 @@ export default function Footer() {
         {/* Brand */}
         <div>
           <div className="mb-4">
-            <img src="/images/logo.png" alt="Slug's Era Logo" className="h-9 lg:h-12 w-auto object-contain brightness-0 invert" />
+            <img src={CDN.LOGO} alt="Slug's Era Logo" className="h-9 lg:h-12 w-auto object-contain brightness-0 invert" />
           </div>
           <p className="font-display text-[11px] lg:text-[13px] italic font-light text-white mb-4 lg:mb-5">
             MOVEMENT. not Merch
@@ -112,7 +116,7 @@ export default function Footer() {
             {footerLinks.shop.map((link) => (
               <li key={link.label}>
                 <button
-                  onClick={() => scrollToSection(link.href)}
+                  onClick={() => handleLink(link.href, link.category)}
                   className="text-[11px] lg:text-[13px] font-light text-white transition-colors duration-200 hover:text-gray-300"
                 >
                   {link.label}
@@ -131,7 +135,7 @@ export default function Footer() {
             {footerLinks.company.map((link) => (
               <li key={link.label}>
                 <button
-                  onClick={() => scrollToSection(link.href)}
+                  onClick={() => handleLink(link.href)}
                   className="text-[11px] lg:text-[13px] font-light text-white transition-colors duration-200 hover:text-gray-300"
                 >
                   {link.label}
@@ -150,7 +154,7 @@ export default function Footer() {
             {footerLinks.support.map((link) => (
               <li key={link.label}>
                 <button
-                  onClick={() => scrollToSection(link.href)}
+                  onClick={() => handleLink(link.href)}
                   className="text-[11px] lg:text-[13px] font-light text-white transition-colors duration-200 hover:text-gray-300"
                 >
                   {link.label}
@@ -167,12 +171,20 @@ export default function Footer() {
           © 2026 Slug's Era. All rights reserved.
         </p>
         <div className="flex gap-5">
-          <a href="#" className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">
-            Privacy Policy
-          </a>
-          <a href="#" className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">
-            Terms of Service
-          </a>
+          <button onClick={() => navigate('/shipping-policy')} className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">
+            Shipping Policy
+          </button>
+          <button onClick={() => navigate('/return-policy')} className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">
+            Return Policy
+          </button>
+          {user && (
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="text-[10px] lg:text-[11px] font-light text-white/40 transition-colors duration-200 hover:text-[#C0132A]"
+            >
+              Admin
+            </button>
+          )}
         </div>
       </div>
     </footer>

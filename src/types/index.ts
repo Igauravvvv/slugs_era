@@ -1,3 +1,9 @@
+export interface SizeStock {
+  size: string;
+  stock: number;         // 0 = out of stock
+  preOrder?: boolean;    // true = available for pre-order
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -14,6 +20,17 @@ export interface Product {
   features: string[];
   inStock: boolean;
   subcategory?: string;
+  slug?: string;             // DB slug for URL-based lookups
+
+  // Deep stock & availability
+  sizeStock?: SizeStock[];     // Per-size stock levels
+  status?: 'active' | 'coming_soon' | 'pre_book' | 'sold_out';
+  launchDate?: string;         // For coming-soon products
+  preOrderPrice?: number;      // Discounted pre-order price
+  maxPreOrders?: number;       // Limit pre-orders
+  careInstructions?: string[];
+  material?: string;
+  fit?: string;
 }
 
 export interface CartItem {
@@ -21,6 +38,7 @@ export interface CartItem {
   quantity: number;
   size: string;
   color: string;
+  isPreOrder?: boolean;  // Track pre-order items in cart
 }
 
 export interface Address {
@@ -41,4 +59,7 @@ export interface User {
   phone?: string;
 }
 
-export type View = 'home' | 'product' | 'cart' | 'address' | 'payment' | 'success' | 'collections';
+// Product slug helper
+export function generateSlug(name: string): string {
+  return name.toLowerCase().replace(/[&]/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}

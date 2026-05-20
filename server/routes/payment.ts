@@ -61,6 +61,16 @@ paymentRouter.post(
   }
 });
 
+// Generate a human-readable order number: SLG-XXXXX
+function generateOrderNumber(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no ambiguous chars (0/O, 1/I)
+  let result = 'SLG-';
+  for (let i = 0; i < 5; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
 // Verify signature endpoint
 paymentRouter.post(
   '/verify',
@@ -83,10 +93,15 @@ paymentRouter.post(
         razorpay_order_id, 
         razorpay_payment_id, 
         razorpay_signature,
-      userId,
-      items,
-      totalAmount
-    } = req.body;
+        userId,
+        customerName,
+        customerEmail,
+        customerPhone,
+        shippingAddress,
+        items,
+        totalAmount,
+        shippingFee
+      } = req.body;
 
     const secret = process.env.RAZORPAY_KEY_SECRET || '';
 
@@ -103,15 +118,27 @@ paymentRouter.post(
       });
     }
 
-    // Payment is valid, save order carefully to Supabase with service role
+    const orderNumber = generateOrderNumber();
+    const subtotal = totalAmount - (shippingFee || 0);
+
+    // Payment is valid, save order to Supabase with service role
     const { data: orderData, error: dbError } = await supabaseAdmin
       .from('orders')
       .insert([
         {
+          order_number: orderNumber,
           user_id: userId,
+          customer_name: customerName || null,
+          customer_email: customerEmail || null,
+          customer_phone: customerPhone || null,
+          shipping_address: shippingAddress || null,
           items: items,
+          subtotal: subtotal,
+          shipping_fee: shippingFee || 0,
           total: totalAmount,
-          status: 'paid',
+          payment_method: 'Razorpay',
+          payment_status: 'Paid',
+          status: 'Pending',
           payment_id: razorpay_payment_id
         }
       ])
@@ -120,26 +147,45 @@ paymentRouter.post(
 
     if (dbError) throw dbError;
 
-    // Wait, fetch user email for confirmation email
-    const { data: userData } = await supabaseAdmin
-      .from('users')
-      .select('email, name')
-      .eq('id', userId)
-      .single();
-
-    if (userData && userData.email) {
-      await transporter.sendMail({
-        from: `"Slug's Era" <${process.env.SMTP_USER}>`,
-        to: userData.email,
-        subject: "Order Confirmation - Slug's Era",
-        text: `Thank you for your order! Payment ID: ${razorpay_payment_id}. Your total was ₹${totalAmount}.`,
-      });
+    // Send confirmation email
+    const emailTo = customerEmail || null;
+    if (!emailTo) {
+      // Fallback: try fetching from users table
+      const { data: userData } = await supabaseAdmin
+        .from('users')
+        .select('email, name')
+        .eq('id', userId)
+        .single();
+      if (userData?.email) {
+        try {
+          await transporter.sendMail({
+            from: `"Slug's Era" <${process.env.SMTP_USER}>`,
+            to: userData.email,
+            subject: `Order Confirmed — ${orderNumber}`,
+            text: `Thank you for your order, ${userData.name || 'there'}!\n\nOrder Number: ${orderNumber}\nPayment ID: ${razorpay_payment_id}\nTotal: ₹${totalAmount}\n\nWe'll notify you when your order ships.`,
+          });
+        } catch (emailErr) {
+          console.warn('Failed to send confirmation email:', emailErr);
+        }
+      }
+    } else {
+      try {
+        await transporter.sendMail({
+          from: `"Slug's Era" <${process.env.SMTP_USER}>`,
+          to: emailTo,
+          subject: `Order Confirmed — ${orderNumber}`,
+          text: `Thank you for your order, ${customerName || 'there'}!\n\nOrder Number: ${orderNumber}\nPayment ID: ${razorpay_payment_id}\nTotal: ₹${totalAmount}\n\nWe'll notify you when your order ships.`,
+        });
+      } catch (emailErr) {
+        console.warn('Failed to send confirmation email:', emailErr);
+      }
     }
 
     res.status(200).json({
       success: true,
       data: {
         message: 'Payment verified and order saved',
+        orderNumber,
         order: orderData
       }
     });

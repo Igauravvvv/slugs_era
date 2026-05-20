@@ -1,11 +1,33 @@
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Check, Package, Truck, Mail, ArrowRight } from 'lucide-react';
 import { useStore } from '@/store';
 
 export default function Success() {
-  const { setView } = useStore();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { lastCompletedOrderId, setLastCompletedOrderId } = useStore();
 
-  const orderNumber = Math.random().toString(36).substr(2, 9).toUpperCase();
+  // Try to get order data from navigation state (passed from Payment)
+  // or fall back to the store's lastCompletedOrderId
+  const navState = location.state as { orderNumber?: string; orderId?: string; total?: number } | null;
+  
+  const orderNumber = navState?.orderNumber
+    || (lastCompletedOrderId ? `SLG-${lastCompletedOrderId.slice(0, 6).toUpperCase()}` : null);
+  const orderTotal = navState?.total;
+
+  // Clean up the completed order flag after displaying
+  useEffect(() => {
+    return () => {
+      // Clear on unmount so user can't revisit stale success page
+      setLastCompletedOrderId(null);
+    };
+  }, [setLastCompletedOrderId]);
+
+  // If there's no order context at all, show a generic success
+  // (e.g., user navigated directly to /order-success)
+  const displayOrderNumber = orderNumber || 'N/A';
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-6 py-16">
@@ -39,8 +61,14 @@ export default function Success() {
         <div className="bg-[#F9F7F5] p-6 mb-8">
           <div className="flex items-center justify-between mb-4">
             <span className="text-sm text-[#888880]">Order Number</span>
-            <span className="font-medium">#{orderNumber}</span>
+            <span className="font-medium">#{displayOrderNumber}</span>
           </div>
+          {orderTotal && (
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm text-[#888880]">Total Paid</span>
+              <span className="font-medium">₹{orderTotal.toLocaleString()}</span>
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <span className="text-sm text-[#888880]">Estimated Delivery</span>
             <span className="font-medium">
@@ -95,10 +123,7 @@ export default function Success() {
 
         {/* CTA */}
         <button
-          onClick={() => {
-            setView('home');
-            window.scrollTo(0, 0);
-          }}
+          onClick={() => navigate('/')}
           className="btn-primary mx-auto"
         >
           Continue Shopping
