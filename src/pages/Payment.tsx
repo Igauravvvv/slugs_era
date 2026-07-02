@@ -10,7 +10,7 @@ import { calculateShipping } from '@/utils/shipping';
 type PaymentMethod = 'card' | 'upi' | 'cod';
 
 const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || '';
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3000');
 
 export default function Payment() {
   const navigate = useNavigate();
