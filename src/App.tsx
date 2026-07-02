@@ -23,7 +23,6 @@ import Loader from '@/components/Loader';
 import TornEdge from '@/components/TornEdge';
 
 import ToastContainer from '@/components/Toast';
-import WhatsAppButton from '@/components/WhatsAppButton';
 import SEOHead from '@/components/SEOHead';
 import { useProducts } from '@/hooks/useProducts';
 
@@ -165,11 +164,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 // Layout for storefront pages (with header and footer)
-function StorefrontLayout({ children, minimal = false, showFooter = true }: { children: React.ReactNode; minimal?: boolean; showFooter?: boolean }) {
+function StorefrontLayout({ children, minimal = false, showFooter = true, noPadding = false }: { children: React.ReactNode; minimal?: boolean; showFooter?: boolean; noPadding?: boolean }) {
   return (
     <>
       <Header minimal={minimal} />
-      <main className="pt-[76px]">
+      <main className={noPadding ? "" : "pt-[76px]"}>
         {children}
       </main>
       {showFooter && (
@@ -330,7 +329,7 @@ function App() {
             <Routes location={location}>
               {/* Home */}
               <Route path="/" element={
-                <StorefrontLayout minimal={false}>
+                <StorefrontLayout minimal={false} noPadding={true}>
                   <HomeView />
                 </StorefrontLayout>
               } />
@@ -449,9 +448,6 @@ function App() {
           </Suspense>
         </motion.div>
       </AnimatePresence>
-
-      {/* WhatsApp floating button */}
-      <WhatsAppButton />
 
       {/* Toast Notifications */}
       <ToastContainer />

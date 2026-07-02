@@ -19,7 +19,7 @@ export const ExpandOnHover = ({ items }: { items: ExpandCardItem[] }) => {
     <div className="w-full bg-transparent">
       <div className="relative flex w-full items-center justify-center py-4 transition-all duration-300 ease-in-out">
         <div className="w-full px-2 lg:px-4">
-          <div className="flex w-full flex-col lg:flex-row items-center justify-center gap-3 lg:gap-4 h-[45rem] lg:h-[32rem]">
+          <div className="flex w-full flex-col lg:flex-row items-center justify-center gap-3 lg:gap-4 h-[35rem] lg:h-[24rem]">
             {items.map((item, idx) => {
               const isExpanded = expandedIndex === idx;
               return (

@@ -40,6 +40,18 @@ app.use(cors({
 // ==========================================
 app.get('/health', (req, res) => res.json({ success: true, message: 'Server is healthy' }));
 
+// Keep-Alive route to prevent Supabase from pausing
+app.get('/api/keep-alive', async (req, res) => {
+  try {
+    // A lightweight query to keep the Supabase database awake
+    const { error } = await supabaseAdmin.from('products').select('id').limit(1);
+    if (error) throw error;
+    res.json({ success: true, message: 'Supabase is awake and active!' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: 'Failed to ping Supabase', error: error.message });
+  }
+});
+
 // Payment Routes (Stricter Rate Limit)
 app.use('/api/payment', strictLimiter, paymentRouter);
 
@@ -127,4 +139,15 @@ app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`🚀 API Server running on port ${PORT}`);
   console.log(`CORS allowed origin: ${allowedOrigin}`);
+
+  // Automated internal keep-alive ping (runs every 12 hours)
+  const TWELVE_HOURS = 12 * 60 * 60 * 1000;
+  setInterval(async () => {
+    try {
+      console.log('Running internal keep-alive ping to Supabase...');
+      await supabaseAdmin.from('products').select('id').limit(1);
+    } catch (err) {
+      console.error('Internal keep-alive ping failed', err);
+    }
+  }, TWELVE_HOURS);
 });

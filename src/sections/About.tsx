@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { TypeAnimation } from 'react-type-animation';
 import { Instagram, Play } from 'lucide-react';
 import { useStore } from '@/store';
@@ -17,8 +17,8 @@ export default function About() {
   const quote = section?.body_text || "We got tired of choosing between things that looked good and things that felt good. So we built something that didn't ask you to compromise.";
   const description = (getMeta('description') as string) || '';
   const signatureSequences = (getMeta('signature_sequences') as string[]) || ['— The Founders', '— The Creators', '— The Visionaries'];
-  const mainImage = section?.image_url || CDN.WHITE_HOODIE_TABLE;
-  const accentImage = (getMeta('accent_image') as string) || CDN.RED_ON_TABLE;
+  const mainImage = section?.image_url && section.image_url.trim() !== '' ? section.image_url : CDN.RED_ON_TABLE;
+  const accentImage = (getMeta('accent_image') as string)?.trim() ? (getMeta('accent_image') as string) : CDN.ARTWORK_BG;
 
   const BEHOLD_URL = "https://feeds.behold.so/jEX0GvueRxPPOb9VgUbX";
 
@@ -35,8 +35,16 @@ export default function About() {
       .catch(err => console.error("Error fetching Instagram feed:", err));
   }, []);
 
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"]
+  });
+  
+  const rightX = useTransform(scrollYProgress, [0, 1], [-100, 100]);
+
   return (
-    <section id="about" className="py-10 lg:py-[120px] px-5 lg:px-20 bg-white">
+    <section ref={sectionRef} id="about" className="py-10 lg:py-[120px] px-5 lg:px-20 bg-white">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-24 items-center">
         {/* Left - Images */}
         <motion.div
@@ -62,7 +70,7 @@ export default function About() {
         </motion.div>
 
         {/* Right - Content */}
-        <div>
+        <motion.div style={{ x: rightX }}>
           {/* Year */}
           <motion.div
             initial={{ opacity: 0, y: 36 }}
@@ -145,7 +153,7 @@ export default function About() {
               cursor={true}
             />
           </motion.div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Instagram Live Feed */}

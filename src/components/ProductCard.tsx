@@ -35,10 +35,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
     setImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
 
-  const handleClick = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('button')) {
-      return;
-    }
+  const goToProduct = () => {
     navigate(`/product/${generateSlug(product.name)}`);
   };
 
@@ -108,7 +105,6 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       className="product-card group relative"
-      onClick={handleClick}
       style={{
         transformStyle: "preserve-3d",
         perspective: "1000px",
@@ -126,7 +122,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
-        <div className="image-wrapper group/slider relative overflow-hidden rounded-md" style={{ willChange: 'transform' }}>
+        <div className="image-wrapper group/slider relative overflow-hidden rounded-md cursor-pointer" style={{ willChange: 'transform' }}>
         {product.badge && (
           <span className={`badge ${product.badge === 'New' ? 'badge-dark' : ''} z-[25]`}>
             {product.badge}
@@ -138,44 +134,61 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
             src={images[imageIndex]}
             alt={product.name}
             loading="lazy"
-            className="w-full h-full object-cover"
+            className={`w-full h-full object-cover transition-all duration-700 ${
+              product.status === 'coming_soon' ? 'filter grayscale-[30%] blur-[6px]' : ''
+            }`}
             initial={{ opacity: 0.8 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0.8 }}
             transition={{ duration: 0.2 }}
-            whileHover={
-              imageIndex === 0
-                ? {
-                    scale: 1.05,
-                    transition: { duration: 0.8, ease: 'easeOut' },
-                  }
-                : {
-                    scale: 1.05,
-                    transition: { duration: 0.8, ease: 'easeOut' },
-                  }
-            }
+            whileHover={{
+              scale: 1.05,
+              transition: { duration: 0.8, ease: 'easeOut' },
+            }}
           />
         </AnimatePresence>
 
-        {/* Navigation Arrows */}
-        <button 
-          type="button"
-          aria-label="Previous product image"
-          onClick={handlePrevImage}
-          onPointerDown={(e) => e.stopPropagation()}
-          className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-white/90 rounded-full opacity-0 group-hover/slider:opacity-100 transition-opacity z-20 hover:bg-white text-black drop-shadow-md"
-        >
-          <ChevronLeft size={18} />
-        </button>
-        <button 
-          type="button"
-          aria-label="Next product image"
-          onClick={handleNextImage}
-          onPointerDown={(e) => e.stopPropagation()}
-          className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-white/90 rounded-full opacity-0 group-hover/slider:opacity-100 transition-opacity z-20 hover:bg-white text-black drop-shadow-md"
-        >
-          <ChevronRight size={18} />
-        </button>
+        {/* Mirror Glass Overlay for Coming Soon */}
+        {product.status === 'coming_soon' && (
+          <div className="absolute inset-0 z-10 bg-white/20 backdrop-blur-[2px] pointer-events-none" />
+        )}
+
+        {/* Clickable overlay for navigation - sits below buttons */}
+        <div 
+          className="absolute inset-0 z-10 cursor-pointer" 
+          onClick={goToProduct}
+        />
+
+        {/* Navigation Arrows - only show if multiple images */}
+        {images.length > 1 && (
+          <>
+            <button 
+              type="button"
+              aria-label="Previous product image"
+              onClick={handlePrevImage}
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-white/90 rounded-full opacity-0 group-hover/slider:opacity-100 transition-opacity z-30 hover:bg-white text-black drop-shadow-md"
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <button 
+              type="button"
+              aria-label="Next product image"
+              onClick={handleNextImage}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-white/90 rounded-full opacity-0 group-hover/slider:opacity-100 transition-opacity z-30 hover:bg-white text-black drop-shadow-md"
+            >
+              <ChevronRight size={18} />
+            </button>
+            {/* Dot indicators */}
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-30">
+              {images.map((_, i) => (
+                <span 
+                  key={i}
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${i === imageIndex ? 'bg-white scale-125' : 'bg-white/50'}`}
+                />
+              ))}
+            </div>
+          </>
+        )}
 
         <div className="quick-add z-[25] flex gap-2">
           <button
@@ -196,7 +209,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
         </div>
       </div>
 
-      <div className="pt-3 lg:pt-4 px-1 lg:px-0.5 text-center lg:text-left">
+      <div className="pt-3 lg:pt-4 px-1 lg:px-0.5 text-center lg:text-left cursor-pointer" onClick={goToProduct}>
         <h3 className="font-display text-[15px] lg:text-[21px] font-bold lg:font-normal text-[#1A1A1A] mb-0.5 lg:mb-1 line-clamp-1">
           {product.name}
         </h3>
@@ -205,7 +218,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
         </p>
         <div className="flex flex-col lg:flex-row items-center lg:justify-between gap-1 lg:gap-0">
           <span className="text-[14px] lg:text-[15px] font-bold lg:font-medium text-[#1A1A1A]">
-            ₹{product.price.toLocaleString()}
+            {product.status === 'coming_soon' ? 'Coming Soon' : `₹${product.price.toLocaleString()}`}
           </span>
           <div className="flex gap-1.5 hidden lg:flex">
             {product.colors.slice(0, 3).map((color, i) => (

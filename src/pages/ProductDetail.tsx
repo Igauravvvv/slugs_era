@@ -26,7 +26,7 @@ export default function ProductDetail() {
   const [selectedColor, setSelectedColor] = useState('');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isAdded, setIsAdded] = useState(false);
-  const [showToteOffer, setShowToteOffer] = useState(false);
+  // Removed Tote Bag Offer State
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showCareInfo, setShowCareInfo] = useState(false);
@@ -116,17 +116,7 @@ export default function ProductDetail() {
       size: selectedSize,
     });
     setIsAdded(true);
-    if (selectedProduct.category !== 'accessories' && !hasToteBag) setShowToteOffer(true);
     setTimeout(() => setIsAdded(false), 2000);
-  };
-
-  const handleAddToteBag = () => {
-    const toteBag = products.find(p => p.id === 'acc-001');
-    if (toteBag) {
-      addToCart({ product: toteBag, quantity: 1, size: 'ONE SIZE', color: toteBag.colors[0] });
-      addToteBag();
-      setShowToteOffer(false);
-    }
   };
 
   const handleShare = (platform: string) => {
@@ -559,29 +549,6 @@ export default function ProductDetail() {
             </div>
           </motion.div>
         </div>
-
-        {/* Tote Bag Offer Modal */}
-        <AnimatePresence>
-          {showToteOffer && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
-              className="fixed bottom-8 right-8 bg-white shadow-2xl border border-[#E8E4E0] p-6 max-w-sm z-50">
-              <button onClick={() => setShowToteOffer(false)} className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
-                <X size={14} />
-              </button>
-              <div className="flex items-start gap-4">
-                <div className="w-16 h-16 bg-[#F9F7F5] flex-shrink-0" />
-                <div className="flex-1">
-                  <h4 className="font-display text-lg font-medium text-[#1A1A1A] mb-1">Free Tote Bag!</h4>
-                  <p className="text-sm text-[#888880] mb-3">Add our Everyday Tote (worth ₹499) to your order for FREE!</p>
-                  <div className="flex gap-2">
-                    <button onClick={handleAddToteBag} className="bg-[#C0132A] text-white text-[10px] font-medium tracking-[0.15em] uppercase px-4 py-2 hover:bg-[#8B0000] transition-colors">Add Free</button>
-                    <button onClick={() => setShowToteOffer(false)} className="text-[10px] font-medium tracking-[0.15em] uppercase text-[#888880] px-4 py-2 hover:text-[#1A1A1A] transition-colors">No Thanks</button>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </div>
   );

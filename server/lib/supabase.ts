@@ -4,11 +4,14 @@ dotenv.config();
 
 // Assert types to prevent TypeScript errors. 
 // These should exist in the environment via dotenv.
-const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const supabaseUrl = process.env.SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key';
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.warn('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env');
+if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.warn(
+    'Warning: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is not defined in the environment. ' +
+    'Using placeholder values. Server will run but database calls will fail.'
+  );
 }
 
 /**

@@ -48,6 +48,7 @@
 
   html {
     scroll-behavior: smooth;
+    overscroll-behavior: none;
   }
 
   body {
@@ -55,6 +56,7 @@
     background: var(--white);
     color: var(--text);
     overflow-x: hidden;
+    overscroll-behavior: none;
   }
 
   ::-webkit-scrollbar {

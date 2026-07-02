@@ -8,9 +8,11 @@
  * Filenames are sanitized (spaces→hyphens, &→and, apostrophes removed).
  */
 
-const SUPABASE_CDN_BASE = import.meta.env.VITE_SUPABASE_URL 
-  ? `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/assets`
-  : '/images';
+const isPlaceholder = !import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('your-project.supabase.co');
+
+const SUPABASE_CDN_BASE = isPlaceholder 
+  ? '/images'
+  : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/assets`;
 
 // Use Supabase CDN for all static assets
 const ACTIVE_CDN_BASE = SUPABASE_CDN_BASE;
@@ -59,32 +61,40 @@ export const CDN = {
   /** SUNLIGHT & WAVES shirt */
   SUNLIGHT_WAVES: cdnUrl('SUNLIGHT-and-WAVES.webp'),
 
-  /** Classic Embroidered Logo hoodie */
-  HOODIE_BLACK: cdnUrl('hoodie-black.webp'),
+  /** Owns the Game Hoodie */
+  OWNS_THE_GAME_F: cdnUrl('owns_the_game_f.webp'),
+  OWNS_THE_GAME_B: cdnUrl('owns_the_game_b.webp'),
 
-  /** White hoodie */
-  WHITE_HOODIE_TABLE: cdnUrl('white_hoodie.webp'),
+  /** Cherry Blossom Hoodie */
+  CHERRY_BLOSSOM_F: cdnUrl('cherry_blossom_f.webp'),
+  CHERRY_BLOSSOM_B: cdnUrl('cherry_blossom_b.webp'),
+
+  /** Brown Patch Hoodie */
+  BROWN_PATCH_F: cdnUrl('brown_patch_f.webp'),
+  BROWN_PATCH_B: cdnUrl('brown_patch_b.webp'),
+
+  /** Couple Heart Patch Hoodies */
+  COUPLE_FOR_EVER_F: cdnUrl('couple_for_ever_f.webp'),
+  COUPLE_FOR_B: cdnUrl('couple_for_b.webp'),
+  COUPLE_EVER_B: cdnUrl('couple_ever_b.webp'),
+
+  /** Red Hoodie */
+  RED_HOODIE_F: cdnUrl('red_hoodie_f.webp'),
 
   /** Red on table */
   RED_ON_TABLE: cdnUrl('Red_on_table.webp'),
 
-  /** Vintage Patchwork hoodie */
-  PATCHWORK_HOODIE: cdnUrl('patchwork-hoodie.webp'),
-
-  /** Graphic Print Club hoodie */
-  PRINTED_HOODIE: cdnUrl('printed-hoodie.webp'),
-
   /** Transparency Background Image */
-  TRANSPARENCY_BG: cdnUrl('transparency.png'),
+  TRANSPARENCY_BG: cdnUrl('transparency.webp'),
 
   /** Value Pillars Background Images */
-  ARTWORK_BG: cdnUrl('ArtWork.png'),
-  COMMUNITY_BG: cdnUrl('community.png'),
-  FOOTPRINT_BG: cdnUrl('footprint.png'),
-  FLUID_FITS_BG: cdnUrl('Fluidfits.png'),
-  MOVEMENT_BG: cdnUrl('Movement.png'),
-  INSPIRATION_BG: cdnUrl('inspiration.png'),
-  FABRIC_LOADING_BG: cdnUrl('fabricloading.jpg'),
+  ARTWORK_BG: cdnUrl('ArtWork.webp'),
+  COMMUNITY_BG: cdnUrl('community.webp'),
+  FOOTPRINT_BG: cdnUrl('footprint.webp'),
+  FLUID_FITS_BG: cdnUrl('Fluidfits.webp'),
+  MOVEMENT_BG: cdnUrl('Movement.webp'),
+  INSPIRATION_BG: cdnUrl('inspiration.webp'),
+  FABRIC_LOADING_BG: cdnUrl('fabricloading.webp'),
 } as const;
 
 export type CDNKey = keyof typeof CDN;

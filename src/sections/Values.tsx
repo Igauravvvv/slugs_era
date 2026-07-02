@@ -1,8 +1,10 @@
-import { motion } from 'framer-motion';
+import { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { Star, Footprints, Shirt, Scissors, Users, Eye, Leaf, Sparkles } from 'lucide-react';
 import { ExpandOnHover } from '@/components/ui/expand-cards';
 import { CDN } from '@/lib/cdn';
 import { useSiteSection } from '@/context/SiteContentContext';
+import LogoAnimation from '@/components/LogoAnimation';
 
 const iconMap: Record<string, any> = { Star, Eye, Scissors, Sparkles, Footprints, Users, Leaf, Shirt };
 
@@ -58,7 +60,6 @@ const defaultValues = [
 export default function Values() {
   const { section, getMeta } = useSiteSection('values');
   const eyebrow = section?.subtitle || 'What We Stand For';
-  const heading = section?.title || 'Our <em class="italic text-[#C0132A]">Journey</em>';
   const metaItems = getMeta('items') as any[] | undefined;
   const values = metaItems && metaItems.length > 0
     ? metaItems.map((item: any) => ({
@@ -67,22 +68,51 @@ export default function Values() {
       }))
     : defaultValues;
 
+  const sectionRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"]
+  });
+
+  // Fade in, stay visible, then fade out as they leave
+  const contentOpacity = useTransform(scrollYProgress, [0, 0.4, 0.5, 1], [0, 1, 1, 0]);
+  
+  // Both come from the right, hold in center, then exit back to the right
+  const contentX = useTransform(scrollYProgress, [0, 0.4, 0.5, 1], ["100vw", "0vw", "0vw", "100vw"]); 
+
   return (
-    <section id="values" className="py-16 lg:py-[120px] bg-[#F9F7F5] overflow-hidden">
+    <section ref={sectionRef} id="values" className="pt-8 pb-16 lg:pt-[60px] lg:pb-[120px] bg-[#F9F7F5] overflow-hidden relative">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 36 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-40px' }}
-        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-        className="text-center px-5 lg:px-20 mb-10 lg:mb-[60px]"
-      >
-        <div className="eye-text eye-text-center mb-3.5">{eyebrow}</div>
-        <h2
-          className="section-title"
-          dangerouslySetInnerHTML={{ __html: heading }}
-        />
-      </motion.div>
+      <div className="text-center px-5 lg:px-20 mb-16 lg:mb-[80px] relative z-10 overflow-hidden">
+        <motion.div 
+          className="flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-0"
+          style={{ 
+            opacity: contentOpacity, 
+            x: contentX,
+          }}
+        >
+          <div className="font-display font-light italic text-4xl md:text-6xl lg:text-[80px] text-[#C0132A] whitespace-nowrap">
+            {eyebrow}
+          </div>
+          
+          {/* Static Background Logo - Colored to match text */}
+          <div className="flex items-center justify-center mt-2 lg:mt-0 lg:translate-y-5 lg:-ml-16">
+            <div 
+              className="w-[280px] h-[80px] md:w-[360px] md:h-[110px] lg:w-[480px] lg:h-[150px] bg-[#C0132A]"
+              style={{ 
+                WebkitMaskImage: "url('/images/TEXT-LOGO.webp')",
+                WebkitMaskSize: "contain",
+                WebkitMaskRepeat: "no-repeat",
+                WebkitMaskPosition: "center",
+                maskImage: "url('/images/TEXT-LOGO.webp')",
+                maskSize: "contain",
+                maskRepeat: "no-repeat",
+                maskPosition: "center"
+              }}
+            />
+          </div>
+        </motion.div>
+      </div>
 
       {/* Expand Cards Component */}
       <motion.div
