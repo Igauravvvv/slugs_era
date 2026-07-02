@@ -91,16 +91,16 @@ export default function Values() {
             x: contentX,
           }}
         >
-          <div className="font-display font-light italic text-4xl md:text-6xl lg:text-[80px] text-[#C0132A] whitespace-nowrap">
+          <div className="font-display font-light italic text-4xl md:text-6xl lg:text-[70px] text-[#C0132A] whitespace-nowrap">
             {eyebrow}
           </div>
           
           {/* Static Background Logo - Blended to remove white background */}
-          <div className="flex items-center justify-center mt-2 lg:mt-0 lg:translate-y-5 lg:-ml-16">
+          <div className="flex items-center justify-center mt-3 lg:mt-0 lg:ml-8">
             <img 
               src="/images/TEXT-LOGO.webp" 
               alt="Slug's Era"
-              className="w-[280px] md:w-[360px] lg:w-[480px] h-auto object-contain"
+              className="w-[180px] md:w-[240px] lg:w-[300px] h-auto object-contain opacity-90"
               style={{ mixBlendMode: 'multiply' }}
             />
           </div>
