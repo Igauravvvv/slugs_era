@@ -107,7 +107,9 @@ export default function Values() {
                 maskImage: "url('/images/TEXT-LOGO.webp')",
                 maskSize: "contain",
                 maskRepeat: "no-repeat",
-                maskPosition: "center"
+                maskPosition: "center",
+                WebkitMaskSourceType: 'luminance',
+                maskType: 'luminance'
               }}
             />
           </div>
