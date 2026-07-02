@@ -197,12 +197,16 @@ adminRouter.patch('/orders/:id/status', async (req, res, next) => {
 
     // Create notification for status changes
     if (['shipped', 'delivered', 'cancelled'].includes(status)) {
-      await supabaseAdmin.from('notifications').insert({
-        type: status === 'cancelled' ? 'system' : 'new_order',
-        title: `Order ${data.order_number || data.id} — ${status}`,
-        message: note || `Status updated to ${status}`,
-        metadata: { order_id: data.id, status },
-      }).catch(() => {}); // non-critical
+      try {
+        await supabaseAdmin.from('notifications').insert({
+          type: status === 'cancelled' ? 'system' : 'new_order',
+          title: `Order ${data.order_number || data.id} — ${status}`,
+          message: note || `Status updated to ${status}`,
+          metadata: { order_id: data.id, status },
+        });
+      } catch (e) {
+        // non-critical
+      }
     }
 
     res.json({ success: true, data });
@@ -342,10 +346,13 @@ adminRouter.patch('/returns/:id', async (req, res, next) => {
 
     // If approved, update order status to 'returned'
     if (status === 'approved' && data.order_id) {
-      await supabaseAdmin.from('orders')
-        .update({ status: 'returned', updated_at: new Date().toISOString() })
-        .eq('id', data.order_id)
-        .catch(() => {});
+      try {
+        await supabaseAdmin.from('orders')
+          .update({ status: 'returned', updated_at: new Date().toISOString() })
+          .eq('id', data.order_id);
+      } catch (e) {
+        // non-critical
+      }
     }
 
     res.json({ success: true, data });

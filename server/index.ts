@@ -15,6 +15,9 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust Vercel's proxy for accurate rate limiting (req.ip)
+app.set('trust proxy', 1);
+
 // ==========================================
 // 1. SECURITY & MIDDLEWARE
 // ==========================================
