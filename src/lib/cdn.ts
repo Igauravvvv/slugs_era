@@ -14,8 +14,8 @@ const SUPABASE_CDN_BASE = isPlaceholder
   ? '/images'
   : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/assets`;
 
-// Use Supabase CDN for all static assets
-const ACTIVE_CDN_BASE = SUPABASE_CDN_BASE;
+// Use Vercel's edge network for static assets (automatically served from /public/images)
+const ACTIVE_CDN_BASE = '/images';
 
 /** Build a CDN URL for any file in the assets bucket */
 export function cdnUrl(filename: string): string {
