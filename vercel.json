@@ -5,7 +5,8 @@
   "framework": "vite",
   "rewrites": [
     { "source": "/api/cron", "destination": "/api/cron" },
-    { "source": "/api/(.*)", "destination": "/api/index" },
+    { "source": "/api/payment/create-order", "destination": "/api/payment/create-order" },
+    { "source": "/api/payment/verify", "destination": "/api/payment/verify" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "crons": [
