@@ -95,22 +95,13 @@ export default function Values() {
             {eyebrow}
           </div>
           
-          {/* Static Background Logo - Colored to match text */}
+          {/* Static Background Logo - Blended to remove white background */}
           <div className="flex items-center justify-center mt-2 lg:mt-0 lg:translate-y-5 lg:-ml-16">
-            <div 
-              className="w-[280px] h-[80px] md:w-[360px] md:h-[110px] lg:w-[480px] lg:h-[150px] bg-[#C0132A]"
-              style={{ 
-                WebkitMaskImage: "url('/images/TEXT-LOGO.webp')",
-                WebkitMaskSize: "contain",
-                WebkitMaskRepeat: "no-repeat",
-                WebkitMaskPosition: "center",
-                maskImage: "url('/images/TEXT-LOGO.webp')",
-                maskSize: "contain",
-                maskRepeat: "no-repeat",
-                maskPosition: "center",
-                WebkitMaskSourceType: 'luminance',
-                maskType: 'luminance'
-              }}
+            <img 
+              src="/images/TEXT-LOGO.webp" 
+              alt="Slug's Era"
+              className="w-[280px] md:w-[360px] lg:w-[480px] h-auto object-contain"
+              style={{ mixBlendMode: 'multiply' }}
             />
           </div>
         </motion.div>
