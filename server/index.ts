@@ -134,20 +134,13 @@ app.post('/api/subscribe', strictLimiter, async (req, res, next) => {
 app.use(errorHandler);
 
 // ==========================================
-// START SERVER
+// START SERVER (Local only)
 // ==========================================
-app.listen(PORT, () => {
-  console.log(`🚀 API Server running on port ${PORT}`);
-  console.log(`CORS allowed origin: ${allowedOrigin}`);
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 API Server running on port ${PORT}`);
+    console.log(`CORS allowed origin: ${allowedOrigin}`);
+  });
+}
 
-  // Automated internal keep-alive ping (runs every 12 hours)
-  const TWELVE_HOURS = 12 * 60 * 60 * 1000;
-  setInterval(async () => {
-    try {
-      console.log('Running internal keep-alive ping to Supabase...');
-      await supabaseAdmin.from('products').select('id').limit(1);
-    } catch (err) {
-      console.error('Internal keep-alive ping failed', err);
-    }
-  }, TWELVE_HOURS);
-});
+export default app;
