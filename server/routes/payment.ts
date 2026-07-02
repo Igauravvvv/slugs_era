@@ -9,10 +9,7 @@ dotenv.config();
 
 export const paymentRouter = express.Router();
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || '',
-  key_secret: process.env.RAZORPAY_KEY_SECRET || '',
-});
+// Instantiate later so we don't crash the server on boot if keys are missing
 
 // Configure Nodemailer transporter
 const transporter = nodemailer.createTransport({
@@ -50,7 +47,16 @@ paymentRouter.post(
       receipt: receipt || `receipt_${Date.now()}`,
     };
 
-    const order = await razorpay.orders.create(options);
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      return res.status(500).json({ success: false, error: 'Razorpay keys are missing from Vercel Environment Variables.' });
+    }
+
+    const rzp = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET,
+    });
+
+    const order = await rzp.orders.create(options);
     
     res.status(200).json({
       success: true,

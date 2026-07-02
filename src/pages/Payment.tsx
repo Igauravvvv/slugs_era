@@ -84,7 +84,9 @@ export default function Payment() {
         body: JSON.stringify({ amount: total, currency: 'INR' }),
       });
       const orderData = await orderRes.json();
-      if (!orderData.success) { throw new Error('Failed to create order'); }
+      if (!orderData.success) { 
+        throw new Error(orderData.error || orderData.message || 'Failed to create order'); 
+      }
 
       // 2. Open Razorpay modal
       const options = {
