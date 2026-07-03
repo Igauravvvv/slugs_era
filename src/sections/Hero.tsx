@@ -131,7 +131,7 @@ export default function Hero() {
             key={img}
             src={img}
             alt="Fashion Model"
-            className="absolute inset-0 w-full h-full object-cover object-[center_80%]"
+            className="absolute inset-0 w-full h-full object-cover object-center"
             initial={false}
             animate={{ 
               opacity: currentImage === img ? 1 : 0,
