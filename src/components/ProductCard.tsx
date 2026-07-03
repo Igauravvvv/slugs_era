@@ -35,8 +35,12 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
     setImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
 
-  const goToProduct = () => {
-    navigate(`/product/${generateSlug(product.name)}`);
+  const goToProduct = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    navigate(`/product/${product.slug || generateSlug(product.name)}`);
   };
 
 
@@ -122,7 +126,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
-        <div className="image-wrapper group/slider relative overflow-hidden rounded-md cursor-pointer" style={{ willChange: 'transform' }}>
+        <div className="image-wrapper group/slider relative overflow-hidden rounded-md cursor-pointer" style={{ willChange: 'transform' }} onClick={goToProduct}>
         {product.badge && (
           <span className={`badge ${product.badge === 'New' ? 'badge-dark' : ''} z-[25]`}>
             {product.badge}
@@ -153,11 +157,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
           <div className="absolute inset-0 z-10 bg-white/20 backdrop-blur-[2px] pointer-events-none" />
         )}
 
-        {/* Clickable overlay for navigation - sits below buttons */}
-        <div 
-          className="absolute inset-0 z-10 cursor-pointer" 
-          onClick={goToProduct}
-        />
+        {/* Clickable overlay removed - onClick moved to parent image-wrapper */}
 
         {/* Navigation Arrows - only show if multiple images */}
         {images.length > 1 && (

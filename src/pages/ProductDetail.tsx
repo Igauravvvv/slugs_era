@@ -30,6 +30,7 @@ export default function ProductDetail() {
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showCareInfo, setShowCareInfo] = useState(false);
+  const [showSizeGuide, setShowSizeGuide] = useState(false);
   const [notifyMe, setNotifyMe] = useState(false);
   const [notifyEmail, setNotifyEmail] = useState('');
   const [notifySubmitted, setNotifySubmitted] = useState(false);
@@ -143,7 +144,7 @@ export default function ProductDetail() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8 pb-24">
         {/* Breadcrumb */}
         <button onClick={goBack}
           className="flex items-center gap-2 text-sm text-[#888880] hover:text-[#1A1A1A] transition-colors mb-8">
@@ -302,7 +303,12 @@ export default function ProductDetail() {
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-3">
                   <label className="text-[11px] font-medium tracking-[0.15em] uppercase text-[#1A1A1A]">Size</label>
-                  <button className="text-[11px] text-[#C0132A] hover:underline">Size Guide</button>
+                  <button 
+                    onClick={() => setShowSizeGuide(true)} 
+                    className="text-[11px] text-[#C0132A] hover:underline"
+                  >
+                    Size Guide
+                  </button>
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   {selectedProduct.sizes.map((size) => {
@@ -550,6 +556,34 @@ export default function ProductDetail() {
           </motion.div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showSizeGuide && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
+              onClick={() => setShowSizeGuide(false)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative bg-white p-2 md:p-4 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto z-10"
+            >
+              <button 
+                onClick={() => setShowSizeGuide(false)}
+                className="absolute top-4 right-4 w-8 h-8 bg-black/5 rounded-full flex items-center justify-center hover:bg-black/10 transition-colors z-20"
+              >
+                <X size={16} />
+              </button>
+              <img src="/images/Size_guide.webp" alt="Size Guide" className="w-full h-auto rounded-lg" />
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

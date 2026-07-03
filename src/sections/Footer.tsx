@@ -60,17 +60,28 @@ export default function Footer() {
 
   return (
     <footer className="bg-black pt-12 lg:pt-20 pb-6 lg:pb-10 px-5 lg:px-20 relative overflow-hidden">
-      {/* Background Text Logo */}
-      <div className="absolute top-[60%] left-0 w-full -translate-y-1/2 flex items-center pointer-events-none opacity-10 z-0 overflow-hidden">
+      {/* Scrolling Background Logo */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', pointerEvents: 'none', overflow: 'hidden', zIndex: 0 }}>
         <motion.div 
-          className="flex w-max"
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{ repeat: Infinity, duration: 18, ease: "linear" }}
+          style={{ display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }}
+          animate={{ x: ['0%', '-50%'] }}
+          transition={{ repeat: Infinity, duration: 25, ease: 'linear' }}
         >
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="px-4 lg:px-6">
-              <img src={CDN.TEXT_LOGO} alt="" className="w-[800px] lg:w-[1200px] max-w-none shrink-0 object-contain invert brightness-0" />
-            </div>
+          {[...Array(10)].map((_, i) => (
+            <img 
+              key={i}
+              src="/images/TEXT-LOGO.webp" 
+              alt=""
+              style={{ 
+                width: '600px', 
+                height: 'auto', 
+                flexShrink: 0, 
+                marginRight: '60px',
+                opacity: 0.15,
+                filter: 'grayscale(1) invert(1)',
+                mixBlendMode: 'screen',
+              }}
+            />
           ))}
         </motion.div>
       </div>

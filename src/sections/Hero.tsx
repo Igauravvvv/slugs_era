@@ -1,6 +1,8 @@
 import { useRef, useEffect, useState } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { useSiteSection } from '@/context/SiteContentContext';
+import { useNavigate } from 'react-router-dom';
+import { useStore } from '@/store';
 
 const HERO_IMAGES = [
   '/images/Female_model_vinyl.webp',
@@ -18,6 +20,9 @@ export default function Hero() {
   const { section } = useSiteSection('hero');
   const ctaText = section?.cta_text || 'Shop now';
   const ctaLink = section?.cta_link || '#products';
+
+  const navigate = useNavigate();
+  const setCollectionFilter = useStore(state => state.setCollectionFilter);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -81,11 +86,8 @@ export default function Hero() {
   }, []);
 
   const handleCta = () => {
-    if (ctaLink.startsWith('#')) {
-      const id = ctaLink.slice(1);
-      const element = document.getElementById(id);
-      if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+    setCollectionFilter('tshirts', null);
+    navigate('/collections');
   };
 
   // Generate some random positions for floating elements

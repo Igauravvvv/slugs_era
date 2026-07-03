@@ -15,6 +15,7 @@ export default function QuickView({ product, onClose }: QuickViewProps) {
   const [selectedColor, setSelectedColor] = useState('');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [showSizeGuide, setShowSizeGuide] = useState(false);
   const { addToCart } = useStore();
   const { user, signInWithGoogle } = useAuth();
 
@@ -175,7 +176,10 @@ export default function QuickView({ product, onClose }: QuickViewProps) {
                   <p className="text-[10px] font-medium tracking-[0.15em] uppercase text-[#1A1A1A]/60">
                     Size {selectedSize && `— ${selectedSize}`}
                   </p>
-                  <button className="text-[10px] text-[#C0132A] underline underline-offset-2 font-medium">
+                  <button 
+                    onClick={() => setShowSizeGuide(true)}
+                    className="text-[10px] text-[#C0132A] underline underline-offset-2 font-medium"
+                  >
                     Size Guide
                   </button>
                 </div>
@@ -247,6 +251,34 @@ export default function QuickView({ product, onClose }: QuickViewProps) {
           </div>
         </motion.div>
       </motion.div>
+
+      {/* Size Guide Modal (placed outside the main QuickView card but inside AnimatePresence) */}
+      {showSizeGuide && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[1001] flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+          onClick={(e) => { e.stopPropagation(); setShowSizeGuide(false); }}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="relative bg-white p-2 md:p-4 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowSizeGuide(false)}
+              className="absolute top-4 right-4 w-8 h-8 bg-black/5 rounded-full flex items-center justify-center hover:bg-black/10 transition-colors z-20"
+            >
+              <X size={16} />
+            </button>
+            <img src="/images/Size_guide.webp" alt="Size Guide" className="w-full h-auto rounded-lg" />
+          </motion.div>
+        </motion.div>
+      )}
     </AnimatePresence>
   );
 }
