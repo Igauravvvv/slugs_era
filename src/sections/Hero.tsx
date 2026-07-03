@@ -131,7 +131,8 @@ export default function Hero() {
             key={img}
             src={img}
             alt="Fashion Model"
-            className={`absolute inset-0 w-full h-full object-cover ${img.includes('seedhe_pahad_se') ? 'object-top' : 'object-center'}`}
+            className={`absolute inset-0 w-full h-full ${img.includes('seedhe_pahad_se') ? 'object-contain' : 'object-cover object-center'}`}
+            style={img.includes('seedhe_pahad_se') ? { backgroundColor: '#7BA7C2' } : undefined}
             initial={false}
             animate={{ 
               opacity: currentImage === img ? 1 : 0,
