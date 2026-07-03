@@ -6,7 +6,7 @@ const HERO_IMAGES = [
   '/images/Female_model_vinyl.webp',
   '/images/turtlemodelimage.webp',
   '/images/slow_down_model.webp',
-  '/images/seedhe_pahad_se_model.webp'
+  '/images/seedhe%20pahad%20se%20model.webp'
 ] as const;
 
 export default function Hero() {
@@ -131,7 +131,7 @@ export default function Hero() {
             key={img}
             src={img}
             alt="Fashion Model"
-            className={`absolute inset-0 w-full h-full object-cover ${img.includes('seedhe_pahad_se') ? 'object-[center_30%]' : 'object-center'}`}
+            className="absolute inset-0 w-full h-full object-cover object-center"
             initial={false}
             animate={{ 
               opacity: currentImage === img ? 1 : 0,
