@@ -1,6 +1,7 @@
 # Slug's Era — robots.txt
 User-agent: *
 Allow: /
+Allow: /blog
 Disallow: /admin
 Disallow: /checkout
 Disallow: /api/

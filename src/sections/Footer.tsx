@@ -14,6 +14,7 @@ const footerLinks = {
   ],
   company: [
     { label: 'Our Story', href: '/about' },
+    { label: 'Blog', href: '/blog' },
     { label: 'Values', href: '#values' },
   ],
   support: [

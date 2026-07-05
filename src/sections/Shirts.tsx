@@ -67,7 +67,7 @@ export default function Shirts() {
       <div className="relative z-10 w-full max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-24 items-center">
         {/* Left Content */}
         <motion.div
-          style={{ opacity, y, x: leftX, willChange: "transform, opacity" }}
+          style={{ opacity, y, x: typeof window !== 'undefined' && window.innerWidth >= 1024 ? leftX : 0, willChange: "transform, opacity" }}
         >
           <div className="text-[10px] lg:text-[12px] font-medium tracking-[0.24em] uppercase text-[#C0132A] mb-3 lg:mb-6 flex items-center gap-4">
             <span className="w-8 h-px bg-[#C0132A]" />

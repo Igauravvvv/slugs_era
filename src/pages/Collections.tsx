@@ -93,11 +93,11 @@ export default function Collections() {
   };
 
   return (
-    <div className="bg-[#F9F7F5] min-h-screen pb-24 pt-6 px-6 lg:px-16" id="collections">
+    <div className="bg-[#F9F7F5] min-h-screen pb-24 pt-4 sm:pt-6 px-3 sm:px-6 lg:px-16" id="collections">
       <div className="max-w-[2000px] mx-auto">
 
         {/* Top Bar with Back Button */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-16 border-b border-[#E8E4E0] pb-8">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 mb-8 sm:mb-16 border-b border-[#E8E4E0] pb-6 sm:pb-8">
           <button
             onClick={goBack}
             className="group flex items-center gap-3 text-[11px] font-medium tracking-[0.2em] uppercase text-[#888880] hover:text-[#C0132A] transition-colors"
@@ -132,15 +132,15 @@ export default function Collections() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-16 lg:mb-24 flex flex-col items-center text-center max-w-3xl mx-auto"
+          className="mb-8 sm:mb-16 lg:mb-24 flex flex-col items-center text-center max-w-3xl mx-auto"
         >
           <div className="text-[10px] font-medium tracking-[0.24em] uppercase text-[#C0132A] mb-4">
             Season Collection
           </div>
-          <h1 className="font-display text-[clamp(40px,5vw,72px)] font-light tracking-tight text-[#1A1A1A] mb-6 leading-[1.1]">
+          <h1 className="font-display text-[clamp(28px,5vw,72px)] font-light tracking-tight text-[#1A1A1A] mb-3 sm:mb-6 leading-[1.1]">
             {title}
           </h1>
-          <p className="text-[15px] font-light leading-[1.8] text-[#888880] max-w-xl">
+          <p className="text-[13px] sm:text-[15px] font-light leading-[1.7] sm:leading-[1.8] text-[#888880] max-w-xl hidden sm:block">
             {subtitleText}
           </p>
         </motion.div>
@@ -151,7 +151,7 @@ export default function Collections() {
             variants={container}
             initial="hidden"
             animate="show"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16"
+            className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-2 gap-y-6 sm:gap-x-8 sm:gap-y-16"
           >
             {filteredProducts.map((product) => (
               <motion.div key={product.id} variants={item}>

@@ -41,6 +41,8 @@ const Contact = lazy(() => import('@/pages/Contact'));
 const Lookbook = lazy(() => import('@/pages/Lookbook'));
 const ShippingPolicy = lazy(() => import('@/pages/ShippingPolicy'));
 const ReturnPolicy = lazy(() => import('@/pages/ReturnPolicy'));
+const BlogList = lazy(() => import('@/pages/BlogList'));
+const BlogPost = lazy(() => import('@/pages/BlogPost'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
 // Admin — lazy loaded (huge bundle: recharts, 10 sub-pages)
@@ -435,6 +437,18 @@ function App() {
                 <StorefrontLayout minimal showFooter>
                   <SEOHead title="Return & Exchange Policy" description="Easy exchanges within 7 days for fit, color, or defects. Hassle-free process via WhatsApp. Slug's Era customer promise." url="/return-policy" />
                   <ReturnPolicy />
+                </StorefrontLayout>
+              } />
+
+              {/* Blog */}
+              <Route path="/blog" element={
+                <StorefrontLayout minimal showFooter>
+                  <BlogList />
+                </StorefrontLayout>
+              } />
+              <Route path="/blog/:slug" element={
+                <StorefrontLayout minimal showFooter>
+                  <BlogPost />
                 </StorefrontLayout>
               } />
 

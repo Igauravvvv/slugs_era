@@ -70,7 +70,7 @@ export default function About() {
         </motion.div>
 
         {/* Right - Content */}
-        <motion.div style={{ x: rightX }}>
+        <motion.div style={{ x: typeof window !== 'undefined' && window.innerWidth >= 1024 ? rightX : 0 }}>
           {/* Year */}
           <motion.div
             initial={{ opacity: 0, y: 36 }}

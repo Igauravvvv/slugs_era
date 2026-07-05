@@ -88,7 +88,7 @@ export default function Values() {
           className="flex flex-col lg:flex-row items-center justify-center gap-4 lg:gap-0"
           style={{ 
             opacity: contentOpacity, 
-            x: contentX,
+            x: typeof window !== 'undefined' && window.innerWidth >= 1024 ? contentX : 0,
           }}
         >
           <div className="font-display font-light italic text-4xl md:text-6xl lg:text-[70px] text-[#C0132A] whitespace-nowrap">

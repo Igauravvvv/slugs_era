@@ -26,7 +26,7 @@ interface SEOHeadProps {
 const SITE_NAME = "Slug's Era";
 const BASE_URL = 'https://slugsera.com';
 const DEFAULT_IMAGE = CDN.MODEL_HERO;
-const DEFAULT_DESCRIPTION = "Shop oversized t-shirts, custom shirts & hoodies crafted for slow living. Premium 240 GSM cotton. Free shipping across India. MOVEMENT. not merch.";
+const DEFAULT_DESCRIPTION = "Shop Slugsera (Slug's Era) for oversized t-shirts, custom shirts & hoodies crafted for slow living. Premium 240 GSM cotton. Free shipping across India. MOVEMENT. not merch.";
 
 export default function SEOHead({
   title,
@@ -37,7 +37,10 @@ export default function SEOHead({
   noindex = false,
   product,
 }: SEOHeadProps) {
-  const fullTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} — Premium Slow Fashion Streetwear | MOVEMENT. not merch`;
+  const isBrandIncluded = title?.toLowerCase().includes('slugs') || title?.toLowerCase().includes('slugsera');
+  const fullTitle = title 
+    ? (isBrandIncluded ? title : `${title} | ${SITE_NAME} (Slugsera)`) 
+    : `${SITE_NAME} (Slugsera) — Premium Slow Fashion Streetwear | MOVEMENT. not merch`;
   const fullUrl = url ? `${BASE_URL}${url}` : BASE_URL;
 
   return (

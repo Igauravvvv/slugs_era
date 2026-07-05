@@ -124,24 +124,30 @@ export default function Hero() {
     <section 
       id="hero" 
       ref={containerRef}
-      className="relative w-full h-screen min-h-[600px] overflow-hidden bg-black flex flex-col items-center justify-center"
+      className="relative w-full h-[100svh] min-h-[520px] overflow-hidden bg-black flex flex-col items-center justify-center"
     >
       {/* Background Model Image - Takes Full Screen */}
       <div className="absolute inset-0 w-full h-full z-0">
-        {HERO_IMAGES.map((img) => (
-          <motion.img
-            key={img}
-            src={img}
-            alt="Fashion Model"
-            className="absolute inset-0 w-full h-full object-cover object-center"
-            initial={false}
-            animate={{ 
-              opacity: currentImage === img ? 1 : 0,
-              scale: currentImage === img ? 1 : 1.05
-            }}
-            transition={{ duration: 0.8, ease: "easeInOut" }}
-          />
-        ))}
+        {HERO_IMAGES.map((img) => {
+          let positionClass = "object-center";
+          if (img === '/images/turtlemodelimage.webp' || img === '/images/seedhe%20pahad%20se%20model.webp') {
+            positionClass = "object-[80%_center] sm:object-center";
+          }
+          return (
+            <motion.img
+              key={img}
+              src={img}
+              alt="Fashion Model"
+              className={`absolute inset-0 w-full h-full object-cover ${positionClass}`}
+              initial={false}
+              animate={{ 
+                opacity: currentImage === img ? 1 : 0,
+                scale: currentImage === img ? 1 : 1.05
+              }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+            />
+          );
+        })}
         {/* Subtle overlay to make text readable if needed */}
         <div className="absolute inset-0 bg-black/10 mix-blend-overlay"></div>
       </div>
@@ -209,10 +215,10 @@ export default function Hero() {
       {/* Top Title Block */}
       <motion.div 
         layout
-        className={`absolute top-36 md:top-48 z-20 flex flex-col w-full max-w-2xl ${
+        className={`absolute top-[100px] sm:top-32 md:top-48 z-20 flex flex-col w-[calc(100%-3rem)] sm:w-full max-w-2xl ${
           isTitleRightAligned
-            ? 'right-6 md:right-12 lg:right-24 items-start md:items-end text-left md:text-right'
-            : 'left-12 md:left-24 lg:left-40 items-start text-left'
+            ? 'left-6 sm:left-auto sm:right-6 md:right-12 lg:right-24 items-start sm:items-end text-left sm:text-right'
+            : 'left-6 sm:left-12 md:left-24 lg:left-40 items-start text-left'
         }`}
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
@@ -220,10 +226,10 @@ export default function Hero() {
         style={{ x: isTitleRightAligned ? rightBlockX : leftBlockX, willChange: "transform" }}
       >
         {/* Top Text */}
-        <motion.div layout className={`flex items-center gap-4 text-white text-[10px] md:text-xs tracking-[0.2em] uppercase mb-4 md:mb-6 opacity-80 ${
+        <motion.div layout className={`flex items-center gap-2 sm:gap-4 text-white text-[8px] sm:text-[10px] md:text-xs tracking-[0.15em] sm:tracking-[0.2em] uppercase mb-2 sm:mb-4 md:mb-6 opacity-80 ${
           isTitleRightAligned ? 'md:mr-6 lg:mr-12' : ''
         }`}>
-          <span className="w-8 md:w-12 h-[1px] bg-white/60 hidden md:block"></span>
+          <span className="w-6 sm:w-8 md:w-12 h-[1px] bg-white/60 hidden sm:block"></span>
           <span>MOVEMENT. NOT MERCH — NEW SEASON</span>
         </motion.div>
 
@@ -232,79 +238,79 @@ export default function Hero() {
           layout
           src="/images/texttttlogo.webp" 
           alt="Slugsera Logo" 
-          className="w-[200px] md:w-[320px] lg:w-[420px] h-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.3)]"
+          className="w-[160px] sm:w-[200px] md:w-[320px] lg:w-[420px] h-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.3)]"
         />
       </motion.div>
 
       {/* Bottom Left Content Block */}
       <motion.div 
-        className="absolute left-6 md:left-12 lg:left-24 bottom-12 md:bottom-16 lg:bottom-24 z-20 flex flex-col items-start text-left w-full max-w-xl"
+        className="absolute left-4 sm:left-6 md:left-12 lg:left-24 bottom-16 sm:bottom-14 md:bottom-16 lg:bottom-24 z-20 flex flex-col items-start text-left w-[calc(100%-2rem)] sm:w-[calc(100%-3rem)] max-w-xl"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, duration: 1 }}
         style={{ x: leftBlockX, willChange: "transform" }}
       >
         {/* Subtitle */}
-        <p className="text-white text-base md:text-xl font-light tracking-wide mb-6 md:mb-8 opacity-90">
+        <p className="text-white text-sm sm:text-base md:text-xl font-light tracking-wide mb-3 sm:mb-4 md:mb-8 opacity-90">
           Premium Slow Fashion
         </p>
 
         {/* CTAs */}
-        <div className="flex items-center gap-6 md:gap-8 mb-6 md:mb-8">
+        <div className="flex items-center gap-4 sm:gap-6 md:gap-8 mb-3 sm:mb-4 md:mb-8">
           <button 
             onClick={handleCta}
-            className="bg-white text-[#C0132A] px-6 py-3 md:px-8 md:py-4 text-[10px] md:text-xs tracking-[0.2em] uppercase font-bold flex items-center gap-3 hover:bg-gray-100 transition-colors"
+            className="bg-white text-[#C0132A] px-4 py-2.5 sm:px-6 sm:py-3 md:px-8 md:py-4 text-[9px] sm:text-[10px] md:text-xs tracking-[0.15em] sm:tracking-[0.2em] uppercase font-bold flex items-center gap-2 sm:gap-3 hover:bg-gray-100 transition-colors"
           >
-            SHOP NOW <span className="text-lg leading-none">→</span>
+            SHOP NOW <span className="text-base sm:text-lg leading-none">→</span>
           </button>
           <a 
             href="#about"
-            className="text-white text-[10px] md:text-xs tracking-[0.2em] uppercase font-medium border-b border-white/40 pb-1 hover:border-white transition-colors"
+            className="text-white text-[9px] sm:text-[10px] md:text-xs tracking-[0.15em] sm:tracking-[0.2em] uppercase font-medium border-b border-white/40 pb-1 hover:border-white transition-colors"
           >
             OUR STORY
           </a>
         </div>
 
         {/* Divider */}
-        <div className="w-full max-w-md h-px bg-white/20 mb-6 md:mb-8"></div>
+        <div className="w-full max-w-md h-px bg-white/20 mb-3 sm:mb-4 md:mb-8"></div>
 
         {/* Tags */}
-        <div className="flex flex-wrap gap-3 text-white text-[9px] md:text-[10px] tracking-[0.15em] uppercase">
-          <span className="border border-white/30 px-3 py-1.5 md:px-4 md:py-2 bg-black/10 backdrop-blur-sm cursor-default hover:bg-white/10 transition-colors">100% ORGANIC</span>
-          <span className="border border-white/30 px-3 py-1.5 md:px-4 md:py-2 bg-black/10 backdrop-blur-sm cursor-default hover:bg-white/10 transition-colors">SLOW FASHION</span>
-          <span className="border border-white/30 px-3 py-1.5 md:px-4 md:py-2 bg-black/10 backdrop-blur-sm cursor-default hover:bg-white/10 transition-colors">5 DROPS</span>
-          <span className="border border-white/30 px-3 py-1.5 md:px-4 md:py-2 bg-black/10 backdrop-blur-sm cursor-default hover:bg-white/10 transition-colors">MOVEMENT. NOT MERCH</span>
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 md:gap-3 text-white text-[7px] sm:text-[8px] md:text-[10px] tracking-[0.1em] sm:tracking-[0.15em] uppercase">
+          <span className="border border-white/30 px-2 py-1 sm:px-3 sm:py-1.5 md:px-4 md:py-2 bg-black/10 backdrop-blur-sm cursor-default hover:bg-white/10 transition-colors">100% ORGANIC</span>
+          <span className="border border-white/30 px-2 py-1 sm:px-3 sm:py-1.5 md:px-4 md:py-2 bg-black/10 backdrop-blur-sm cursor-default hover:bg-white/10 transition-colors">SLOW FASHION</span>
+          <span className="border border-white/30 px-2 py-1 sm:px-3 sm:py-1.5 md:px-4 md:py-2 bg-black/10 backdrop-blur-sm cursor-default hover:bg-white/10 transition-colors">5 DROPS</span>
+          <span className="border border-white/30 px-2 py-1 sm:px-3 sm:py-1.5 md:px-4 md:py-2 bg-black/10 backdrop-blur-sm cursor-default hover:bg-white/10 transition-colors hidden sm:inline-block">MOVEMENT. NOT MERCH</span>
         </div>
       </motion.div>
 
-      {/* Navigation Arrows (Glassmorphism) */}
+      {/* Navigation Arrows (Glassmorphism) — hidden on very small phones to prevent overlap */}
       <button 
         onClick={handlePrev}
-        className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 md:w-16 md:h-16 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-lg border border-white/20 text-white shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:bg-white/20 hover:scale-105 transition-all duration-300"
+        className="absolute left-2 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 z-30 w-9 h-9 sm:w-10 sm:h-10 md:w-16 md:h-16 hidden sm:flex items-center justify-center rounded-full bg-white/10 backdrop-blur-lg border border-white/20 text-white shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:bg-white/20 hover:scale-105 transition-all duration-300"
         aria-label="Previous Look"
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-8 md:h-8">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 md:w-8 md:h-8">
           <polyline points="15 18 9 12 15 6"></polyline>
         </svg>
       </button>
 
       <button 
         onClick={handleNext}
-        className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 w-12 h-12 md:w-16 md:h-16 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-lg border border-white/20 text-white shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:bg-white/20 hover:scale-105 transition-all duration-300"
+        className="absolute right-2 sm:right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 w-9 h-9 sm:w-10 sm:h-10 md:w-16 md:h-16 hidden sm:flex items-center justify-center rounded-full bg-white/10 backdrop-blur-lg border border-white/20 text-white shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:bg-white/20 hover:scale-105 transition-all duration-300"
         aria-label="Next Look"
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="md:w-8 md:h-8">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 md:w-8 md:h-8">
           <polyline points="9 18 15 12 9 6"></polyline>
         </svg>
       </button>
 
       {/* Image Toggle Switch (Dots) */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-4">
+      <div className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2.5 sm:gap-3 md:gap-4">
         {HERO_IMAGES.map((img, idx) => (
           <button
             key={img}
             onClick={() => setCurrentImage(img)}
-            className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+            className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-all duration-300 ${
               currentImage === img 
                 ? 'bg-white scale-125' 
                 : 'bg-white/40 hover:bg-white/60'
