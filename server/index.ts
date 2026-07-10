@@ -30,8 +30,18 @@ app.use(helmet());
 // Global Rate Limiting
 app.use(globalLimiter);
 
-// Parse JSON Bodies
-app.use(express.json());
+// Parse JSON Bodies (Vercel automatically parses body, so we skip it to prevent hanging)
+if (!process.env.VERCEL) {
+  app.use(express.json());
+} else {
+  // If Vercel parsed it but didn't set it to an object for some reason, ensure it's safe
+  app.use((req, res, next) => {
+    if (req.body && typeof req.body === 'string') {
+      try { req.body = JSON.parse(req.body); } catch(e) {}
+    }
+    next();
+  });
+}
 
 // CORS config
 const allowedOrigin = process.env.ALLOWED_ORIGIN || 'http://localhost:5173';
