@@ -390,7 +390,7 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
                       onClick={() => toggleSize(size)}
                       className={`px-4 py-2 border rounded-lg text-xs font-medium transition-colors ${
                         values.sizes?.includes(size)
-                          ? 'border-[#C8A96E] bg-[#C8A96E]/10 text-[#C8A96E]'
+                          ? 'border-[#C0132A] bg-[#C0132A]/10 text-[#C0132A]'
                           : 'border-[#2A2A2A] text-[#888] hover:border-[#3A3A3A] hover:text-[#F5F5F5]'
                       }`}
                     >

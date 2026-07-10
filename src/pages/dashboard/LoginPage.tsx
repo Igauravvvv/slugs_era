@@ -44,13 +44,13 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
       {/* Ambient background effects */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -left-32 w-96 h-96 rounded-full opacity-[0.03]"
-          style={{ background: 'radial-gradient(circle, #C8A96E, transparent 70%)' }} />
+          style={{ background: 'radial-gradient(circle, #C0132A, transparent 70%)' }} />
         <div className="absolute bottom-1/4 -right-32 w-96 h-96 rounded-full opacity-[0.03]"
-          style={{ background: 'radial-gradient(circle, #C8A96E, transparent 70%)' }} />
+          style={{ background: 'radial-gradient(circle, #C0132A, transparent 70%)' }} />
         {/* Grid pattern */}
         <div className="absolute inset-0 opacity-[0.02]"
           style={{
-            backgroundImage: 'linear-gradient(#C8A96E 1px, transparent 1px), linear-gradient(90deg, #C8A96E 1px, transparent 1px)',
+            backgroundImage: 'linear-gradient(#C0132A 1px, transparent 1px), linear-gradient(90deg, #C0132A 1px, transparent 1px)',
             backgroundSize: '60px 60px',
           }} />
       </div>
@@ -69,7 +69,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
           className="text-center mb-8"
         >
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
-            style={{ background: 'linear-gradient(135deg, #C8A96E, #A8894E)' }}>
+            style={{ background: 'linear-gradient(135deg, #C0132A, #9C0E21)' }}>
             <Sparkles size={28} className="text-white" />
           </div>
           <h1 className="text-3xl font-bold tracking-wider text-[#F5F5F5]"

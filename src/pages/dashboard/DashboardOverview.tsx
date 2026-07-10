@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { fetchDashboardStats, fetchRecentProducts } from '@/lib/queries';
 import { StatsGridSkeleton } from '@/components/dashboard/SkeletonLoader';
+import MigrateButton from '@/components/dashboard/MigrateButton';
 import type { DashboardStats, Product } from '@/types/dashboard';
 import type { DashboardView } from '@/components/dashboard/Sidebar';
 
@@ -100,7 +101,7 @@ function QuickActionButton({
       <span className="text-sm font-medium text-[#F5F5F5] flex-1">{label}</span>
       <ArrowUpRight
         size={14}
-        className="text-[#555] group-hover:text-[#C8A96E] transition-colors"
+        className="text-[#555] group-hover:text-[#C0132A] transition-colors"
       />
     </motion.button>
   );
@@ -142,7 +143,7 @@ function RecentProductRow({ product, index }: { product: Product; index: number 
       </div>
 
       {/* Price */}
-      <p className="text-sm font-semibold text-[#C8A96E] flex-shrink-0">
+      <p className="text-sm font-semibold text-[#C0132A] flex-shrink-0">
         ₹{Number(product.price).toLocaleString('en-IN')}
       </p>
 
@@ -217,8 +218,9 @@ export default function DashboardOverview({ onNavigate }: DashboardOverviewProps
       {/* Welcome Header */}
       <motion.div variants={stagger.item} className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-[#F5F5F5] font-heading">
+          <h2 className="text-xl font-bold text-[#F5F5F5] font-heading flex items-center gap-4">
             Welcome back to SLUGSERA
+            <MigrateButton />
           </h2>
           <p className="text-sm text-[#888] mt-1">
             Here's what's happening with your store today.
@@ -240,7 +242,7 @@ export default function DashboardOverview({ onNavigate }: DashboardOverviewProps
           label="Total Products"
           value={stats?.totalProducts ?? 0}
           sub={`${stats?.featuredProducts ?? 0} featured`}
-          gradient="linear-gradient(135deg, #C8A96E, #A8894E)"
+          gradient="linear-gradient(135deg, #C0132A, #9C0E21)"
         />
         <StatCard
           icon={Eye}
@@ -276,7 +278,7 @@ export default function DashboardOverview({ onNavigate }: DashboardOverviewProps
             icon={Plus}
             label="Add New Product"
             onClick={() => onNavigate('products-new')}
-            gradient="linear-gradient(135deg, #C8A96E, #A8894E)"
+            gradient="linear-gradient(135deg, #C0132A, #9C0E21)"
           />
           <QuickActionButton
             icon={Layers}
@@ -306,7 +308,7 @@ export default function DashboardOverview({ onNavigate }: DashboardOverviewProps
             </h3>
             <button
               onClick={() => onNavigate('products')}
-              className="text-xs text-[#C8A96E] hover:text-[#D4B87A] transition-colors flex items-center gap-1"
+              className="text-xs text-[#C0132A] hover:text-[#9C0E21] transition-colors flex items-center gap-1"
             >
               View all <ArrowUpRight size={12} />
             </button>
@@ -347,7 +349,7 @@ export default function DashboardOverview({ onNavigate }: DashboardOverviewProps
         className="cms-card p-5 flex flex-wrap items-center justify-between gap-4"
       >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#C8A96E] to-[#A8894E] flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#C0132A] to-[#9C0E21] flex items-center justify-center">
             <Star size={14} className="text-white" />
           </div>
           <div>

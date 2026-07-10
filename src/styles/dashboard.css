@@ -10,9 +10,9 @@
   --cms-bg: #0A0A0A;
   --cms-surface: #111111;
   --cms-surface-2: #1A1A1A;
-  --cms-accent: #C8A96E;
-  --cms-accent-hover: #D4B87A;
-  --cms-accent-dim: rgba(200, 169, 110, 0.12);
+  --cms-accent: #C0132A;
+  --cms-accent-hover: #9C0E21;
+  --cms-accent-dim: rgba(192, 19, 42, 0.12);
   --cms-text: #F5F5F5;
   --cms-text-secondary: #888888;
   --cms-text-muted: #555555;
@@ -82,7 +82,7 @@
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: linear-gradient(135deg, var(--cms-accent), #A8894E);
+  background: linear-gradient(135deg, var(--cms-accent), #9C0E21);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -173,7 +173,7 @@
   width: 3px;
   height: 20px;
   border-radius: 0 4px 4px 0;
-  background: linear-gradient(180deg, var(--cms-accent), #A8894E);
+  background: linear-gradient(180deg, var(--cms-accent), #9C0E21);
 }
 
 .cms-nav-badge {
@@ -253,7 +253,7 @@
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: linear-gradient(135deg, var(--cms-accent), #A8894E);
+  background: linear-gradient(135deg, var(--cms-accent), #9C0E21);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -340,14 +340,14 @@
 }
 
 .cms-btn--primary {
-  background: linear-gradient(135deg, var(--cms-accent), #A8894E);
+  background: linear-gradient(135deg, var(--cms-accent), #9C0E21);
   color: #0A0A0A;
 }
 
 .cms-btn--primary:hover {
   background: linear-gradient(135deg, var(--cms-accent-hover), var(--cms-accent));
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(200, 169, 110, 0.25);
+  box-shadow: 0 4px 16px rgba(192, 19, 42, 0.25);
 }
 
 .cms-btn--primary:active {
@@ -524,7 +524,7 @@
 .cms-badge--accent {
   background: var(--cms-accent-dim);
   color: var(--cms-accent);
-  border: 1px solid rgba(200, 169, 110, 0.2);
+  border: 1px solid rgba(192, 19, 42, 0.2);
 }
 
 /* ─── Toggle Switch ──────────────────────────────────────────── */
@@ -609,7 +609,7 @@
 
 .cms-tab--active {
   color: #0A0A0A !important;
-  background: linear-gradient(135deg, var(--cms-accent), #A8894E) !important;
+  background: linear-gradient(135deg, var(--cms-accent), #9C0E21) !important;
   font-weight: 600;
 }
 
@@ -735,3 +735,5 @@
     padding: 0 12px;
   }
 }
+
+/* Force HMR Reload */

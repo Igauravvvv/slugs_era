@@ -8,7 +8,8 @@
  * Filenames are sanitized (spaces→hyphens, &→and, apostrophes removed).
  */
 
-const isPlaceholder = !import.meta.env.VITE_SUPABASE_URL || import.meta.env.VITE_SUPABASE_URL.includes('your-project.supabase.co');
+const env = typeof process !== 'undefined' && process.env.VITE_SUPABASE_URL ? process.env : (import.meta as any).env || {};
+const isPlaceholder = !env.VITE_SUPABASE_URL || env.VITE_SUPABASE_URL.includes('your-project.supabase.co');
 
 const SUPABASE_CDN_BASE = isPlaceholder 
   ? '/images'

@@ -154,7 +154,7 @@ export default function TopBar({
             title="Notifications"
           >
             <Bell size={18} />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#C8A96E] animate-pulse" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#C0132A] animate-pulse" />
           </button>
 
           <AnimatePresence>
@@ -167,7 +167,7 @@ export default function TopBar({
               >
                 <div className="flex items-center justify-between p-4 border-b border-[#2A2A2A]">
                   <span className="text-sm font-semibold text-[#F5F5F5]">Notifications</span>
-                  <button className="text-[10px] font-medium text-[#C8A96E] hover:text-[#D4B87A] flex items-center gap-1">
+                  <button className="text-[10px] font-medium text-[#C0132A] hover:text-[#9C0E21] flex items-center gap-1">
                     <Check size={10} /> Mark all read
                   </button>
                 </div>

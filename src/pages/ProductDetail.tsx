@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Check, ShoppingBag, Heart, Share2, Truck, RotateCcw, Shield, Clock, Bell, AlertTriangle, Info, ChevronDown, ChevronUp, Copy, X } from 'lucide-react';
 import { useStore } from '@/store';
-import { getSizeStock } from '@/data/products';
+import { getSizeStock } from '@/types';
 import { generateSlug } from '@/types';
 import type { SizeStock } from '@/types';
 import SEOHead from '@/components/SEOHead';

@@ -63,3 +63,9 @@ export interface User {
 export function generateSlug(name: string): string {
   return name.toLowerCase().replace(/[&]/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
+
+// Size stock helper — finds the stock entry for a given size
+export function getSizeStock(product: Product, size: string): SizeStock | undefined {
+  return product.sizeStock?.find(s => s.size === size);
+}
+

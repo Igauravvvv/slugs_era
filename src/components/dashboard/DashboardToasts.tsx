@@ -13,7 +13,7 @@ const colorMap = {
   success: { bg: 'rgba(76, 175, 80, 0.12)', border: 'rgba(76, 175, 80, 0.3)', text: '#4CAF50' },
   error: { bg: 'rgba(244, 67, 54, 0.12)', border: 'rgba(244, 67, 54, 0.3)', text: '#F44336' },
   warning: { bg: 'rgba(255, 152, 0, 0.12)', border: 'rgba(255, 152, 0, 0.3)', text: '#FF9800' },
-  info: { bg: 'rgba(200, 169, 110, 0.12)', border: 'rgba(200, 169, 110, 0.3)', text: '#C8A96E' },
+  info: { bg: 'rgba(192, 19, 42, 0.12)', border: 'rgba(192, 19, 42, 0.3)', text: '#C0132A' },
 };
 
 export default function DashboardToasts() {

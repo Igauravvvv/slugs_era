@@ -4,9 +4,15 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '@/store';
 import ProductCard from '@/components/ProductCard';
 
+import { useSiteSection } from '@/context/SiteContentContext';
+
 export default function Products() {
   const { setCollectionFilter, products } = useStore();
   const navigate = useNavigate();
+  const { section } = useSiteSection('products');
+
+  const title = section?.title || 'The Essential Five';
+  const subtitle = section?.subtitle || 'T-Shirt Collection';
 
   const tshirts = products.filter((p) => p.category === 'tshirts');
 
@@ -37,9 +43,15 @@ export default function Products() {
         className="flex items-end justify-between mb-8 lg:mb-10 max-w-[1800px] mx-auto"
       >
         <div>
-          <div className="text-[12px] font-medium tracking-[0.2em] uppercase text-[#888880] mb-2">T-Shirt Collection</div>
+          <div className="text-[12px] font-medium tracking-[0.2em] uppercase text-[#888880] mb-2">{subtitle}</div>
           <h2 className="font-display text-[32px] lg:text-[48px] font-medium leading-[1.1] text-[#1A1A1A]">
-            The <em className="italic font-light">Essential</em> Five
+            {title.includes(' ') ? (
+              <>
+                {title.split(' ').slice(0, -1).join(' ')} <em className="italic font-light">{title.split(' ').slice(-1)}</em>
+              </>
+            ) : (
+              title
+            )}
           </h2>
         </div>
         <button

@@ -105,7 +105,7 @@ export default function RichTextEditor({ content, onChange }: RichTextEditorProp
   }, [content, editor]);
 
   return (
-    <div className="border border-[#2A2A2A] rounded-[8px] overflow-hidden focus-within:border-[#C8A96E] focus-within:ring-1 focus-within:ring-[#C8A96E]/30 transition-all bg-[#1A1A1A]">
+    <div className="border border-[#2A2A2A] rounded-[8px] overflow-hidden focus-within:border-[#C0132A] focus-within:ring-1 focus-within:ring-[#C0132A]/30 transition-all bg-[#1A1A1A]">
       <MenuBar editor={editor} />
       <EditorContent editor={editor} />
     </div>

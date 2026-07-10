@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag, ArrowRight, Gift } from 'lucide-react';
 import { useStore } from '@/store';
 import { calculateShipping } from '@/utils/shipping';
-import { getSizeStock } from '@/data/products';
+import { getSizeStock } from '@/types';
 
 export default function Cart() {
   const navigate = useNavigate();

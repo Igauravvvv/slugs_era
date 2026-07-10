@@ -267,7 +267,7 @@ function SectionEditor({
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#C8A96E] to-[#A8894E] flex items-center justify-center">
+          <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#C0132A] to-[#9C0E21] flex items-center justify-center">
             <Icon size={16} className="text-white" />
           </div>
           <div>
@@ -444,8 +444,8 @@ export default function SiteEditor() {
         </div>
         <div className="flex items-center gap-3">
           {saveStatus === 'saving' && (
-            <span className="text-xs text-[#C8A96E] flex items-center gap-1.5">
-              <div className="w-3 h-3 border border-[#C8A96E] border-t-transparent rounded-full animate-spin" />
+            <span className="text-xs text-[#C0132A] flex items-center gap-1.5">
+              <div className="w-3 h-3 border border-[#C0132A] border-t-transparent rounded-full animate-spin" />
               Saving...
             </span>
           )}
@@ -483,7 +483,7 @@ export default function SiteEditor() {
                 className="w-full flex items-center gap-3 p-4 hover:bg-[#1A1A1A]/50 transition-colors"
               >
                 <div className="w-8 h-8 rounded-lg bg-[#1A1A1A] flex items-center justify-center flex-shrink-0 border border-[#2A2A2A]">
-                  <Icon size={14} className="text-[#C8A96E]" />
+                  <Icon size={14} className="text-[#C0132A]" />
                 </div>
                 <span className="flex-1 text-left text-sm font-medium text-[#F5F5F5]">
                   {config.label}
@@ -526,8 +526,8 @@ export default function SiteEditor() {
       </div>
 
       <div className="cms-card p-4 flex items-center gap-3 text-xs text-[#666]">
-        <Palette size={14} className="text-[#C8A96E]" />
-        <span>Changes are saved to the <code className="text-[#C8A96E]">site_sections</code> table. The storefront reads from this table in real-time. If the table is empty or unreachable, hardcoded defaults are used.</span>
+        <Palette size={14} className="text-[#C0132A]" />
+        <span>Changes are saved to the <code className="text-[#C0132A]">site_sections</code> table. The storefront reads from this table in real-time. If the table is empty or unreachable, hardcoded defaults are used.</span>
       </div>
     </div>
   );

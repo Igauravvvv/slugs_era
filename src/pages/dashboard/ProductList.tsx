@@ -187,7 +187,7 @@ export default function ProductList({ onAddNew, onEdit, searchQuery }: ProductLi
                             {product.season && <span className="cms-chip">{product.season}</span>}
                           </div>
                         </td>
-                        <td className="font-medium text-[#C8A96E]">
+                        <td className="font-medium text-[#C0132A]">
                           ₹{Number(product.price).toLocaleString('en-IN')}
                         </td>
                         <td>
@@ -214,7 +214,7 @@ export default function ProductList({ onAddNew, onEdit, searchQuery }: ProductLi
                           <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button 
                               onClick={() => onEdit(product.id)}
-                              className="p-1.5 rounded-md text-[#888] hover:text-[#C8A96E] hover:bg-white/5 transition-colors"
+                              className="p-1.5 rounded-md text-[#888] hover:text-[#C0132A] hover:bg-white/5 transition-colors"
                               title="Edit Product"
                             >
                               <Edit3 size={16} />

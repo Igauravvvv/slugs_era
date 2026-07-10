@@ -225,7 +225,7 @@ function HomeView() {
 const ADMIN_EMAILS = ['slugsera@gmail.com', 'igauravvvv@gmail.com'];
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading, signOut, signInWithGoogle, signingIn } = useAuth();
 
   if (loading) return <PageLoader />;
 
@@ -238,7 +238,15 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
           </svg>
         </div>
         <h2 className="font-bebas text-3xl tracking-wider text-[#1A1A1A]">ADMIN ACCESS REQUIRED</h2>
-        <p className="text-sm text-[#888880] text-center max-w-sm">You must be signed in with an authorized admin account to access this area.</p>
+        <p className="text-sm text-[#888880] text-center max-w-sm mb-4">You must be signed in with an authorized admin account to access this area.</p>
+        
+        <button
+          onClick={signInWithGoogle}
+          disabled={signingIn}
+          className="group relative flex items-center gap-3 bg-white text-[#1A1A1A] pl-4 pr-6 py-3.5 border border-[#E8E4E0] hover:border-[#1A1A1A] hover:shadow-lg transition-all duration-300 uppercase tracking-[0.15em] text-xs font-bold disabled:opacity-60"
+        >
+          {signingIn ? 'Connecting...' : 'Sign in with Google'}
+        </button>
       </div>
     );
   }
@@ -252,9 +260,16 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
           </svg>
         </div>
         <h2 className="font-bebas text-3xl tracking-wider text-[#1A1A1A]">ACCESS DENIED</h2>
-        <p className="text-sm text-[#888880] text-center max-w-sm">
+        <p className="text-sm text-[#888880] text-center max-w-sm mb-4">
           Your account <strong>{user.email}</strong> does not have admin privileges.
         </p>
+        
+        <button
+          onClick={signOut}
+          className="bg-[#C0132A] text-white px-6 py-3 uppercase tracking-[0.15em] text-xs font-bold hover:bg-[#9C0E21] transition-colors"
+        >
+          Sign Out / Switch Account
+        </button>
       </div>
     );
   }

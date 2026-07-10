@@ -118,7 +118,7 @@ export default function ImageUploader({ images, onChange, bucket, maxFiles = 8 }
         />
         <div className="flex flex-col items-center justify-center gap-3 pointer-events-none">
           {uploading ? (
-            <Loader2 size={32} className="text-[#C8A96E] animate-spin" />
+            <Loader2 size={32} className="text-[#C0132A] animate-spin" />
           ) : (
             <Upload size={32} className="text-[#888]" />
           )}
@@ -144,7 +144,7 @@ export default function ImageUploader({ images, onChange, bucket, maxFiles = 8 }
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 className={`relative group rounded-xl overflow-hidden aspect-square border-2 ${
-                  image.isPrimary ? 'border-[#C8A96E]' : 'border-[#2A2A2A] hover:border-[#3A3A3A]'
+                  image.isPrimary ? 'border-[#C0132A]' : 'border-[#2A2A2A] hover:border-[#3A3A3A]'
                 } transition-colors`}
               >
                 <img src={image.url} alt={image.alt} className="w-full h-full object-cover" />
@@ -156,13 +156,13 @@ export default function ImageUploader({ images, onChange, bucket, maxFiles = 8 }
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); setPrimary(idx); }}
-                        className="text-[10px] font-semibold bg-black/80 text-white px-2 py-1 rounded border border-[#3A3A3A] hover:border-[#C8A96E]"
+                        className="text-[10px] font-semibold bg-black/80 text-white px-2 py-1 rounded border border-[#3A3A3A] hover:border-[#C0132A]"
                       >
                         Make Primary
                       </button>
                     )}
                     {image.isPrimary && (
-                      <span className="text-[10px] font-bold bg-[#C8A96E] text-black px-2 py-1 rounded flex items-center gap-1">
+                      <span className="text-[10px] font-bold bg-[#C0132A] text-white px-2 py-1 rounded flex items-center gap-1">
                         <CheckCircle size={10} /> Primary
                       </span>
                     )}

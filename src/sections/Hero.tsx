@@ -86,8 +86,19 @@ export default function Hero() {
   }, []);
 
   const handleCta = () => {
-    setCollectionFilter('tshirts', null);
-    navigate('/collections');
+    if (ctaLink.includes('/collections')) {
+      const match = ctaLink.match(/\/collections\/([^/]+)/);
+      if (match) {
+        setCollectionFilter(match[1], null);
+      } else {
+        setCollectionFilter(null, null);
+      }
+    }
+    if (ctaLink.startsWith('/')) {
+      navigate(ctaLink);
+    } else {
+      window.location.href = ctaLink;
+    }
   };
 
   // Generate some random positions for floating elements
@@ -230,7 +241,7 @@ export default function Hero() {
           isTitleRightAligned ? 'md:mr-6 lg:mr-12' : ''
         }`}>
           <span className="w-6 sm:w-8 md:w-12 h-[1px] bg-white/60 hidden sm:block"></span>
-          <span>MOVEMENT. NOT MERCH — NEW SEASON</span>
+          <span>{section?.subtitle || 'MOVEMENT. NOT MERCH — NEW SEASON'}</span>
         </motion.div>
 
         {/* Title Logo */}
@@ -261,7 +272,7 @@ export default function Hero() {
             onClick={handleCta}
             className="bg-white text-[#C0132A] px-4 py-2.5 sm:px-6 sm:py-3 md:px-8 md:py-4 text-[9px] sm:text-[10px] md:text-xs tracking-[0.15em] sm:tracking-[0.2em] uppercase font-bold flex items-center gap-2 sm:gap-3 hover:bg-gray-100 transition-colors"
           >
-            SHOP NOW <span className="text-base sm:text-lg leading-none">→</span>
+            {ctaText} <span className="text-base sm:text-lg leading-none">→</span>
           </button>
           <a 
             href="#about"

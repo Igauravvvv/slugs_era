@@ -7,6 +7,16 @@ import ProductCard from '@/components/ProductCard';
 
 export default function Collections() {
   const { selectedCategory, selectedSubcategory, setCollectionFilter, products } = useStore();
+  
+  // Compute dynamic categories from actual products
+  const availableCategories = Array.from(new Set(products.map(p => p.category)))
+    .filter(Boolean)
+    .sort();
+  
+  const categoriesList = ['All', ...availableCategories.map(c => 
+    c.charAt(0).toUpperCase() + c.slice(1)
+  )];
+
   const navigate = useNavigate();
   const { category: urlCategory } = useParams<{ category?: string }>();
 
@@ -109,7 +119,7 @@ export default function Collections() {
           </button>
 
           <div className="flex items-center gap-6 overflow-x-auto no-scrollbar pb-2 lg:pb-0">
-            {['All', 'Shirts', 'T-Shirts', 'Hoodies'].map((cat) => {
+            {categoriesList.map((cat) => {
               const mappedCat = cat.toLowerCase().replace('-', '');
               const isActive = (!selectedCategory && cat === 'All') || (selectedCategory === mappedCat);
 

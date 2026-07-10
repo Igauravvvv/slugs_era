@@ -90,7 +90,7 @@ export default function DashboardLayout() {
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-          className="w-8 h-8 border-2 border-[#C8A96E] border-t-transparent rounded-full"
+          className="w-8 h-8 border-2 border-[#C0132A] border-t-transparent rounded-full"
         />
       </div>
     );
