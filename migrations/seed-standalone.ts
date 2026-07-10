@@ -26,7 +26,7 @@ const productsData = [
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: [{ name: '#1A1A1A', hex: '#1A1A1A' }],
     images: [{ url: 'https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/assets/vinyl-moment.webp', alt: 'Let The Moment Play', isPrimary: true }],
-    tags: ['Premium Cotton', 'Oversized Fit', 'Graphic Back Print', 'New Arrival']
+    tags: ['Premium Cotton', 'Oversized Fit', 'New Arrival', 'Best Seller']
   },
   {
     name: 'The Tortoise',
@@ -40,7 +40,7 @@ const productsData = [
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: [{ name: '#42C0FB', hex: '#42C0FB' }],
     images: [{ url: 'https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/assets/tortoise.webp', alt: 'The Tortoise', isPrimary: true }],
-    tags: ['Premium Cotton', 'Relaxed Fit', 'Graphic Back Print', 'Bestseller']
+    tags: ['Premium Cotton', 'Relaxed Fit', 'Bestseller', 'Hot Seller']
   },
   {
     name: 'Slow Down',
@@ -54,7 +54,7 @@ const productsData = [
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: [{ name: '#1E4D2B', hex: '#1E4D2B' }],
     images: [{ url: 'https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/assets/sloth.webp', alt: 'Slow Down', isPrimary: true }],
-    tags: ['Premium Cotton', 'Oversized Fit', 'Graphic Back Print', 'New Arrival']
+    tags: ['Premium Cotton', 'Oversized Fit', 'New Arrival', 'Trending']
   },
   {
     name: 'The Slow Club',
@@ -68,7 +68,7 @@ const productsData = [
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: [{ name: '#1A1A1A', hex: '#1A1A1A' }],
     images: [{ url: 'https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/assets/slow-club.webp', alt: 'The Slow Club', isPrimary: true }],
-    tags: ['Premium Cotton', 'Oversized Fit', 'Typography Print', 'Limited']
+    tags: ['Premium Cotton', 'Oversized Fit', 'Limited', 'Few Left']
   },
   {
     name: 'Slugs Era Intro',
@@ -82,7 +82,7 @@ const productsData = [
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: [{ name: '#3A3A3A', hex: '#3A3A3A' }],
     images: [{ url: 'https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/assets/barbed-wire.webp', alt: 'Slugs Era Intro', isPrimary: true }],
-    tags: ['Washed Cotton', 'Barbed Wire Pattern', 'Center Chest Detail', 'Exclusive']
+    tags: ['Washed Cotton', 'Exclusive', 'New Arrival']
   },
   {
     name: 'NYT & WAVES',
@@ -96,7 +96,7 @@ const productsData = [
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: [{ name: '#0A192F', hex: '#0A192F' }],
     images: [{ url: 'https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/assets/NYT-and-WAVES.webp', alt: 'NYT & WAVES', isPrimary: true }],
-    tags: ['Premium Rayon', 'Relaxed Fit', 'Graphic Print', 'Limited']
+    tags: ['Premium Rayon', 'Relaxed Fit', 'Limited', 'Hot Seller']
   },
   {
     name: 'SUNLIGHT & WAVES',
@@ -110,7 +110,7 @@ const productsData = [
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: [{ name: '#D4A574', hex: '#D4A574' }],
     images: [{ url: 'https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/assets/SUNLIGHT-and-WAVES.webp', alt: 'SUNLIGHT & WAVES', isPrimary: true }],
-    tags: ['Premium Rayon', 'Relaxed Fit', 'Graphic Print', 'New Arrival']
+    tags: ['Premium Rayon', 'Relaxed Fit', 'New Arrival', 'Best Seller']
   },
   {
     name: 'Classic Embroidered Logo',
