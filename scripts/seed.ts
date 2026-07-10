@@ -5,8 +5,8 @@ import path from 'path';
 // Load env vars
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+const supabaseUrl = 'https://usymwbefimqcsxbbojyt.supabase.co';
+const supabaseKey = 'sb_secret_rY7NVlkt0NxooNmIX2n3pw_4LgHxLX2';
 
 if (!supabaseUrl || !supabaseKey) {
   console.error("Missing Supabase credentials in .env");

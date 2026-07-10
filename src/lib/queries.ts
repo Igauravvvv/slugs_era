@@ -59,31 +59,31 @@ export async function fetchProductById(id: string): Promise<Product | null> {
 }
 
 export async function createProduct(product: ProductFormData): Promise<Product> {
-  const { data, error } = await supabase
-    .from('products')
-    .insert(product)
-    .select()
-    .single();
-
-  if (error) throw new Error(`Failed to create product: ${error.message}`);
-  return data as Product;
+  const res = await fetch('/api/admin/products', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(product)
+  });
+  const json = await res.json();
+  if (!json.success) throw new Error(json.error || 'Failed to create product');
+  return json.data;
 }
 
 export async function updateProduct(id: string, updates: Partial<ProductFormData>): Promise<Product> {
-  const { data, error } = await supabase
-    .from('products')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) throw new Error(`Failed to update product: ${error.message}`);
-  return data as Product;
+  const res = await fetch(`/api/admin/products/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updates)
+  });
+  const json = await res.json();
+  if (!json.success) throw new Error(json.error || 'Failed to update product');
+  return json.data;
 }
 
 export async function deleteProduct(id: string): Promise<void> {
-  const { error } = await supabase.from('products').delete().eq('id', id);
-  if (error) throw new Error(`Failed to delete product: ${error.message}`);
+  const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE' });
+  const json = await res.json();
+  if (!json.success) throw new Error(json.error || 'Failed to delete product');
 }
 
 export async function updateProductSortOrder(updates: { id: string; sort_order: number }[]): Promise<void> {
@@ -101,21 +101,23 @@ export async function updateProductSortOrder(updates: { id: string; sort_order: 
 }
 
 export async function toggleProductPublished(id: string, is_published: boolean): Promise<void> {
-  const { error } = await supabase
-    .from('products')
-    .update({ is_published })
-    .eq('id', id);
-
-  if (error) throw new Error(`Failed to toggle published: ${error.message}`);
+  const res = await fetch(`/api/admin/products/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ is_published })
+  });
+  const json = await res.json();
+  if (!json.success) throw new Error(json.error || 'Failed to toggle published');
 }
 
 export async function updateProductStock(id: string, stock_quantity: number): Promise<void> {
-  const { error } = await supabase
-    .from('products')
-    .update({ stock_quantity })
-    .eq('id', id);
-
-  if (error) throw new Error(`Failed to update stock: ${error.message}`);
+  const res = await fetch(`/api/admin/products/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ stock_quantity })
+  });
+  const json = await res.json();
+  if (!json.success) throw new Error(json.error || 'Failed to update stock');
 }
 
 // ─────────────────────────────────────────────────────────────
