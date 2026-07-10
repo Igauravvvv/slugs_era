@@ -8,7 +8,9 @@ import { errorHandler } from './middleware/errorHandler';
 // Route Imports
 import { paymentRouter } from './routes/payment';
 import { adminRouter } from './routes/admin';
-// import { authRouter } from './routes/auth'; // Not strictly needed entirely as Supabase handles auth natively in frontend, but could be added
+import { supabaseAdmin } from './lib/supabase';
+import nodemailer from 'nodemailer';
+import emailTemplate from './template';
 
 dotenv.config();
 
@@ -59,13 +61,10 @@ app.get('/api/keep-alive', async (req, res) => {
 app.use('/api/payment', strictLimiter, paymentRouter);
 
 // Admin Routes (Could add auth middleware here later)
+// Admin Routes (Could add auth middleware here later)
 app.use('/api/admin', adminRouter);
 
 // Fallback legacy subscribe route (Updated for consistency)
-import nodemailer from 'nodemailer';
-import emailTemplate from './template';
-import { supabaseAdmin } from './lib/supabase';
-
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: parseInt(process.env.SMTP_PORT || '587'),
