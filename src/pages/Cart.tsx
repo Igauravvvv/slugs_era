@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
+import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag, ArrowRight, Truck, RotateCcw, ShieldCheck } from 'lucide-react';
 import { useStore } from '@/store';
 import { calculateShipping } from '@/utils/shipping';
 import { getSizeStock } from '@/types';
@@ -31,7 +31,7 @@ export default function Cart() {
     category,
     products: products
       .filter((product) => product.inStock && product.category === category && !cart.some((item) => item.product.id === product.id))
-      .slice(0, 4),
+      .slice(0, 3),
   })).filter((group) => group.products.length > 0);
 
   const categoryLabel = (category: string) => ({
@@ -193,31 +193,34 @@ export default function Cart() {
             ))}
 
             {recommendationGroups.map((group) => (
-              <section key={group.category} className="pt-6 sm:pt-8">
-                <div className="flex items-end justify-between gap-4 mb-4">
+              <section key={group.category} className="pt-8 sm:pt-10 border-t border-[#E8E4E0]">
+                <div className="bg-[#F9F7F5] p-4 sm:p-6">
+                <div className="flex items-end justify-between gap-4 mb-5 sm:mb-6">
                   <div>
-                    <p className="text-[10px] font-medium tracking-[0.18em] uppercase text-[#C0132A]">More in your style</p>
-                    <h2 className="font-display text-2xl font-light text-[#1A1A1A]">More {categoryLabel(group.category)}</h2>
+                    <p className="text-[10px] font-medium tracking-[0.18em] uppercase text-[#C0132A] mb-1">Selected for your bag</p>
+                    <h2 className="font-display text-[25px] sm:text-[28px] font-light leading-none text-[#1A1A1A]">More {categoryLabel(group.category)}</h2>
+                    <p className="hidden sm:block text-xs text-[#888880] mt-2">Pieces from the same collection, chosen to go together.</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => { setCollectionFilter(group.category, null); navigate(`/collections/${group.category}`); window.scrollTo(0, 0); }}
-                    className="min-h-10 text-xs font-medium uppercase tracking-[0.12em] text-[#1A1A1A] underline underline-offset-4 hover:text-[#C0132A] touch-manipulation"
+                    className="min-h-10 px-3 border border-[#1A1A1A] text-[10px] font-medium uppercase tracking-[0.12em] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white transition-colors touch-manipulation"
                   >
                     View all
                   </button>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
                   {group.products.map((product) => (
                     <button
                       type="button"
                       key={product.id}
                       onClick={() => { navigate(`/product/${product.slug || generateSlug(product.name)}`); window.scrollTo(0, 0); }}
-                      className="text-left group touch-manipulation"
+                      className="text-left group bg-white border border-transparent hover:border-[#1A1A1A]/15 transition-colors touch-manipulation"
                     >
-                      <div className="aspect-[3/4] bg-[#F9F7F5] overflow-hidden mb-2">
+                      <div className="aspect-[4/5] bg-[#F2EFEC] overflow-hidden">
                         <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                       </div>
+                      <div className="p-2.5 sm:p-3">
                       <p className="font-display text-sm text-[#1A1A1A] truncate">{product.name}</p>
                       <ProductPrice
                         price={product.price}
@@ -226,8 +229,10 @@ export default function Cart() {
                         priceClassName="text-xs font-medium text-[#1A1A1A]"
                         compareClassName="text-[11px] text-[#888880] line-through"
                       />
+                      </div>
                     </button>
                   ))}
+                </div>
                 </div>
               </section>
             ))}
@@ -238,7 +243,7 @@ export default function Cart() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1.1, delay: 0.2 }}
-            className="bg-[#F9F7F5] p-5 sm:p-6 lg:p-8 h-fit lg:sticky lg:top-6"
+            className="bg-[#F9F7F5] p-5 sm:p-6 lg:p-8 h-fit lg:sticky lg:top-6 border border-[#E8E4E0]"
           >
             <h3 className="font-display text-xl font-medium text-[#1A1A1A] mb-6">
               Order Summary
@@ -281,13 +286,25 @@ export default function Cart() {
                 navigate('/checkout/address');
                 window.scrollTo(0, 0);
               }}
-              className="w-full bg-[#1A1A1A] text-white text-[11px] font-medium tracking-[0.17em] uppercase py-4 flex items-center justify-center gap-2 hover:bg-black transition-colors"
+              className="w-full min-h-13 bg-[#1A1A1A] text-white text-[11px] font-medium tracking-[0.17em] uppercase py-4 flex items-center justify-center gap-2 hover:bg-black transition-colors touch-manipulation"
             >
               Proceed to Checkout
               <ArrowRight size={14} />
             </button>
 
-            <div className="mt-6 text-center">
+            <div className="grid grid-cols-3 gap-2 py-5 border-b border-[#E8E4E0] text-center">
+              <div className="flex flex-col items-center gap-1 text-[9px] uppercase tracking-[0.08em] text-[#888880]">
+                <Truck size={15} className="text-[#C0132A]" /> Free shipping
+              </div>
+              <div className="flex flex-col items-center gap-1 text-[9px] uppercase tracking-[0.08em] text-[#888880]">
+                <RotateCcw size={15} className="text-[#C0132A]" /> Easy returns
+              </div>
+              <div className="flex flex-col items-center gap-1 text-[9px] uppercase tracking-[0.08em] text-[#888880]">
+                <ShieldCheck size={15} className="text-[#C0132A]" /> Secure pay
+              </div>
+            </div>
+
+            <div className="mt-5 text-center">
               <img
                 src="https://cdn-icons-png.flaticon.com/512/349/349221.png"
                 alt="Visa"
