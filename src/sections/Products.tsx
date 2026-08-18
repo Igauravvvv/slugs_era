@@ -14,7 +14,11 @@ export default function Products() {
   const title = section?.title || 'The Essential Five';
   const subtitle = section?.subtitle || 'T-Shirt Collection';
 
+  const featuredProducts = products.filter((p) => p.isFeatured && p.status !== 'sold_out');
   const tshirts = products.filter((p) => p.category === 'tshirts');
+  // A dashboard editor controls the home shelf. Preserve the original T-shirt
+  // shelf as a sensible fallback until at least one product is featured.
+  const homeProducts = featuredProducts.length > 0 ? featuredProducts : tshirts;
 
   const viewAll = () => {
     setCollectionFilter('tshirts', null);
@@ -65,7 +69,7 @@ export default function Products() {
 
       {/* Products Grid - Desktop & Mobile */}
       <div className="max-w-[1800px] mx-auto grid grid-cols-2 lg:grid-cols-5 gap-2 lg:gap-3">
-        {tshirts.slice(0, 5).map((product, index) => (
+        {homeProducts.slice(0, 5).map((product, index) => (
           <div key={product.id} className="w-full" style={{ willChange: 'transform, opacity' }}>
             <ProductCard product={product} index={index} customVariants={getCardVariants(index)} />
           </div>

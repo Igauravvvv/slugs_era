@@ -21,6 +21,7 @@ export interface Product {
   inStock: boolean;
   subcategory?: string;
   slug?: string;             // DB slug for URL-based lookups
+  isFeatured?: boolean;      // Dashboard-controlled homepage listing
 
   // Deep stock & availability
   sizeStock?: SizeStock[];     // Per-size stock levels

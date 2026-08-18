@@ -36,6 +36,7 @@ export default function ProductDetail() {
   const [notifyEmail, setNotifyEmail] = useState('');
   const [notifySubmitted, setNotifySubmitted] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [openPolicy, setOpenPolicy] = useState<'shipping' | 'returns' | 'payment' | null>(null);
 
   useEffect(() => {
     if (selectedProduct) {
@@ -551,20 +552,45 @@ export default function ProductDetail() {
               </div>
             )}
 
-            {/* Trust Badges */}
-            <div className="grid grid-cols-3 gap-4 mt-6 pt-8 border-t border-[#E8E4E0]">
-              <div className="flex flex-col items-center text-center">
-                <Truck size={20} className="text-[#C0132A] mb-2" strokeWidth={1.5} />
-                <span className="text-[10px] font-medium tracking-[0.1em] uppercase text-[#888880]">Free Shipping</span>
-              </div>
-              <div className="flex flex-col items-center text-center">
-                <RotateCcw size={20} className="text-[#C0132A] mb-2" strokeWidth={1.5} />
-                <span className="text-[10px] font-medium tracking-[0.1em] uppercase text-[#888880]">Easy Returns</span>
-              </div>
-              <div className="flex flex-col items-center text-center">
-                <Shield size={20} className="text-[#C0132A] mb-2" strokeWidth={1.5} />
-                <span className="text-[10px] font-medium tracking-[0.1em] uppercase text-[#888880]">Secure Payment</span>
-              </div>
+            {/* Trust badges double as concise, expandable policy summaries. */}
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 mt-6 pt-8 border-t border-[#E8E4E0]">
+              {[
+                { id: 'shipping' as const, label: 'Free Shipping', icon: Truck, detail: 'Complimentary standard shipping across India. Orders are generally delivered in 3–5 business days.', link: '/shipping-policy', linkLabel: 'Read shipping policy' },
+                { id: 'returns' as const, label: 'Easy Returns', icon: RotateCcw, detail: 'Eligible unused items can be exchanged within 7 days of delivery, with tags and original packaging intact.', link: '/return-policy', linkLabel: 'Read return policy' },
+                { id: 'payment' as const, label: 'Secure Payment', icon: Shield, detail: 'Checkout is processed through secure payment providers. Slugsera does not store your card details.', link: null, linkLabel: null },
+              ].map((policy) => {
+                const Icon = policy.icon;
+                const isOpen = openPolicy === policy.id;
+                return (
+                  <div key={policy.id} className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => setOpenPolicy(isOpen ? null : policy.id)}
+                      aria-expanded={isOpen}
+                      className="w-full flex flex-col items-center rounded-lg px-2 py-2 hover:bg-[#F9F7F5] transition-colors"
+                    >
+                      <Icon size={20} className="text-[#C0132A] mb-2" strokeWidth={1.5} />
+                      <span className="text-[10px] font-medium tracking-[0.1em] uppercase text-[#888880]">{policy.label}</span>
+                      <ChevronDown size={13} className={`text-[#C0132A] mt-1 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    <AnimatePresence initial={false}>
+                      {isOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="overflow-hidden text-left"
+                        >
+                          <div className="mt-2 rounded-lg bg-[#F9F7F5] px-3 py-3 text-xs leading-relaxed text-[#666]">
+                            <p>{policy.detail}</p>
+                            {policy.link && <Link to={policy.link} className="inline-block mt-2 text-[#C0132A] font-medium hover:underline">{policy.linkLabel} →</Link>}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
             </div>
           </motion.div>
         </div>

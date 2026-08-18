@@ -327,7 +327,10 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
 
               <div className="cms-card p-6 space-y-4">
                 <div className="flex items-center justify-between">
-                  <label className="cms-label mb-0">Feature this product?</label>
+                  <div>
+                    <label className="cms-label mb-0">Show on homepage?</label>
+                    <p className="text-[11px] text-[#888] mt-1">Featured products are listed in the homepage product shelf.</p>
+                  </div>
                   <Controller
                     name="is_featured"
                     control={control}

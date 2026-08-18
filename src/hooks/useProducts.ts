@@ -5,6 +5,22 @@ import type { Product, SizeStock } from '@/types';
 
 // ─── DB ↔ Frontend Mapping ───────────────────────────────────
 
+/** RichTextEditor stores HTML. Storefront cards and product details use plain
+ * text, so convert it before rendering rather than exposing literal tags. */
+function richTextToPlainText(value: unknown): string {
+  if (typeof value !== 'string') return '';
+  const withBreaks = value.replace(/<\/?(?:p|div|li|br|h[1-6])\b[^>]*>/gi, ' ');
+  const withoutTags = withBreaks.replace(/<[^>]*>/g, ' ');
+  const decoded = typeof document !== 'undefined'
+    ? (() => {
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = withoutTags;
+        return textarea.value;
+      })()
+    : withoutTags;
+  return decoded.replace(/\s+/g, ' ').trim();
+}
+
 function mapDbToProduct(row: any): Product {
   const images: { url: string; alt: string; isPrimary: boolean }[] = row.images || [];
   const primaryImg = images.find((img) => img.isPrimary)?.url || images[0]?.url || row.image || '';
@@ -48,11 +64,13 @@ function mapDbToProduct(row: any): Product {
   // Badge
   const badge = row.badge || (row.tags && row.tags.length > 0 ? row.tags[row.tags.length - 1] : undefined);
 
+  const description = richTextToPlainText(row.description);
+
   return {
     id: row.id,
     name: row.name || '',
     slug,
-    slogan: row.description ? row.description.split('.')[0] : '',
+    slogan: description ? description.split('.')[0] : '',
     price: Number(row.price) || 0,
     originalPrice: row.compare_price ? Number(row.compare_price) : undefined,
     category: row.category || 'tshirts',
@@ -62,9 +80,10 @@ function mapDbToProduct(row: any): Product {
     badge,
     colors: row.colors?.map((c: any) => (typeof c === 'string' ? c : c.hex)) || [],
     sizes: row.sizes || [],
-    description: row.description || '',
+    description,
     features: row.tags || [],
     inStock: totalStock > 0,
+    isFeatured: Boolean(row.is_featured),
     sizeStock,
     status,
     material: row.material || undefined,
@@ -106,7 +125,7 @@ function mapProductToDb(p: Partial<Product> & { stock?: number }) {
     size_stock: p.sizeStock || [],
     stock_quantity: totalStock,
     is_published: p.status !== 'sold_out',
-    is_featured: p.badge === 'Bestseller' || p.badge === 'Exclusive',
+    is_featured: p.isFeatured ?? (p.badge === 'Bestseller' || p.badge === 'Exclusive'),
     tags: p.features || [],
     badge: p.badge || null,
     material: p.material || null,
