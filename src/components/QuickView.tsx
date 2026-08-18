@@ -4,6 +4,7 @@ import { X, ShoppingBag, Heart, Star, ChevronLeft, ChevronRight, Check } from 'l
 import { Product } from '@/types';
 import { useStore } from '@/store';
 import { useAuth } from '@/context/AuthContext';
+import ProductPrice from '@/components/ProductPrice';
 
 interface QuickViewProps {
   product: Product | null;
@@ -30,7 +31,12 @@ export default function QuickView({ product, onClose }: QuickViewProps) {
     }
     if (!selectedSize) return;
 
-    addToCart(product, selectedSize, selectedColor || product.colors[0]);
+    addToCart({
+      product,
+      quantity: 1,
+      size: selectedSize,
+      color: selectedColor || product.colors[0],
+    });
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
   };
@@ -137,17 +143,13 @@ export default function QuickView({ product, onClose }: QuickViewProps) {
               <p className="font-display text-sm italic text-[#1A1A1A]/50 mb-4">"{product.slogan}"</p>
 
               {/* Price */}
-              <div className="flex items-center gap-3 mb-6">
-                <span className="text-2xl font-bold text-[#1A1A1A]">₹{product.price.toLocaleString('en-IN')}</span>
-                {product.originalPrice && (
-                  <>
-                    <span className="text-base text-[#1A1A1A]/40 line-through">₹{product.originalPrice.toLocaleString('en-IN')}</span>
-                    <span className="text-xs font-bold text-[#C0132A] bg-[#C0132A]/5 px-2 py-0.5">
-                      {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
-                    </span>
-                  </>
-                )}
-              </div>
+              <ProductPrice
+                price={product.price}
+                compareAtPrice={product.originalPrice}
+                className="mb-6"
+                priceClassName="text-2xl font-bold text-[#1A1A1A]"
+                compareClassName="text-base text-[#888880] line-through"
+              />
 
               {/* Colors */}
               {product.colors.length > 0 && (

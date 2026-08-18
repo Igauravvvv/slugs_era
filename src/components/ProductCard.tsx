@@ -6,6 +6,7 @@ import type { Product } from '@/types';
 import { generateSlug } from '@/types';
 import { ShoppingBag, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import { trackCustomerEvent } from '@/lib/customerAnalytics';
+import ProductPrice from '@/components/ProductPrice';
 
 interface ProductCardProps {
   product: Product;
@@ -226,9 +227,17 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
           {product.slogan}
         </p>
         <div className="flex flex-col lg:flex-row items-center lg:justify-between gap-1 lg:gap-0">
-          <span className="text-[14px] lg:text-[15px] font-bold lg:font-medium text-[#1A1A1A]">
-            {product.status === 'coming_soon' ? 'Coming Soon' : `₹${product.price.toLocaleString()}`}
-          </span>
+          {product.status === 'coming_soon' ? (
+            <span className="text-[14px] lg:text-[15px] font-bold lg:font-medium text-[#1A1A1A]">Coming Soon</span>
+          ) : (
+            <ProductPrice
+              price={product.price}
+              compareAtPrice={product.originalPrice}
+              className="gap-2"
+              priceClassName="text-[14px] lg:text-[15px] font-bold lg:font-medium text-[#1A1A1A]"
+              compareClassName="text-[12px] lg:text-[13px] text-[#888880] line-through"
+            />
+          )}
           <div className="flex gap-1.5 hidden lg:flex">
             {product.colors.slice(0, 3).map((color, i) => (
               <button

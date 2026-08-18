@@ -11,6 +11,7 @@ import {
 import { CDN } from '@/lib/cdn';
 import { supabase } from '@/lib/supabase';
 import { generateSlug } from '@/types';
+import ProductPrice from '@/components/ProductPrice';
 
 type ProfileTab = 'orders' | 'addresses' | 'wishlist' | 'settings';
 
@@ -300,7 +301,13 @@ export default function Profile() {
                       </div>
                       <div className="p-3">
                         <p className="text-sm font-medium text-[#1A1A1A] truncate">{product.name}</p>
-                        <p className="text-xs text-[#1A1A1A]/50">₹{product.price.toLocaleString('en-IN')}</p>
+                        <ProductPrice
+                          price={product.price}
+                          compareAtPrice={product.originalPrice}
+                          className="gap-1.5"
+                          priceClassName="text-xs text-[#1A1A1A]/70"
+                          compareClassName="text-[11px] text-[#888880] line-through"
+                        />
                       </div>
                     </motion.div>
                   ))}

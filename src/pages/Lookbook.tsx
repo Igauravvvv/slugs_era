@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '@/store';
 import { generateSlug } from '@/types';
+import ProductPrice from '@/components/ProductPrice';
 
 const lookbookSections = [
   {
@@ -115,7 +116,13 @@ export default function Lookbook() {
                     <div className="mt-4">
                       <h3 className="font-display text-[18px] lg:text-[20px] font-light text-[#1A1A1A]">{product.name}</h3>
                       <p className="text-[12px] text-[#888880] font-light mt-0.5">{product.slogan}</p>
-                      <p className="text-[14px] font-medium text-[#1A1A1A] mt-1">₹{product.price.toLocaleString('en-IN')}</p>
+                      <ProductPrice
+                        price={product.price}
+                        compareAtPrice={product.originalPrice}
+                        className="mt-1 gap-2"
+                        priceClassName="text-[14px] font-medium text-[#1A1A1A]"
+                        compareClassName="text-[12px] text-[#888880] line-through"
+                      />
                     </div>
                   </motion.div>
                 ))}

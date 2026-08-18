@@ -10,6 +10,7 @@ import SEOHead from '@/components/SEOHead';
 import { trackViewItem, trackAddToCart } from '@/lib/analytics';
 import { trackCustomerEvent } from '@/lib/customerAnalytics';
 import { supabase } from '@/lib/supabase';
+import ProductPrice from '@/components/ProductPrice';
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -245,19 +246,21 @@ export default function ProductDetail() {
             <div className="flex items-center gap-3 mb-2">
               {isFullPreBook && selectedProduct.preOrderPrice ? (
                 <>
-                  <span className="text-2xl font-medium text-[#C0132A]">₹{selectedProduct.preOrderPrice.toLocaleString()}</span>
-                  <span className="text-lg text-[#888880] line-through">₹{selectedProduct.price.toLocaleString()}</span>
+                  <ProductPrice
+                    price={selectedProduct.preOrderPrice}
+                    compareAtPrice={selectedProduct.price}
+                    priceClassName="text-2xl font-medium text-[#C0132A]"
+                  />
                   <span className="text-xs font-medium bg-[#C0132A]/10 text-[#C0132A] px-2 py-0.5">
                     Pre-Book Price
                   </span>
                 </>
               ) : (
-                <>
-                  <span className="text-2xl font-medium text-[#1A1A1A]">₹{selectedProduct.price.toLocaleString()}</span>
-                  {selectedProduct.originalPrice && (
-                    <span className="text-lg text-[#888880] line-through">₹{selectedProduct.originalPrice.toLocaleString()}</span>
-                  )}
-                </>
+                <ProductPrice
+                  price={selectedProduct.price}
+                  compareAtPrice={selectedProduct.originalPrice}
+                  priceClassName="text-2xl font-medium text-[#1A1A1A]"
+                />
               )}
             </div>
 

@@ -6,6 +6,8 @@ import { useStore } from '@/store';
 import { useAuth } from '@/context/AuthContext';
 import { trackPurchase } from '@/lib/analytics';
 import { calculateShipping } from '@/utils/shipping';
+import ProductPrice from '@/components/ProductPrice';
+import { getCartCompareAtTotal } from '@/lib/pricing';
 
 type PaymentMethod = 'card' | 'upi' | 'cod';
 
@@ -19,6 +21,7 @@ export default function Payment() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const subtotal = getCartTotal();
+  const compareAtSubtotal = getCartCompareAtTotal(cart);
   const shipping = calculateShipping(subtotal);
   const total = subtotal + shipping;
 
@@ -220,11 +223,18 @@ export default function Payment() {
             {/* Items */}
             <div className="space-y-3 mb-6 pb-6 border-b border-[#E8E4E0]">
               {cart.map((item) => (
-                <div key={`${item.product.id}-${item.size}`} className="flex justify-between text-sm">
+                <div key={`${item.product.id}-${item.size}-${item.color}`} className="flex justify-between text-sm">
                   <span className="text-[#888880]">
                     {item.product.name} x {item.quantity}
                   </span>
-                  <span>₹{(item.product.price * item.quantity).toLocaleString()}</span>
+                  <ProductPrice
+                    price={item.product.price}
+                    compareAtPrice={item.product.originalPrice}
+                    quantity={item.quantity}
+                    className="justify-end gap-2"
+                    priceClassName="text-sm text-[#1A1A1A]"
+                    compareClassName="text-xs text-[#888880] line-through"
+                  />
                 </div>
               ))}
             </div>
@@ -232,7 +242,13 @@ export default function Payment() {
             <div className="space-y-4 mb-6">
               <div className="flex justify-between text-sm">
                 <span className="text-[#888880]">Subtotal</span>
-                <span>₹{subtotal.toLocaleString()}</span>
+                <ProductPrice
+                  price={subtotal}
+                  compareAtPrice={compareAtSubtotal}
+                  className="justify-end gap-2"
+                  priceClassName="text-sm text-[#1A1A1A]"
+                  compareClassName="text-xs text-[#888880] line-through"
+                />
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-[#888880]">Shipping</span>

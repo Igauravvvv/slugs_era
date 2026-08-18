@@ -4,6 +4,9 @@ import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-
 import { useStore } from '@/store';
 import { calculateShipping } from '@/utils/shipping';
 import { getSizeStock } from '@/types';
+import { generateSlug } from '@/types';
+import ProductPrice from '@/components/ProductPrice';
+import { getCartCompareAtTotal } from '@/lib/pricing';
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -13,12 +16,17 @@ export default function Cart() {
     updateQuantity, 
     getCartTotal, 
     getCartCount,
+    products,
   } = useStore();
 
   const subtotal = getCartTotal();
   const shipping = calculateShipping(subtotal);
   const total = subtotal + shipping;
   const itemCount = getCartCount();
+  const compareAtSubtotal = getCartCompareAtTotal(cart);
+  const recommendations = products
+    .filter((product) => product.inStock && !cart.some((item) => item.product.id === product.id))
+    .slice(0, 4);
 
   const getMaximumQuantity = (item: (typeof cart)[number]) => {
     const sizeStock = getSizeStock(item.product, item.size);
@@ -151,9 +159,14 @@ export default function Cart() {
 
                     {/* Price & Remove */}
                     <div className="flex items-center gap-4">
-                      <span className="text-lg font-medium">
-                        ₹{(item.product.price * item.quantity).toLocaleString()}
-                      </span>
+                      <ProductPrice
+                        price={item.product.price}
+                        compareAtPrice={item.product.originalPrice}
+                        quantity={item.quantity}
+                        className="justify-end gap-2"
+                        priceClassName="text-lg font-medium text-[#1A1A1A]"
+                        compareClassName="text-sm text-[#888880] line-through"
+                      />
                       <button
                         onClick={() => removeFromCart(item.product.id, item.size, item.color)}
                         type="button"
@@ -167,6 +180,45 @@ export default function Cart() {
               </motion.div>
             ))}
 
+            {recommendations.length > 0 && (
+              <section className="pt-6">
+                <div className="flex items-end justify-between gap-4 mb-4">
+                  <div>
+                    <p className="text-[10px] font-medium tracking-[0.18em] uppercase text-[#C0132A]">Keep exploring</p>
+                    <h2 className="font-display text-2xl font-light text-[#1A1A1A]">You might also like</h2>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { navigate('/collections'); window.scrollTo(0, 0); }}
+                    className="text-xs font-medium uppercase tracking-[0.12em] text-[#1A1A1A] underline underline-offset-4 hover:text-[#C0132A]"
+                  >
+                    View all
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {recommendations.map((product) => (
+                    <button
+                      type="button"
+                      key={product.id}
+                      onClick={() => { navigate(`/product/${product.slug || generateSlug(product.name)}`); window.scrollTo(0, 0); }}
+                      className="text-left group"
+                    >
+                      <div className="aspect-[3/4] bg-[#F9F7F5] overflow-hidden mb-2">
+                        <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                      </div>
+                      <p className="font-display text-sm text-[#1A1A1A] truncate">{product.name}</p>
+                      <ProductPrice
+                        price={product.price}
+                        compareAtPrice={product.originalPrice}
+                        className="gap-1.5 mt-0.5"
+                        priceClassName="text-xs font-medium text-[#1A1A1A]"
+                        compareClassName="text-[11px] text-[#888880] line-through"
+                      />
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
 
           {/* Order Summary */}
@@ -183,7 +235,13 @@ export default function Cart() {
             <div className="space-y-4 mb-6">
               <div className="flex justify-between text-sm">
                 <span className="text-[#888880]">Subtotal</span>
-                <span>₹{subtotal.toLocaleString()}</span>
+                <ProductPrice
+                  price={subtotal}
+                  compareAtPrice={compareAtSubtotal}
+                  className="justify-end gap-2"
+                  priceClassName="text-sm text-[#1A1A1A]"
+                  compareClassName="text-xs text-[#888880] line-through"
+                />
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-[#888880]">Shipping</span>
