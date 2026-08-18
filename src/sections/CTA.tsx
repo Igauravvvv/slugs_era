@@ -20,12 +20,14 @@ export default function CTA() {
 
   const handleCtaPrimary = () => {
     setCollectionFilter(ctaPrimaryLink, null);
-    navigate('/collections');
+    navigate(`/collections/${ctaPrimaryLink}`);
+    window.scrollTo(0, 0);
   };
 
   const handleCtaSecondary = () => {
     setCollectionFilter(ctaSecondaryLink, null);
-    navigate('/collections');
+    navigate(`/collections/${ctaSecondaryLink}`);
+    window.scrollTo(0, 0);
   };
 
   return (
@@ -75,6 +77,7 @@ export default function CTA() {
 
         <div className="flex gap-5 items-center justify-center flex-wrap">
           <button
+            type="button"
             onClick={handleCtaPrimary}
             className="inline-flex items-center gap-3 bg-[#1A1A1A] text-white text-[10px] lg:text-[11px] font-medium tracking-[0.17em] uppercase px-6 lg:px-8 py-3.5 lg:py-4 transition-all duration-300 hover:bg-black hover:-translate-y-0.5"
           >
@@ -82,6 +85,7 @@ export default function CTA() {
             <ArrowRight size={13} strokeWidth={2} />
           </button>
           <button
+            type="button"
             onClick={handleCtaSecondary}
             className="inline-flex items-center gap-3 bg-white/15 text-white text-[10px] lg:text-[11px] font-medium tracking-[0.17em] uppercase px-6 lg:px-8 py-3.5 lg:py-4 transition-all duration-300 hover:bg-white/25 hover:-translate-y-0.5"
           >

@@ -7,6 +7,7 @@ import { getSizeStock } from '@/types';
 import { generateSlug } from '@/types';
 import ProductPrice from '@/components/ProductPrice';
 import { getCartCompareAtTotal } from '@/lib/pricing';
+import InstagramFeed from '@/components/InstagramFeed';
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export default function Cart() {
     getCartTotal, 
     getCartCount,
     products,
+    setCollectionFilter,
   } = useStore();
 
   const subtotal = getCartTotal();
@@ -24,9 +26,20 @@ export default function Cart() {
   const total = subtotal + shipping;
   const itemCount = getCartCount();
   const compareAtSubtotal = getCartCompareAtTotal(cart);
-  const recommendations = products
-    .filter((product) => product.inStock && !cart.some((item) => item.product.id === product.id))
-    .slice(0, 4);
+  const cartCategories = Array.from(new Set(cart.map((item) => item.product.category)));
+  const recommendationGroups = cartCategories.map((category) => ({
+    category,
+    products: products
+      .filter((product) => product.inStock && product.category === category && !cart.some((item) => item.product.id === product.id))
+      .slice(0, 4),
+  })).filter((group) => group.products.length > 0);
+
+  const categoryLabel = (category: string) => ({
+    tshirts: 'T-Shirts',
+    shirts: 'Shirts',
+    hoodies: 'Hoodies',
+    accessories: 'Accessories',
+  }[category] || category);
 
   const getMaximumQuantity = (item: (typeof cart)[number]) => {
     const sizeStock = getSizeStock(item.product, item.size);
@@ -66,8 +79,8 @@ export default function Cart() {
   }
 
   return (
-    <div className="min-h-screen bg-white py-8">
-      <div className="max-w-6xl mx-auto px-6 lg:px-8">
+    <div className="min-h-screen bg-white py-5 sm:py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <button
@@ -82,23 +95,23 @@ export default function Cart() {
           </button>
         </div>
 
-        <h1 className="font-display text-[clamp(28px,4vw,42px)] font-light text-[#1A1A1A] mb-8">
+        <h1 className="font-display text-[clamp(28px,4vw,42px)] font-light text-[#1A1A1A] mb-6 sm:mb-8">
           Shopping Bag ({itemCount})
         </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8 lg:gap-12">
           {/* Cart Items */}
-          <div className="space-y-6">
+          <div className="space-y-5 sm:space-y-6">
             {cart.map((item, index) => (
               <motion.div
                 key={`${item.product.id}-${item.size}-${item.color}`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
-                className="flex gap-6 pb-6 border-b border-[#E8E4E0]"
+                className="flex gap-3 sm:gap-6 pb-5 sm:pb-6 border-b border-[#E8E4E0]"
               >
                 {/* Image */}
-                <div className="w-24 h-24 lg:w-32 lg:h-32 bg-[#F9F7F5] flex-shrink-0">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 bg-[#F9F7F5] flex-shrink-0">
                   <img
                     src={item.product.image}
                     alt={item.product.name}
@@ -109,10 +122,10 @@ export default function Cart() {
                 {/* Details */}
                 <div className="flex-1 flex flex-col justify-between">
                   <div>
-                    <h3 className="font-display text-lg font-medium text-[#1A1A1A]">
+                    <h3 className="font-display text-base sm:text-lg font-medium text-[#1A1A1A] line-clamp-1">
                       {item.product.name}
                     </h3>
-                    <p className="text-sm text-[#888880]">
+                    <p className="text-xs sm:text-sm text-[#888880]">
                       Size: {item.size} | Color: 
                       <span 
                         className="inline-block w-3 h-3 rounded-full ml-1 align-middle"
@@ -121,22 +134,21 @@ export default function Cart() {
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-3 mt-3 sm:mt-0">
                     {/* Quantity */}
                     <div className="flex items-center border border-[#E8E4E0]">
                       <button
                         aria-label={`Decrease quantity of ${item.product.name}`}
                         onClick={() => {
-                          if (item.quantity > 1) {
-                            updateQuantity(item.product.id, item.size, item.color, item.quantity - 1);
-                          }
+                          if (item.quantity > 1) updateQuantity(item.product.id, item.size, item.color, item.quantity - 1);
+                          else removeFromCart(item.product.id, item.size, item.color);
                         }}
                         type="button"
-                        className="w-8 h-8 flex items-center justify-center hover:bg-[#F9F7F5] transition-colors"
+                        className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center hover:bg-[#F9F7F5] transition-colors touch-manipulation"
                       >
                         <Minus size={14} />
                       </button>
-                      <span className="w-10 text-center text-sm">{item.quantity}</span>
+                      <span className="w-10 sm:w-10 text-center text-sm">{item.quantity}</span>
                       <button
                         aria-label={`Increase quantity of ${item.product.name}`}
                         onClick={() => {
@@ -147,7 +159,7 @@ export default function Cart() {
                         }}
                         type="button"
                         disabled={item.quantity >= getMaximumQuantity(item)}
-                        className={`w-8 h-8 flex items-center justify-center transition-colors ${
+                        className={`w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center transition-colors touch-manipulation ${
                           item.quantity >= getMaximumQuantity(item)
                             ? 'text-[#E8E4E0] cursor-not-allowed'
                             : 'hover:bg-[#F9F7F5]'
@@ -158,7 +170,7 @@ export default function Cart() {
                     </div>
 
                     {/* Price & Remove */}
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3 sm:gap-4 ml-auto">
                       <ProductPrice
                         price={item.product.price}
                         compareAtPrice={item.product.originalPrice}
@@ -170,7 +182,7 @@ export default function Cart() {
                       <button
                         onClick={() => removeFromCart(item.product.id, item.size, item.color)}
                         type="button"
-                        className="text-[#888880] hover:text-[#C0132A] transition-colors"
+                        className="w-10 h-10 sm:w-auto sm:h-auto flex items-center justify-center text-[#888880] hover:text-[#C0132A] transition-colors touch-manipulation"
                       >
                         <Trash2 size={18} />
                       </button>
@@ -180,28 +192,28 @@ export default function Cart() {
               </motion.div>
             ))}
 
-            {recommendations.length > 0 && (
-              <section className="pt-6">
+            {recommendationGroups.map((group) => (
+              <section key={group.category} className="pt-6 sm:pt-8">
                 <div className="flex items-end justify-between gap-4 mb-4">
                   <div>
-                    <p className="text-[10px] font-medium tracking-[0.18em] uppercase text-[#C0132A]">Keep exploring</p>
-                    <h2 className="font-display text-2xl font-light text-[#1A1A1A]">You might also like</h2>
+                    <p className="text-[10px] font-medium tracking-[0.18em] uppercase text-[#C0132A]">More in your style</p>
+                    <h2 className="font-display text-2xl font-light text-[#1A1A1A]">More {categoryLabel(group.category)}</h2>
                   </div>
                   <button
                     type="button"
-                    onClick={() => { navigate('/collections'); window.scrollTo(0, 0); }}
-                    className="text-xs font-medium uppercase tracking-[0.12em] text-[#1A1A1A] underline underline-offset-4 hover:text-[#C0132A]"
+                    onClick={() => { setCollectionFilter(group.category, null); navigate(`/collections/${group.category}`); window.scrollTo(0, 0); }}
+                    className="min-h-10 text-xs font-medium uppercase tracking-[0.12em] text-[#1A1A1A] underline underline-offset-4 hover:text-[#C0132A] touch-manipulation"
                   >
                     View all
                   </button>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {recommendations.map((product) => (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                  {group.products.map((product) => (
                     <button
                       type="button"
                       key={product.id}
                       onClick={() => { navigate(`/product/${product.slug || generateSlug(product.name)}`); window.scrollTo(0, 0); }}
-                      className="text-left group"
+                      className="text-left group touch-manipulation"
                     >
                       <div className="aspect-[3/4] bg-[#F9F7F5] overflow-hidden mb-2">
                         <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
@@ -218,7 +230,7 @@ export default function Cart() {
                   ))}
                 </div>
               </section>
-            )}
+            ))}
           </div>
 
           {/* Order Summary */}
@@ -226,7 +238,7 @@ export default function Cart() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1.1, delay: 0.2 }}
-            className="bg-[#F9F7F5] p-6 lg:p-8 h-fit"
+            className="bg-[#F9F7F5] p-5 sm:p-6 lg:p-8 h-fit lg:sticky lg:top-6"
           >
             <h3 className="font-display text-xl font-medium text-[#1A1A1A] mb-6">
               Order Summary
@@ -299,6 +311,7 @@ export default function Cart() {
             </div>
           </motion.div>
         </div>
+        <InstagramFeed className="mt-14 sm:mt-20" />
       </div>
     </div>
   );
