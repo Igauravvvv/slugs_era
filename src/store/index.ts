@@ -25,15 +25,13 @@ interface AppState {
   // Cart
   cart: CartItem[];
   addToCart: (item: CartItem) => void;
-  removeFromCart: (productId: string, size: string) => void;
-  updateQuantity: (productId: string, size: string, quantity: number) => void;
+  removeFromCart: (productId: string, size: string, color: string) => void;
+  updateQuantity: (productId: string, size: string, color: string, quantity: number) => void;
   clearCart: () => void;
   getCartTotal: () => number;
   getCartCount: () => number;
   getShipping: () => number;
   getOrderTotal: () => number;
-  hasToteBag: boolean;
-  addToteBag: () => void;
 
   // User
   user: User | null;
@@ -85,11 +83,10 @@ export const useStore = create<AppState>()(
 
       // Cart
       cart: [],
-      hasToteBag: false,
       addToCart: (item) => {
         const { cart } = get();
         const existingIndex = cart.findIndex(
-          (i) => i.product.id === item.product.id && i.size === item.size
+          (i) => i.product.id === item.product.id && i.size === item.size && i.color === item.color
         );
         if (existingIndex >= 0) {
           const newCart = [...cart];
@@ -102,18 +99,19 @@ export const useStore = create<AppState>()(
           set({ cart: [...cart, item] });
         }
       },
-      removeFromCart: (productId, size) => {
-        set({ cart: get().cart.filter((i) => !(i.product.id === productId && i.size === size)) });
+      removeFromCart: (productId, size, color) => {
+        set({ cart: get().cart.filter((i) => !(i.product.id === productId && i.size === size && i.color === color)) });
       },
-      updateQuantity: (productId, size, quantity) => {
+      updateQuantity: (productId, size, color, quantity) => {
+        const safeQuantity = Math.max(1, Math.floor(quantity) || 1);
         const newCart = get().cart.map((item) =>
-          item.product.id === productId && item.size === size
-            ? { ...item, quantity }
+          item.product.id === productId && item.size === size && item.color === color
+            ? { ...item, quantity: safeQuantity }
             : item
         );
         set({ cart: newCart });
       },
-      clearCart: () => set({ cart: [], hasToteBag: false }),
+      clearCart: () => set({ cart: [] }),
       getCartTotal: () => {
         return get().cart.reduce((total, item) => total + item.product.price * item.quantity, 0);
       },
@@ -126,7 +124,6 @@ export const useStore = create<AppState>()(
       getOrderTotal: () => {
         return get().getCartTotal() + get().getShipping();
       },
-      addToteBag: () => set({ hasToteBag: true }),
 
       // User
       user: null,
@@ -164,7 +161,6 @@ export const useStore = create<AppState>()(
       },
       partialize: (state) => ({
         cart: state.cart,
-        hasToteBag: state.hasToteBag,
         user: state.user,
         addresses: state.addresses,
         wishlist: state.wishlist,

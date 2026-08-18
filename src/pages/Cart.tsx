@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag, ArrowRight, Gift } from 'lucide-react';
+import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useStore } from '@/store';
 import { calculateShipping } from '@/utils/shipping';
 import { getSizeStock } from '@/types';
@@ -13,10 +13,6 @@ export default function Cart() {
     updateQuantity, 
     getCartTotal, 
     getCartCount,
-    hasToteBag,
-    addToteBag,
-    addToCart,
-    products,
   } = useStore();
 
   const subtotal = getCartTotal();
@@ -24,24 +20,11 @@ export default function Cart() {
   const total = subtotal + shipping;
   const itemCount = getCartCount();
 
-  const handleAddToteBag = () => {
-    const toteBag = products.find(p => p.id === 'acc-001');
-    if (toteBag) {
-      addToCart({
-        product: toteBag,
-        quantity: 1,
-        size: 'ONE SIZE',
-        color: toteBag.colors[0],
-      });
-      addToteBag();
-    }
+  const getMaximumQuantity = (item: (typeof cart)[number]) => {
+    const sizeStock = getSizeStock(item.product, item.size);
+    if (item.isPreOrder || sizeStock?.preOrder) return 5;
+    return sizeStock?.stock ?? (item.product.inStock ? 10 : 0);
   };
-
-  const hasClothing = cart.some(item => 
-    item.product.category === 'tshirts' || item.product.category === 'shirts'
-  );
-
-  const canGetFreeTote = hasClothing && !hasToteBag;
 
   if (cart.length === 0) {
     return (
@@ -100,7 +83,7 @@ export default function Cart() {
           <div className="space-y-6">
             {cart.map((item, index) => (
               <motion.div
-                key={`${item.product.id}-${item.size}`}
+                key={`${item.product.id}-${item.size}-${item.color}`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
@@ -137,9 +120,10 @@ export default function Cart() {
                         aria-label={`Decrease quantity of ${item.product.name}`}
                         onClick={() => {
                           if (item.quantity > 1) {
-                            updateQuantity(item.product.id, item.size, item.quantity - 1);
+                            updateQuantity(item.product.id, item.size, item.color, item.quantity - 1);
                           }
                         }}
+                        type="button"
                         className="w-8 h-8 flex items-center justify-center hover:bg-[#F9F7F5] transition-colors"
                       >
                         <Minus size={14} />
@@ -148,22 +132,18 @@ export default function Cart() {
                       <button
                         aria-label={`Increase quantity of ${item.product.name}`}
                         onClick={() => {
-                          const sizeStock = getSizeStock(item.product, item.size);
-                          const maxQty = sizeStock ? sizeStock.stock : 10;
+                          const maxQty = getMaximumQuantity(item);
                           if (item.quantity < maxQty) {
-                            updateQuantity(item.product.id, item.size, item.quantity + 1);
+                            updateQuantity(item.product.id, item.size, item.color, item.quantity + 1);
                           }
                         }}
-                        disabled={(() => {
-                          const sizeStock = getSizeStock(item.product, item.size);
-                          return sizeStock ? item.quantity >= sizeStock.stock : false;
-                        })()}
-                        className={`w-8 h-8 flex items-center justify-center transition-colors ${(() => {
-                          const sizeStock = getSizeStock(item.product, item.size);
-                          return sizeStock && item.quantity >= sizeStock.stock
+                        type="button"
+                        disabled={item.quantity >= getMaximumQuantity(item)}
+                        className={`w-8 h-8 flex items-center justify-center transition-colors ${
+                          item.quantity >= getMaximumQuantity(item)
                             ? 'text-[#E8E4E0] cursor-not-allowed'
-                            : 'hover:bg-[#F9F7F5]';
-                        })()}`}
+                            : 'hover:bg-[#F9F7F5]'
+                        }`}
                       >
                         <Plus size={14} />
                       </button>
@@ -175,7 +155,8 @@ export default function Cart() {
                         ₹{(item.product.price * item.quantity).toLocaleString()}
                       </span>
                       <button
-                        onClick={() => removeFromCart(item.product.id, item.size)}
+                        onClick={() => removeFromCart(item.product.id, item.size, item.color)}
+                        type="button"
                         className="text-[#888880] hover:text-[#C0132A] transition-colors"
                       >
                         <Trash2 size={18} />
@@ -186,34 +167,6 @@ export default function Cart() {
               </motion.div>
             ))}
 
-            {/* Free Tote Bag Offer */}
-            {canGetFreeTote && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-[#F9F7F5] p-6 border border-[#E8E4E0]"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-[#C0132A]/10 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Gift size={20} className="text-[#C0132A]" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-display text-lg font-medium text-[#1A1A1A] mb-1">
-                      Free Gift Available!
-                    </h4>
-                    <p className="text-sm text-[#888880] mb-4">
-                      Add our Everyday Tote Bag (worth ₹499) to your order for FREE!
-                    </p>
-                    <button
-                      onClick={handleAddToteBag}
-                      className="bg-[#C0132A] text-white text-[11px] font-medium tracking-[0.15em] uppercase px-6 py-3 hover:bg-[#8B0000] transition-colors"
-                    >
-                      Add Free Tote Bag
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            )}
           </div>
 
           {/* Order Summary */}

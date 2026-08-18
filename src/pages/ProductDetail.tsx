@@ -14,7 +14,7 @@ import { supabase } from '@/lib/supabase';
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { addToCart, addToteBag, hasToteBag, products, toggleWishlist, isInWishlist } = useStore();
+  const { addToCart, products, toggleWishlist, isInWishlist } = useStore();
   
   // Find product by slug — try multiple strategies:
   // 1. Match by DB slug field (if mapped)
@@ -27,7 +27,6 @@ export default function ProductDetail() {
   const [selectedColor, setSelectedColor] = useState('');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isAdded, setIsAdded] = useState(false);
-  // Removed Tote Bag Offer State
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showCareInfo, setShowCareInfo] = useState(false);
