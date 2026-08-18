@@ -24,12 +24,25 @@ async function apiRequest<T>(
     headers: { ...headers, ...options.headers },
   });
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Network error' }));
-    throw new Error(error.message || error.error || `API Error: ${response.status}`);
+  const body = await response.text();
+  let parsedBody: unknown;
+
+  if (body.trim()) {
+    try {
+      parsedBody = JSON.parse(body);
+    } catch {
+      if (!response.ok) throw new Error(body || `API Error: ${response.status}`);
+      throw new Error(`Invalid response from ${endpoint}. Please refresh and try again.`);
+    }
   }
 
-  return response.json();
+  if (!response.ok) {
+    const error = parsedBody as { message?: string; error?: string } | undefined;
+    throw new Error(error?.message || error?.error || `API Error: ${response.status}`);
+  }
+
+  // A successful DELETE may deliberately return 204 No Content.
+  return parsedBody as T;
 }
 
 export const api = {
@@ -51,10 +64,20 @@ export const api = {
       headers,
       body: formData,
     });
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Upload failed' }));
-      throw new Error(error.message || 'Upload failed');
+    const body = await response.text();
+    let parsedBody: unknown;
+    if (body.trim()) {
+      try {
+        parsedBody = JSON.parse(body);
+      } catch {
+        if (!response.ok) throw new Error(body || 'Upload failed');
+        throw new Error('Upload returned an invalid response. Please try again.');
+      }
     }
-    return response.json() as Promise<T>;
+    if (!response.ok) {
+      const error = parsedBody as { message?: string; error?: string } | undefined;
+      throw new Error(error?.message || error?.error || 'Upload failed');
+    }
+    return parsedBody as T;
   },
 };

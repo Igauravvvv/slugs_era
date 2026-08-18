@@ -156,6 +156,20 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
     }
   };
 
+  const onInvalid = () => {
+    const currentErrors = errors;
+    if (currentErrors.name || currentErrors.slug || currentErrors.category) setActiveTab('basic');
+    else if (currentErrors.price || currentErrors.stock_quantity) setActiveTab('inventory');
+    else if (currentErrors.images) setActiveTab('media');
+    else if (currentErrors.description) setActiveTab('description');
+
+    addToast({
+      type: 'error',
+      title: 'Product was not saved',
+      message: 'Please correct the highlighted required fields and save again.',
+    });
+  };
+
   const addTag = () => {
     if (tagInput.trim() && !values.tags?.includes(tagInput.trim())) {
       setValue('tags', [...(values.tags || []), tagInput.trim()], { shouldDirty: true });
@@ -184,7 +198,7 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pb-20">
+    <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-6 pb-20">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#0A0A0A] sticky top-0 z-20 py-4 border-b border-[#2A2A2A]">
         <div className="flex items-center gap-4">
