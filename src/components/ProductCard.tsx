@@ -119,7 +119,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
       viewport={{ once: true, margin: '-20px' }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className={`product-card group relative ${isComingSoon ? 'bg-[#1A1A1A] border border-[#303030] p-3' : ''}`}
+      className={`product-card group relative ${isComingSoon ? 'bg-white border border-[#E8E4E0] p-3' : ''}`}
       style={{
         transformStyle: "preserve-3d",
         perspective: "1000px",
@@ -227,11 +227,11 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
       </div>
 
       <div className={`pt-3 lg:pt-4 px-1 lg:px-0.5 text-center lg:text-left cursor-pointer ${isComingSoon ? 'px-1.5 pb-1' : ''}`} onClick={goToProduct}>
-        <h3 className={`font-display text-[15px] lg:text-[21px] font-bold lg:font-normal mb-0.5 lg:mb-1 line-clamp-1 ${isComingSoon ? 'text-white/75' : 'text-[#1A1A1A]'}`}>
+        <h3 className="font-display text-[15px] lg:text-[21px] font-bold lg:font-normal mb-0.5 lg:mb-1 line-clamp-1 text-[#1A1A1A]">
           {product.name}
         </h3>
         {isComingSoon ? (
-          <div className="flex items-center justify-between pt-2 border-t border-white/10 text-[10px] font-medium tracking-[0.14em] uppercase text-white/40">
+          <div className="flex items-center justify-between pt-2 border-t border-[#E8E4E0] text-[10px] font-medium tracking-[0.14em] uppercase text-[#888880]">
             <span>Coming Soon</span>
             <span className="text-[#C0132A]">TBA</span>
           </div>
