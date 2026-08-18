@@ -5,7 +5,7 @@ import { useStore } from '@/store';
 import { useSiteSection } from '@/context/SiteContentContext';
 
 export default function CTA() {
-  const { setCollectionFilter } = useStore();
+  const { setCollectionFilter, products } = useStore();
   const navigate = useNavigate();
   const { section, getMeta } = useSiteSection('cta');
 
@@ -13,10 +13,27 @@ export default function CTA() {
   const heading = section?.title || 'Shop <em class="italic">Premium</em><br />Pieces';
   const bodyText = section?.body_text || "Life is too short for uncomfortable clothes. Invest in essentials that earn their place for years, not months.";
   const marqueeText = (getMeta('marquee_text') as string) || "Don't Rush.";
-  const ctaPrimaryText = section?.cta_text || 'Shop T-Shirts — ₹1,899';
   const ctaPrimaryLink = section?.cta_link || 'tshirts';
-  const ctaSecondaryText = (getMeta('cta_secondary_text') as string) || 'Shop Shirts — ₹2,299';
   const ctaSecondaryLink = (getMeta('cta_secondary_link') as string) || 'shirts';
+
+  const buildCollectionCta = (category: string, label: string, fallback: string) => {
+    const categoryProducts = products.filter((product) => product.category === category);
+    const availableProducts = categoryProducts.filter((product) => product.status === 'active');
+    const comingSoon = categoryProducts.some((product) => product.status === 'coming_soon');
+
+    if (availableProducts.length > 0) {
+      const prices = availableProducts.map((product) => product.price);
+      const lowestPrice = Math.min(...prices);
+      const pricePrefix = prices.some((price) => price !== lowestPrice) ? 'from ' : '';
+      return `Shop ${label} — ${pricePrefix}₹${lowestPrice.toLocaleString('en-IN')}`;
+    }
+
+    return comingSoon ? `Shop ${label} — Coming Soon` : fallback;
+  };
+
+  // Prices and availability come from the live product catalogue, not old marketing copy.
+  const ctaPrimaryText = buildCollectionCta(ctaPrimaryLink, 'T-Shirts', 'Shop T-Shirts — ₹1,199');
+  const ctaSecondaryText = buildCollectionCta(ctaSecondaryLink, 'Shirts', 'Shop Shirts — Coming Soon');
 
   const handleCtaPrimary = () => {
     setCollectionFilter(ctaPrimaryLink, null);
