@@ -5,17 +5,28 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useStore } from '@/store';
 import ProductCard from '@/components/ProductCard';
 
+const COLLECTION_CATEGORY_ORDER = ['tshirts', 'shirts', 'hoodies', 'accessories'];
+const COLLECTION_CATEGORY_LABELS: Record<string, string> = {
+  tshirts: 'T-Shirts',
+  shirts: 'Shirts',
+  hoodies: 'Hoodies',
+  accessories: 'Accessories',
+};
+
 export default function Collections() {
   const { selectedCategory, selectedSubcategory, setCollectionFilter, products } = useStore();
   
   // Compute dynamic categories from actual products
   const availableCategories = Array.from(new Set(products.map(p => p.category)))
     .filter(Boolean)
-    .sort();
+    .sort((a, b) => {
+      const aIndex = COLLECTION_CATEGORY_ORDER.indexOf(a);
+      const bIndex = COLLECTION_CATEGORY_ORDER.indexOf(b);
+      return (aIndex === -1 ? COLLECTION_CATEGORY_ORDER.length : aIndex)
+        - (bIndex === -1 ? COLLECTION_CATEGORY_ORDER.length : bIndex);
+    });
   
-  const categoriesList = ['All', ...availableCategories.map(c => 
-    c.charAt(0).toUpperCase() + c.slice(1)
-  )];
+  const categoriesList = ['All', ...availableCategories.map(c => COLLECTION_CATEGORY_LABELS[c] || c)];
 
   const navigate = useNavigate();
   const { category: urlCategory } = useParams<{ category?: string }>();
@@ -56,6 +67,9 @@ export default function Collections() {
     if (selectedCategory && p.category !== selectedCategory) return false;
     if (selectedSubcategory && p.subcategory !== selectedSubcategory) return false;
     return true;
+  }).sort((a, b) => {
+    if (selectedCategory) return 0;
+    return COLLECTION_CATEGORY_ORDER.indexOf(a.category) - COLLECTION_CATEGORY_ORDER.indexOf(b.category);
   });
 
   const goBack = () => {
