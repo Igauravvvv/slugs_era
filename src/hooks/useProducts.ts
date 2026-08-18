@@ -125,6 +125,7 @@ function mapProductToDb(p: Partial<Product> & { stock?: number }) {
     size_stock: p.sizeStock || [],
     stock_quantity: totalStock,
     is_published: p.status !== 'sold_out',
+    status: p.status || 'active',
     is_featured: p.isFeatured ?? (p.badge === 'Bestseller' || p.badge === 'Exclusive'),
     tags: p.features || [],
     badge: p.badge || null,

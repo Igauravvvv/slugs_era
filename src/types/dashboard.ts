@@ -40,6 +40,7 @@ export interface DbProduct {
   stock_quantity: number;
   is_published: boolean;
   is_featured: boolean;
+  status: 'active' | 'coming_soon' | 'sold_out';
   sort_order: number;
   material: string | null;
   fit: string | null;

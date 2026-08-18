@@ -29,6 +29,7 @@ const productSchema = z.object({
   images: z.array(z.object({ url: z.string(), alt: z.string(), isPrimary: z.boolean() })).default([]),
   is_published: z.boolean(),
   is_featured: z.boolean(),
+  status: z.enum(['active', 'coming_soon', 'sold_out']),
   sort_order: z.number().default(0),
 });
 
@@ -90,6 +91,7 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
       images: [],
       is_published: false,
       is_featured: false,
+      status: 'active',
       sort_order: 0,
     }
   });
@@ -110,6 +112,7 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
               size_stock: createSizeStock(data.sizes || [], data.stock_quantity || 0, data.size_stock || []),
               colors: data.colors || [],
               images: data.images || [],
+              status: data.status || 'active',
             });
             setLastSaved(new Date(data.updated_at));
           }
@@ -313,6 +316,15 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               <div className="cms-card p-6 space-y-4">
+                <div>
+                  <label className="cms-label">Storefront Availability</label>
+                  <select {...register('status')} className="cms-select">
+                    <option value="active">Active — available to buy</option>
+                    <option value="coming_soon">Coming Soon — blurred with a locked overlay</option>
+                    <option value="sold_out">Sold Out — visible but unavailable</option>
+                  </select>
+                  <p className="text-[11px] text-[#888] mt-1">Coming Soon uses the same blur and overlay effect shown in the home-page drop section.</p>
+                </div>
                 <div>
                   <label className="cms-label">Product Name</label>
                   <input {...register('name')} className="cms-input" placeholder="Heavyweight Oversized Tee" />

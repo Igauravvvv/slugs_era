@@ -4,7 +4,7 @@ import { motion, AnimatePresence, useMotionTemplate, useMotionValue, useSpring }
 import { useStore } from '@/store';
 import type { Product } from '@/types';
 import { generateSlug } from '@/types';
-import { ShoppingBag, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { ShoppingBag, ChevronLeft, ChevronRight, Eye, LockKeyhole } from 'lucide-react';
 import { trackCustomerEvent } from '@/lib/customerAnalytics';
 import ProductPrice from '@/components/ProductPrice';
 
@@ -19,6 +19,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
   const { addToCart } = useStore();
   const navigate = useNavigate();
   const [imageIndex, setImageIndex] = useState(0);
+  const isComingSoon = product.status === 'coming_soon';
 
   // Use the product's actual images array; fall back to just the primary image
   const images = product.images && product.images.length > 0
@@ -118,7 +119,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
       viewport={{ once: true, margin: '-20px' }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="product-card group relative"
+      className={`product-card group relative ${isComingSoon ? 'bg-[#1A1A1A] border border-[#303030] p-3' : ''}`}
       style={{
         transformStyle: "preserve-3d",
         perspective: "1000px",
@@ -137,9 +138,9 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
         <div className="image-wrapper group/slider relative overflow-hidden rounded-md cursor-pointer" style={{ willChange: 'transform' }} onClick={goToProduct}>
-        {product.badge && (
+        {(product.badge || isComingSoon) && (
           <span className={`badge ${product.badge === 'New' ? 'badge-dark' : ''} z-[25]`}>
-            {product.badge}
+            {isComingSoon ? 'Soon' : product.badge}
           </span>
         )}
         <AnimatePresence mode="wait">
@@ -149,7 +150,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
             alt={product.name}
             loading="lazy"
             className={`w-full h-full object-cover transition-all duration-700 ${
-              product.status === 'coming_soon' ? 'filter grayscale-[30%] blur-[6px]' : ''
+              isComingSoon ? 'filter grayscale-[40%] blur-[8px] scale-105' : ''
             }`}
             initial={{ opacity: 0.8 }}
             animate={{ opacity: 1 }}
@@ -163,14 +164,20 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
         </AnimatePresence>
 
         {/* Mirror Glass Overlay for Coming Soon */}
-        {product.status === 'coming_soon' && (
-          <div className="absolute inset-0 z-10 bg-white/20 backdrop-blur-[2px] pointer-events-none" />
+        {isComingSoon && (
+          <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#1A1A1A]/90 via-[#1A1A1A]/30 to-[#1A1A1A]/10 backdrop-blur-[2px] pointer-events-none flex flex-col items-center justify-center">
+            <span className="w-12 h-12 rounded-full border border-white/15 bg-[#1A1A1A]/80 text-white flex items-center justify-center shadow-[0_0_30px_rgba(192,19,42,0.2)]">
+              <LockKeyhole size={19} strokeWidth={1.5} />
+            </span>
+            <span className="mt-4 text-[11px] font-semibold tracking-[0.24em] uppercase text-white">Coming Soon</span>
+            <span className="mt-3 w-8 h-px bg-[#C0132A]" />
+          </div>
         )}
 
         {/* Clickable overlay removed - onClick moved to parent image-wrapper */}
 
         {/* Navigation Arrows - only show if multiple images */}
-        {images.length > 1 && (
+        {!isComingSoon && images.length > 1 && (
           <>
             <button 
               type="button"
@@ -200,7 +207,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
           </>
         )}
 
-        <div className="quick-add z-[25] flex gap-2">
+        {!isComingSoon && <div className="quick-add z-[25] flex gap-2">
           <button
             className="quick-add-btn flex items-center gap-2"
             onClick={handleQuickAdd}
@@ -216,20 +223,24 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
               <Eye size={14} />
             </button>
           )}
-        </div>
+        </div>}
       </div>
 
-      <div className="pt-3 lg:pt-4 px-1 lg:px-0.5 text-center lg:text-left cursor-pointer" onClick={goToProduct}>
-        <h3 className="font-display text-[15px] lg:text-[21px] font-bold lg:font-normal text-[#1A1A1A] mb-0.5 lg:mb-1 line-clamp-1">
+      <div className={`pt-3 lg:pt-4 px-1 lg:px-0.5 text-center lg:text-left cursor-pointer ${isComingSoon ? 'px-1.5 pb-1' : ''}`} onClick={goToProduct}>
+        <h3 className={`font-display text-[15px] lg:text-[21px] font-bold lg:font-normal mb-0.5 lg:mb-1 line-clamp-1 ${isComingSoon ? 'text-white/75' : 'text-[#1A1A1A]'}`}>
           {product.name}
         </h3>
-        <p className="font-display text-[12px] lg:text-[13px] italic font-light text-[#888880] mb-1.5 lg:mb-2.5 line-clamp-1 leading-tight">
-          {product.slogan}
-        </p>
-        <div className="flex flex-col lg:flex-row items-center lg:justify-between gap-1 lg:gap-0">
-          {product.status === 'coming_soon' ? (
-            <span className="text-[14px] lg:text-[15px] font-bold lg:font-medium text-[#1A1A1A]">Coming Soon</span>
-          ) : (
+        {isComingSoon ? (
+          <div className="flex items-center justify-between pt-2 border-t border-white/10 text-[10px] font-medium tracking-[0.14em] uppercase text-white/40">
+            <span>Coming Soon</span>
+            <span className="text-[#C0132A]">TBA</span>
+          </div>
+        ) : (
+          <>
+          <p className="font-display text-[12px] lg:text-[13px] italic font-light text-[#888880] mb-1.5 lg:mb-2.5 line-clamp-1 leading-tight">
+            {product.slogan}
+          </p>
+          <div className="flex flex-col lg:flex-row items-center lg:justify-between gap-1 lg:gap-0">
             <ProductPrice
               price={product.price}
               compareAtPrice={product.originalPrice}
@@ -237,7 +248,6 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
               priceClassName="text-[14px] lg:text-[15px] font-bold lg:font-medium text-[#1A1A1A]"
               compareClassName="text-[12px] lg:text-[13px] text-[#888880] line-through"
             />
-          )}
           <div className="flex gap-1.5 hidden lg:flex">
             {product.colors.slice(0, 3).map((color, i) => (
               <button
@@ -249,6 +259,8 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
             ))}
           </div>
         </div>
+        </>
+        )}
       </div>
       </motion.div>
     </motion.div>
