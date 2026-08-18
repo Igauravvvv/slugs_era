@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '@/store';
 import { useAuth } from '@/context/AuthContext';
 import { trackPageView } from '@/lib/analytics';
+import { trackCustomerEvent } from '@/lib/customerAnalytics';
 
 // Sections — kept eager (above-the-fold on home page)
 import Header from '@/sections/Header';
@@ -301,6 +302,7 @@ function App() {
   // Track page views on route change
   useEffect(() => {
     trackPageView(location.pathname, document.title);
+    void trackCustomerEvent('page_view', { properties: { path: location.pathname } });
   }, [location.pathname]);
 
   // Scroll to top on route change

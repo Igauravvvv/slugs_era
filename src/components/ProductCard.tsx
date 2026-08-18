@@ -5,6 +5,7 @@ import { useStore } from '@/store';
 import type { Product } from '@/types';
 import { generateSlug } from '@/types';
 import { ShoppingBag, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { trackCustomerEvent } from '@/lib/customerAnalytics';
 
 interface ProductCardProps {
   product: Product;
@@ -41,6 +42,10 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
       e.stopPropagation();
     }
     navigate(`/product/${product.slug || generateSlug(product.name)}`);
+    void trackCustomerEvent('product_clicked', {
+      productId: product.id,
+      properties: { product_name: product.name, category: product.category, source: 'product_card' },
+    });
   };
 
 
@@ -51,6 +56,10 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
       quantity: 1,
       size: product.sizes[0],
       color: product.colors[0],
+    });
+    void trackCustomerEvent('quick_add', {
+      productId: product.id,
+      properties: { product_name: product.name, size: product.sizes[0] || '', quantity: 1 },
     });
 
     // Show feedback

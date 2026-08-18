@@ -19,16 +19,21 @@ function mapDbToProduct(row: any): Product {
           .replace(/(^-|-$)/g, '')
       : '');
 
-  // Build sizeStock — prefer DB size_stock, fallback to distributing stock_quantity
+  // Build sizeStock — prefer DB size_stock. Legacy products only had one total,
+  // so distribute that total without losing the remainder until an admin enters
+  // the exact per-size quantities.
   let sizeStock: SizeStock[] = [];
   if (row.size_stock && Array.isArray(row.size_stock) && row.size_stock.length > 0) {
-    sizeStock = row.size_stock;
+    sizeStock = row.size_stock.map((entry: SizeStock) => ({ size: entry.size, stock: Number(entry.stock) || 0 }));
   } else if (row.sizes && row.sizes.length > 0) {
     const perSize = row.stock_quantity > 0 ? Math.floor(row.stock_quantity / row.sizes.length) : 0;
-    sizeStock = row.sizes.map((s: string) => ({ size: s, stock: perSize }));
+    let remainder = row.stock_quantity > 0 ? row.stock_quantity % row.sizes.length : 0;
+    sizeStock = row.sizes.map((s: string) => ({ size: s, stock: perSize + (remainder-- > 0 ? 1 : 0) }));
   }
 
-  const totalStock = sizeStock.reduce((sum, s) => sum + s.stock, 0);
+  const totalStock = sizeStock.length > 0
+    ? sizeStock.reduce((sum, s) => sum + s.stock, 0)
+    : Number(row.stock_quantity) || 0;
 
   // Determine status
   let status: Product['status'] = 'active';
@@ -156,7 +161,11 @@ export function useProducts() {
 
       return data.map(mapDbToProduct);
     },
-    staleTime: 30_000, // 30 seconds — Realtime handles instant updates
+    // Realtime is a convenience, not the source of truth. Refetch on each
+    // storefront mount/focus so published description edits never remain stale.
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: 'always',
   });
 }
 
@@ -167,14 +176,9 @@ export function useCreateProduct() {
   return useMutation({
     mutationFn: async (newProduct: Partial<Product> & { stock?: number }) => {
       const dbPayload = mapProductToDb(newProduct);
-      const res = await fetch('/api/admin/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dbPayload)
-      });
-      const json = await res.json();
-      if (!json.success) throw new Error(json.error || 'Failed to create product');
-      return json.data;
+      const { data, error } = await supabase.from('products').insert(dbPayload).select().single();
+      if (error) throw new Error(error.message);
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
@@ -189,14 +193,14 @@ export function useUpdateProduct() {
   return useMutation({
     mutationFn: async (updatedProduct: Product & { stock?: number }) => {
       const dbPayload = mapProductToDb(updatedProduct);
-      const res = await fetch(`/api/admin/products/${updatedProduct.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dbPayload)
-      });
-      const json = await res.json();
-      if (!json.success) throw new Error(json.error || 'Failed to update product');
-      return json.data;
+      const { data, error } = await supabase
+        .from('products')
+        .update(dbPayload)
+        .eq('id', updatedProduct.id)
+        .select()
+        .single();
+      if (error) throw new Error(error.message);
+      return data;
     },
     onSuccess: (data, variables) => {
       queryClient.setQueryData(['products'], (old: Product[] | undefined) => {
@@ -214,11 +218,8 @@ export function useDeleteProduct() {
 
   return useMutation({
     mutationFn: async (productId: string) => {
-      const res = await fetch(`/api/admin/products/${productId}`, {
-        method: 'DELETE',
-      });
-      const json = await res.json();
-      if (!json.success) throw new Error(json.error || 'Failed to delete product');
+      const { error } = await supabase.from('products').delete().eq('id', productId);
+      if (error) throw new Error(error.message);
       return productId;
     },
     onSuccess: () => {

@@ -1,19 +1,21 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Save, Tag, Box, FileText, Image as ImageIcon, CheckCircle2, Loader2, Plus, X } from 'lucide-react';
+import { ArrowLeft, Save, Tag, Box, FileText, Image as ImageIcon, Loader2, Plus, X } from 'lucide-react';
 import { fetchProductById, createProduct, updateProduct } from '@/lib/queries';
 import { useDashboardToast } from '@/store/dashboardToast';
 import ImageUploader from '@/components/dashboard/ImageUploader';
 import RichTextEditor from '@/components/dashboard/RichTextEditor';
 import type { Product, ProductFormData } from '@/types/dashboard';
+import { PRODUCT_CATEGORIES, PRODUCT_SIZES, type ProductCategory } from '@/lib/productTaxonomy';
 
 const productSchema = z.object({
   name: z.string().min(2, 'Name is required'),
   slug: z.string().min(2, 'Slug is required').regex(/^[a-z0-9-]+$/, 'Lowercase letters, numbers, and hyphens only'),
-  category: z.enum(['tops', 'bottoms', 'outerwear', 'accessories']).nullable(),
+  category: z.enum(['tshirts', 'shirts', 'hoodies']).nullable(),
+  subcategory: z.string().nullable(),
   season: z.string().nullable(),
   drop_name: z.string().nullable(),
   description: z.string().nullable(),
@@ -22,6 +24,7 @@ const productSchema = z.object({
   stock_quantity: z.number().int().min(0),
   tags: z.array(z.string()).nullable(),
   sizes: z.array(z.string()).nullable(),
+  size_stock: z.array(z.object({ size: z.string(), stock: z.number().int().min(0) })).default([]),
   colors: z.array(z.object({ name: z.string(), hex: z.string() })).default([]),
   images: z.array(z.object({ url: z.string(), alt: z.string(), isPrimary: z.boolean() })).default([]),
   is_published: z.boolean(),
@@ -30,6 +33,17 @@ const productSchema = z.object({
 });
 
 type FormValues = z.infer<typeof productSchema>;
+
+function createSizeStock(sizes: string[], stockQuantity: number, existing: Array<{ size: string; stock: number }> = []) {
+  if (existing.length > 0) return existing.filter((entry) => sizes.includes(entry.size));
+  if (sizes.length === 0) return [];
+
+  // Existing products used one total stock value. Keep that total intact while
+  // giving the admin an explicit, editable starting point for every size.
+  const base = Math.floor((stockQuantity || 0) / sizes.length);
+  let remainder = (stockQuantity || 0) % sizes.length;
+  return sizes.map((size) => ({ size, stock: base + (remainder-- > 0 ? 1 : 0) }));
+}
 
 const tabs = [
   { id: 'basic', label: 'Basic Info', icon: Tag },
@@ -61,7 +75,8 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
     defaultValues: {
       name: '',
       slug: '',
-      category: 'tops',
+      category: 'tshirts',
+      subcategory: null,
       season: 'SS25',
       drop_name: '',
       description: '',
@@ -70,6 +85,7 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
       stock_quantity: 0,
       tags: [],
       sizes: [],
+      size_stock: [],
       colors: [],
       images: [],
       is_published: false,
@@ -90,6 +106,8 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
               ...data,
               tags: data.tags || [],
               sizes: data.sizes || [],
+              subcategory: data.subcategory || null,
+              size_stock: createSizeStock(data.sizes || [], data.stock_quantity || 0, data.size_stock || []),
               colors: data.colors || [],
               images: data.images || [],
             });
@@ -103,6 +121,20 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
         });
     }
   }, [productId, reset]);
+
+  // A child category is meaningful only under its selected parent category.
+  useEffect(() => {
+    const subscription = watch((value, { name }) => {
+      if (name === 'category') {
+        const category = value.category as ProductCategory | null;
+        const allowed = category ? PRODUCT_CATEGORIES.find(([id]) => id === category)?.[1].subcategories || [] : [];
+        if (value.subcategory && !allowed.includes(value.subcategory as never)) {
+          setValue('subcategory', null, { shouldDirty: true });
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, setValue]);
 
   // Auto-generate slug from name if empty
   useEffect(() => {
@@ -181,9 +213,19 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
     const current = values.sizes || [];
     if (current.includes(size)) {
       setValue('sizes', current.filter(s => s !== size), { shouldDirty: true });
+      setValue('size_stock', (values.size_stock || []).filter((entry) => entry.size !== size), { shouldDirty: true });
     } else {
       setValue('sizes', [...current, size], { shouldDirty: true });
+      setValue('size_stock', [...(values.size_stock || []), { size, stock: 0 }], { shouldDirty: true });
     }
+  };
+
+  const updateSizeStock = (size: string, stock: number) => {
+    const sizeStock = (values.size_stock || []).map((entry) =>
+      entry.size === size ? { ...entry, stock: Math.max(0, stock || 0) } : entry,
+    );
+    setValue('size_stock', sizeStock, { shouldDirty: true });
+    setValue('stock_quantity', sizeStock.reduce((total, entry) => total + entry.stock, 0), { shouldDirty: true });
   };
 
   const addColor = () => {
@@ -303,10 +345,22 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
                   <label className="cms-label">Category</label>
                   <select {...register('category')} className="cms-select">
                     <option value="">Select Category</option>
-                    <option value="tops">Tops</option>
-                    <option value="bottoms">Bottoms</option>
-                    <option value="outerwear">Outerwear</option>
-                    <option value="accessories">Accessories</option>
+                    {PRODUCT_CATEGORIES.map(([id, category]) => (
+                      <option key={id} value={id}>{category.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="cms-label">Subcategory</label>
+                  <select
+                    {...register('subcategory')}
+                    className="cms-select"
+                    disabled={!values.category}
+                  >
+                    <option value="">Select Subcategory</option>
+                    {values.category && PRODUCT_CATEGORIES.find(([id]) => id === values.category)?.[1].subcategories.map((subcategory) => (
+                      <option key={subcategory} value={subcategory}>{subcategory}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -387,8 +441,9 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
                 </div>
               </div>
               <div className="pt-2">
-                <label className="cms-label">Stock Quantity</label>
-                <input type="number" {...register('stock_quantity', { valueAsNumber: true })} className="cms-input w-full sm:w-1/2" />
+                <label className="cms-label">Total Stock</label>
+                <input type="number" {...register('stock_quantity', { valueAsNumber: true })} readOnly className="cms-input w-full sm:w-1/2 opacity-70 cursor-not-allowed" />
+                <p className="text-[11px] text-[#888] mt-1">Calculated from the quantities entered for each size.</p>
                 {errors.stock_quantity && <span className="cms-error-msg">{errors.stock_quantity.message}</span>}
               </div>
             </div>
@@ -397,7 +452,7 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
               <div>
                 <h3 className="text-sm font-semibold text-[#F5F5F5] mb-3">Sizes</h3>
                 <div className="flex flex-wrap gap-2">
-                  {['XS', 'S', 'M', 'L', 'XL', 'XXL', 'ONE SIZE'].map(size => (
+                  {PRODUCT_SIZES.map(size => (
                     <button
                       key={size}
                       type="button"
@@ -413,6 +468,30 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
                   ))}
                 </div>
               </div>
+
+              {(values.sizes || []).length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-[#F5F5F5] mb-3">Quantity by Size</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {(values.sizes || []).map((size) => {
+                      const stock = values.size_stock?.find((entry) => entry.size === size)?.stock ?? 0;
+                      return (
+                        <label key={size} className="flex items-center gap-2 rounded-lg border border-[#2A2A2A] bg-[#111] px-3 py-2">
+                          <span className="text-xs font-semibold text-[#F5F5F5] w-10">{size}</span>
+                          <input
+                            type="number"
+                            min="0"
+                            value={stock}
+                            onChange={(event) => updateSizeStock(size, Number(event.target.value))}
+                            className="cms-input h-8 py-1 text-sm text-right"
+                            aria-label={`${size} quantity`}
+                          />
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               <div>
                 <h3 className="text-sm font-semibold text-[#F5F5F5] mb-3">Colors</h3>

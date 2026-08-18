@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
+import { trackSignedInCustomer } from '../lib/customerAnalytics';
 import type { Session, User } from '@supabase/supabase-js';
 
 type AuthContextType = {
@@ -48,6 +49,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user || null);
+      if (session?.user) trackSignedInCustomer(session.user.id);
       setLoading(false);
     });
 
@@ -57,6 +59,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setUser(session?.user || null);
+      if (session?.user) trackSignedInCustomer(session.user.id);
       setLoading(false);
       setSigningIn(false);
       // Clear any previous auth error on successful sign-in

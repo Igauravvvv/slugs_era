@@ -8,6 +8,7 @@ import { generateSlug } from '@/types';
 import type { SizeStock } from '@/types';
 import SEOHead from '@/components/SEOHead';
 import { trackViewItem, trackAddToCart } from '@/lib/analytics';
+import { trackCustomerEvent } from '@/lib/customerAnalytics';
 import { supabase } from '@/lib/supabase';
 
 export default function ProductDetail() {
@@ -40,6 +41,10 @@ export default function ProductDetail() {
     if (selectedProduct) {
       // Track view
       trackViewItem({ id: selectedProduct.id, name: selectedProduct.name, category: selectedProduct.category, price: selectedProduct.price });
+      void trackCustomerEvent('product_viewed', {
+        productId: selectedProduct.id,
+        properties: { product_name: selectedProduct.name, category: selectedProduct.category },
+      });
       // Select first available size
       const firstAvailable = selectedProduct.sizeStock?.find(s => s.stock > 0 || s.preOrder);
       setSelectedSize(firstAvailable?.size || selectedProduct.sizes[0]);
@@ -97,6 +102,10 @@ export default function ProductDetail() {
     } else {
       setQuantity(1);
     }
+    void trackCustomerEvent('size_selected', {
+      productId: selectedProduct.id,
+      properties: { product_name: selectedProduct.name, size },
+    });
   };
 
   const handleAddToCart = () => {
@@ -115,6 +124,10 @@ export default function ProductDetail() {
       price: selectedProduct.price,
       quantity,
       size: selectedSize,
+    });
+    void trackCustomerEvent('add_to_cart', {
+      productId: selectedProduct.id,
+      properties: { product_name: selectedProduct.name, size: selectedSize, quantity },
     });
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);

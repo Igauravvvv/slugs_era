@@ -23,6 +23,16 @@ export interface AdminProductVariant { id: string; product_id: string; variant_n
 export interface AdminOrder { id: string; order_number: string; customer_name: string; customer_email: string | null; customer_phone: string | null; shipping_address: { street?: string; city?: string; state?: string; pincode?: string; country?: string } | null; items: Array<{ name: string; qty: number; price: number; size?: string }>; subtotal: number; shipping_fee: number; total: number; payment_method: string | null; payment_status: string; status: string; notes: string | null; created_at: string; updated_at: string; }
 export interface AdminCustomer { id: string; name: string; email: string | null; phone: string | null; city: string | null; state: string | null; total_orders: number; total_spent: number; last_order_at: string | null; created_at: string; }
 export interface AdminAnalyticsEvent { id: string; date: string; sessions: number; unique_visitors: number; page_views: number; source: string | null; created_at: string; }
+export interface CustomerEvent {
+  id: string;
+  event_name: 'page_view' | 'product_clicked' | 'product_viewed' | 'size_selected' | 'add_to_cart' | 'quick_add' | 'signed_in';
+  product_id: string | null;
+  user_id: string | null;
+  session_id: string;
+  properties: Record<string, string | number | boolean | null>;
+  created_at: string;
+}
+export interface StorefrontProfile { id: string; email: string; name: string | null; created_at: string; }
 export interface AdminSiteSettings { id: string; store_name: string; currency: string; currency_symbol: string; timezone: string; founder_name: string | null; founder_email: string | null; logo_url: string | null; updated_at: string; }
 
 const keys = {
@@ -205,19 +215,73 @@ export function useAdminCustomers() {
   return useQuery({ queryKey: keys.customers, queryFn: async () => FALLBACK_CUSTOMERS });
 }
 
-// ─── ANALYTICS (generated until table created) ──────────────
+// ─── ANALYTICS (real storefront events) ─────────────────────
 export function useAdminAnalytics(days = 30) {
   return useQuery({
     queryKey: [...keys.analytics, days],
     queryFn: async (): Promise<AdminAnalyticsEvent[]> => {
-      const sources = ['Direct', 'Instagram', 'Google', 'Twitter', 'Facebook'];
-      const result: AdminAnalyticsEvent[] = [];
+      const from = new Date();
+      from.setDate(from.getDate() - days);
+      const { data, error } = await supabase
+        .from('customer_events')
+        .select('id, event_name, user_id, session_id, created_at')
+        .gte('created_at', from.toISOString())
+        .order('created_at', { ascending: true });
+      if (error) throw error;
+
+      const byDate = new Map<string, { sessions: Set<string>; visitors: Set<string>; pageViews: number }>();
       for (let i = days; i >= 0; i--) {
         const d = new Date(); d.setDate(d.getDate() - i);
-        const seed = d.getDate() * 7 + d.getMonth() * 31;
-        result.push({ id: String(i), date: d.toISOString().split('T')[0], sessions: 50 + (seed * 13) % 200, unique_visitors: 30 + (seed * 11) % 150, page_views: 100 + (seed * 17) % 600, source: sources[seed % sources.length], created_at: d.toISOString() });
+        byDate.set(d.toISOString().slice(0, 10), { sessions: new Set(), visitors: new Set(), pageViews: 0 });
       }
-      return result;
+      (data || []).forEach((event: any) => {
+        const date = event.created_at.slice(0, 10);
+        const row = byDate.get(date);
+        if (!row) return;
+        row.sessions.add(event.session_id);
+        row.visitors.add(event.user_id || event.session_id);
+        if (event.event_name === 'page_view' || event.event_name === 'product_viewed') row.pageViews += 1;
+      });
+      return Array.from(byDate.entries()).map(([date, value]) => ({
+        id: date,
+        date,
+        sessions: value.sessions.size,
+        unique_visitors: value.visitors.size,
+        page_views: value.pageViews,
+        source: 'Storefront activity',
+        created_at: date,
+      }));
+    },
+  });
+}
+
+export function useCustomerActivity(days = 30) {
+  return useQuery({
+    queryKey: ['customer-activity', days],
+    queryFn: async (): Promise<CustomerEvent[]> => {
+      const from = new Date();
+      from.setDate(from.getDate() - days);
+      const { data, error } = await supabase
+        .from('customer_events')
+        .select('id, event_name, product_id, user_id, session_id, properties, created_at')
+        .gte('created_at', from.toISOString())
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return (data || []) as CustomerEvent[];
+    },
+  });
+}
+
+export function useStorefrontProfiles() {
+  return useQuery({
+    queryKey: ['storefront-profiles'],
+    queryFn: async (): Promise<StorefrontProfile[]> => {
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, email, name, created_at')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return (data || []) as StorefrontProfile[];
     },
   });
 }
