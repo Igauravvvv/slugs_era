@@ -189,7 +189,7 @@ function HomeView() {
     <div className="flex flex-col">
       <SEOHead
         title=""
-        description="MOVEMENT. not merch. Slugsera is an Indian slow-fashion streetwear brand for oversized T-shirts, printed shirts and hoodies. Shop online in Delhi, Noida, Gurugram and across India."
+        description="MOVEMENT. not merch. Slugsera is an Indian slow-fashion streetwear label built for people who move at their own pace — heavyweight oversized T-shirts, printed shirts and hoodies, made for Delhi NCR and shipped across India."
         keywords={['streetwear Delhi', 'streetwear Noida', 'streetwear Gurugram', 'oversized t-shirts Delhi NCR', 'Indian slow fashion brand']}
         url="/"
       />

@@ -32,7 +32,7 @@ interface SEOHeadProps {
 const SITE_NAME = "Slug's Era";
 const BASE_URL = 'https://www.slugsera.com';
 const DEFAULT_IMAGE = CDN.MODEL_HERO;
-const DEFAULT_DESCRIPTION = "Shop Slug's Era for premium oversized t-shirts, printed shirts and hoodies. Designed for slow living and delivered across India, including Delhi NCR.";
+const DEFAULT_DESCRIPTION = "MOVEMENT. not merch. Slugsera is an Indian slow-fashion streetwear label creating heavyweight oversized T-shirts, printed shirts and hoodies for people who move at their own pace.";
 const DEFAULT_KEYWORDS = [
   'Slugsera',
   "Slug's Era",
