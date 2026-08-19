@@ -310,6 +310,15 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
             ))}
           </div>
         </div>
+        <button
+          type="button"
+          aria-label={`Quick add ${product.name}`}
+          className="lg:hidden mt-2.5 min-h-10 w-full border border-[#C0132A] bg-white px-3 text-[10px] font-semibold tracking-[0.14em] uppercase text-[#C0132A] transition-colors active:bg-[#C0132A] active:text-white flex items-center justify-center gap-2"
+          onClick={handleQuickAdd}
+        >
+          <ShoppingBag size={14} aria-hidden="true" />
+          Quick Add
+        </button>
         </>
         )}
       </div>
