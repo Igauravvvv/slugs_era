@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-labelledby="title">
+  <title>Slugsera</title>
+  <rect width="192" height="192" rx="42" fill="#C0132A"/>
+  <!-- Compact white snail mark, designed to remain recognisable at 16px. -->
+  <path fill="#fff" d="M44 132c0-28 20-49 48-49 9 0 17 2 24 6l17-31c3-5 9-7 14-4s7 9 4 14L133 101c10 9 16 21 16 35H44Zm29-7h53c0-19-12-31-27-31s-26 12-26 31Zm26-22a13 13 0 1 1 0 26 13 13 0 0 1 0-26Z"/>
+  <circle cx="145" cy="54" r="9" fill="#fff"/>
+  <circle cx="119" cy="42" r="9" fill="#fff"/>
+  <path d="M139 61 123 83M116 49 109 75" stroke="#fff" stroke-width="9" stroke-linecap="round"/>
+</svg>
