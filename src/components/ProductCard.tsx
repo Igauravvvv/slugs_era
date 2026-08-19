@@ -19,6 +19,8 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
   const { addToCart } = useStore();
   const navigate = useNavigate();
   const [imageIndex, setImageIndex] = useState(0);
+  const touchStartX = useRef<number | null>(null);
+  const didSwipeImage = useRef(false);
   const isComingSoon = product.status === 'coming_soon';
 
   // Use the product's actual images array; fall back to just the primary image
@@ -26,16 +28,24 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
     ? product.images
     : [product.image];
 
+  const showPreviousImage = () => {
+    setImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  const showNextImage = () => {
+    setImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+
   const handlePrevImage = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+    showPreviousImage();
   };
 
   const handleNextImage = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+    showNextImage();
   };
 
   const goToProduct = (e?: React.MouseEvent) => {
@@ -48,6 +58,38 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
       productId: product.id,
       properties: { product_name: product.name, category: product.category, source: 'product_card' },
     });
+  };
+
+  const handleImageClick = (e: React.MouseEvent) => {
+    // A swipe is followed by a click event on many mobile browsers. Consume that
+    // event so browsing the gallery never accidentally opens the product page.
+    if (didSwipeImage.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      didSwipeImage.current = false;
+      return;
+    }
+    goToProduct(e);
+  };
+
+  const handleImageTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (isComingSoon || images.length < 2) return;
+    touchStartX.current = e.touches[0]?.clientX ?? null;
+  };
+
+  const handleImageTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    const startX = touchStartX.current;
+    const endX = e.changedTouches[0]?.clientX;
+    touchStartX.current = null;
+
+    if (isComingSoon || images.length < 2 || startX === null || endX === undefined) return;
+
+    const distance = endX - startX;
+    if (Math.abs(distance) < 44) return;
+
+    didSwipeImage.current = true;
+    if (distance > 0) showPreviousImage();
+    else showNextImage();
   };
 
 
@@ -137,7 +179,13 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
-        <div className="image-wrapper group/slider relative overflow-hidden rounded-md cursor-pointer" style={{ willChange: 'transform' }} onClick={goToProduct}>
+        <div
+          className="image-wrapper group/slider relative overflow-hidden rounded-md cursor-pointer"
+          style={{ willChange: 'transform' }}
+          onClick={handleImageClick}
+          onTouchStart={handleImageTouchStart}
+          onTouchEnd={handleImageTouchEnd}
+        >
         {(product.badge || isComingSoon) && (
           <span className={`badge ${product.badge === 'New' ? 'badge-dark' : ''} z-[25]`}>
             {isComingSoon ? 'Soon' : product.badge}
@@ -183,7 +231,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
               type="button"
               aria-label="Previous product image"
               onClick={handlePrevImage}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-white/90 rounded-full opacity-0 group-hover/slider:opacity-100 transition-opacity z-30 hover:bg-white text-black drop-shadow-md"
+              className="absolute left-3 top-1/2 -translate-y-1/2 hidden lg:flex w-8 h-8 items-center justify-center bg-white/90 rounded-full opacity-0 group-hover/slider:opacity-100 transition-opacity z-30 hover:bg-white text-black drop-shadow-md"
             >
               <ChevronLeft size={18} />
             </button>
@@ -191,12 +239,12 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
               type="button"
               aria-label="Next product image"
               onClick={handleNextImage}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center bg-white/90 rounded-full opacity-0 group-hover/slider:opacity-100 transition-opacity z-30 hover:bg-white text-black drop-shadow-md"
+              className="absolute right-3 top-1/2 -translate-y-1/2 hidden lg:flex w-8 h-8 items-center justify-center bg-white/90 rounded-full opacity-0 group-hover/slider:opacity-100 transition-opacity z-30 hover:bg-white text-black drop-shadow-md"
             >
               <ChevronRight size={18} />
             </button>
             {/* Dot indicators */}
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-30">
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 hidden lg:flex gap-1.5 z-30">
               {images.map((_, i) => (
                 <span 
                   key={i}
@@ -204,10 +252,13 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
                 />
               ))}
             </div>
+            <span className="lg:hidden absolute right-2 bottom-2 z-20 rounded-full bg-black/60 px-2 py-1 text-[9px] font-medium tracking-[0.08em] text-white pointer-events-none">
+              {imageIndex + 1}/{images.length} · SWIPE
+            </span>
           </>
         )}
 
-        {!isComingSoon && <div className="quick-add z-[25] flex gap-2">
+        {!isComingSoon && <div className="quick-add z-[25] hidden lg:flex gap-2">
           <button
             className="quick-add-btn flex items-center gap-2"
             onClick={handleQuickAdd}

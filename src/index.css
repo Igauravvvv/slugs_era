@@ -139,18 +139,10 @@
     transition: left 0.6s ease;
   }
 
-  .product-card:hover .image-wrapper::after {
-    @apply left-[140%];
-  }
-
   .product-card .image-wrapper img {
     @apply w-full h-full object-cover p-[6%_5%] transition-transform;
     transition-duration: 0.65s;
     transition-timing-function: var(--ease);
-  }
-
-  .product-card:hover .image-wrapper img {
-    @apply scale-105;
   }
 
   .badge {
@@ -165,21 +157,33 @@
     @apply absolute inset-0 bg-black/0 flex items-end justify-center p-5 transition-all duration-300;
   }
 
-  .product-card:hover .quick-add {
-    @apply bg-black/[0.04];
-  }
-
   .quick-add-btn {
     @apply bg-[#1A1A1A] text-white border-none text-[10px] font-medium tracking-[0.16em] uppercase px-6 py-3.5 cursor-pointer whitespace-nowrap translate-y-3.5 opacity-0 transition-all duration-300;
     transition-timing-function: var(--ease);
   }
 
-  .product-card:hover .quick-add-btn {
-    @apply opacity-100 translate-y-0;
-  }
-
   .quick-add-btn:hover {
     @apply bg-[#C0132A];
+  }
+
+  /* Touch devices can retain :hover after a tap. Keep desktop overlays strictly
+     hover-only so a mobile tap always opens the product cleanly. */
+  @media (hover: hover) {
+    .product-card:hover .image-wrapper::after {
+      @apply left-[140%];
+    }
+
+    .product-card:hover .image-wrapper img {
+      @apply scale-105;
+    }
+
+    .product-card:hover .quick-add {
+      @apply bg-black/[0.04];
+    }
+
+    .product-card:hover .quick-add-btn {
+      @apply opacity-100 translate-y-0;
+    }
   }
 
   .reveal {
