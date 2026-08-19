@@ -109,7 +109,13 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
     if (error) {
       console.error('Could not build Merchant Center feed:', error.message);
     } else {
-      products = (data || []) as DbProduct[];
+      // Coming-soon cards belong in the storefront collection, not Google
+      // Shopping. Merchant Center requires an availability_date for preorders;
+      // submitting a teaser without a confirmed date causes a disapproval.
+      // Keep the feed limited to items shoppers can buy now (or sold-out items
+      // that can correctly be shown as out_of_stock).
+      products = ((data || []) as DbProduct[])
+        .filter((product) => product.status !== 'coming_soon' && product.status !== 'pre_book');
     }
   }
 
