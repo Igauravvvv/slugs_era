@@ -100,7 +100,10 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
     const supabase = createClient(supabaseUrl, supabaseKey);
     const { data, error } = await supabase
       .from('products')
-      .select('id,slug,name,description,category,price,images,image,stock_quantity,size_stock,status,is_published,colors,sizes,material')
+      // Keep this schema-tolerant: dashboard migrations may add or rename
+      // optional product fields, but a feed should never become empty because
+      // one enrichment field is unavailable in an older project.
+      .select('*')
       .eq('is_published', true);
 
     if (error) {
