@@ -17,6 +17,11 @@ interface SEOHeadProps {
     availability?: 'InStock' | 'OutOfStock' | 'PreOrder';
     category?: string;
     image?: string;
+    images?: string[];
+    colors?: string[];
+    sizes?: string[];
+    material?: string;
+    fit?: string;
     description?: string;
     sku?: string;
     rating?: number;
@@ -54,6 +59,7 @@ export default function SEOHead({
     ? (url.startsWith('http') ? url : `${BASE_URL}${url}`)
     : BASE_URL;
   const imageUrl = image.startsWith('http') ? image : `${BASE_URL}${image}`;
+  const absoluteUrl = (value: string) => value.startsWith('http') ? value : `${BASE_URL}${value}`;
   const keywordContent = [...new Set([...DEFAULT_KEYWORDS, ...keywords])]
     .map((keyword) => keyword.trim())
     .filter(Boolean)
@@ -91,9 +97,27 @@ export default function SEOHead({
             '@type': 'Product',
             name: product.name,
             description: product.description || description,
-            image: product.image ? (product.image.startsWith('http') ? product.image : `${BASE_URL}${product.image}`) : imageUrl,
+            image: product.images?.length
+              ? product.images.map(absoluteUrl)
+              : product.image ? absoluteUrl(product.image) : imageUrl,
             sku: product.sku || '',
             category: product.category,
+            ...(product.colors?.length ? { color: product.colors.join(', ') } : {}),
+            ...(product.sizes?.length ? { size: product.sizes.join(', ') } : {}),
+            ...(product.material || product.fit ? {
+              additionalProperty: [
+                ...(product.material ? [{
+                  '@type': 'PropertyValue',
+                  name: 'Material',
+                  value: product.material,
+                }] : []),
+                ...(product.fit ? [{
+                  '@type': 'PropertyValue',
+                  name: 'Fit',
+                  value: product.fit,
+                }] : []),
+              ],
+            } : {}),
             brand: {
               '@type': 'Brand',
               name: SITE_NAME,
@@ -108,6 +132,33 @@ export default function SEOHead({
               seller: {
                 '@type': 'Organization',
                 name: SITE_NAME,
+              },
+              shippingDetails: {
+                '@type': 'OfferShippingDetails',
+                shippingRate: {
+                  '@type': 'MonetaryAmount',
+                  value: '0',
+                  currency: 'INR',
+                },
+                shippingDestination: {
+                  '@type': 'DefinedRegion',
+                  addressCountry: 'IN',
+                },
+                deliveryTime: {
+                  '@type': 'ShippingDeliveryTime',
+                  handlingTime: {
+                    '@type': 'QuantitativeValue',
+                    minValue: 1,
+                    maxValue: 2,
+                    unitCode: 'DAY',
+                  },
+                  transitTime: {
+                    '@type': 'QuantitativeValue',
+                    minValue: 2,
+                    maxValue: 7,
+                    unitCode: 'DAY',
+                  },
+                },
               },
             },
             ...(product.rating && product.reviewCount ? {

@@ -198,6 +198,11 @@ export default function ProductDetail() {
           availability: productAvailability,
           category: selectedProduct.category,
           image: selectedProduct.images[0] || selectedProduct.image,
+          images: selectedProduct.images,
+          colors: selectedProduct.colors,
+          sizes: selectedProduct.sizes,
+          material: selectedProduct.material,
+          fit: selectedProduct.fit,
           description: productDescription,
           sku: selectedProduct.id,
         }}
@@ -215,7 +220,7 @@ export default function ProductDetail() {
             transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}>
             <div className="relative bg-[#F9F7F5] aspect-square mb-4 overflow-hidden">
               <motion.img key={currentImageIndex} src={selectedProduct.images[currentImageIndex]}
-                alt={selectedProduct.name} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                alt={`${selectedProduct.name} — product view ${currentImageIndex + 1} of ${selectedProduct.images.length}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                 transition={{ duration: 0.4 }} className="w-full h-full object-cover" />
 
               {selectedProduct.images.length > 1 && (
@@ -263,7 +268,7 @@ export default function ProductDetail() {
                 {selectedProduct.images.map((img, index) => (
                   <button key={index} onClick={() => setCurrentImageIndex(index)}
                     className={`w-20 h-20 bg-[#F9F7F5] overflow-hidden border-2 transition-colors ${index === currentImageIndex ? 'border-[#1A1A1A]' : 'border-transparent'}`}>
-                    <img src={img} alt={`${selectedProduct.name} - ${index + 1}`} className="w-full h-full object-cover" />
+                    <img src={img} alt={`${selectedProduct.name} — product thumbnail ${index + 1} of ${selectedProduct.images.length}`} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
