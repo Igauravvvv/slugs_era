@@ -67,7 +67,7 @@ export default function AboutPage() {
             <em className="italic text-[#C0132A]">We're a movement.</em>
           </h1>
           <p className="text-[#888880] text-[15px] lg:text-[17px] font-light leading-[1.7] mt-6 max-w-xl mx-auto">
-            Slugsera is an Indian premium slow-fashion and streetwear brand founded by Gaurav Bhatt and Bandhan Kumar. Born from frustration, built with intention — because good clothes shouldn't cost a month's rent.
+            Slugsera is an Indian premium slow-fashion and streetwear brand founded by college entrepreneurs Gaurav Bhatt and Bandhan Kumar. Born from frustration, built with intention — because good clothes shouldn't cost a month's rent.
           </p>
         </motion.div>
       </section>
