@@ -85,7 +85,7 @@ export default function Settings() {
                   <InputField label="Store Name" defaultValue="Slug's Era" />
                   <InputField label="Store Email" defaultValue="hello@slugsera.com" type="email" />
                   <InputField label="Phone Number" defaultValue="+91 98765 43210" />
-                  <InputField label="Website" defaultValue="https://slugsera.com" />
+                  <InputField label="Website" defaultValue="https://www.slugsera.com" />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-gray-400 uppercase tracking-wider">Store Description</label>
@@ -183,7 +183,7 @@ export default function Settings() {
                 </div>
                 <InputField label="Google Analytics 4 Measurement ID" defaultValue="G-XXXXXXXXXX" />
                 <InputField label="Facebook Pixel ID" defaultValue="" placeholder="Optional" />
-                <InputField label="OG Image URL" defaultValue="https://slugsera.com/og-image.jpg" />
+                <InputField label="OG Image URL" defaultValue="https://www.slugsera.com/og-image.jpg" />
               </div>
             )}
 

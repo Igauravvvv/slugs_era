@@ -22,6 +22,7 @@ export default function BlogPost() {
       <SEOHead 
         title={post.title} 
         description={post.excerpt} 
+        keywords={[post.title, post.category, 'Indian streetwear', 'slow fashion India', 'Slugsera']}
         url={`/blog/${post.slug}`} 
         image={post.image}
         type="article"
@@ -34,21 +35,21 @@ export default function BlogPost() {
           "@type": "BlogPosting",
           "mainEntityOfPage": {
             "@type": "WebPage",
-            "@id": `https://slugsera.com/blog/${post.slug}`
+            "@id": `https://www.slugsera.com/blog/${post.slug}`
           },
           "headline": post.title,
-          "image": post.image.startsWith('http') ? post.image : `https://slugsera.com${post.image}`,  
+          "image": post.image.startsWith('http') ? post.image : `https://www.slugsera.com${post.image}`,
           "author": {
             "@type": "Organization",
             "name": post.author,
-            "url": "https://slugsera.com"
+            "url": "https://www.slugsera.com"
           },  
           "publisher": {
             "@type": "Organization",
             "name": "Slug's Era",
             "logo": {
               "@type": "ImageObject",
-              "url": "https://slugsera.com/images/logo.png"
+              "url": "https://www.slugsera.com/images/logo.webp"
             }
           },
           "datePublished": post.date,

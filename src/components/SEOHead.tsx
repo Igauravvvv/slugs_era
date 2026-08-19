@@ -6,6 +6,7 @@ interface SEOHeadProps {
   description?: string;
   url?: string;
   image?: string;
+  keywords?: string[];
   type?: 'website' | 'product' | 'article';
   noindex?: boolean;
   // Product-specific
@@ -24,15 +25,23 @@ interface SEOHeadProps {
 }
 
 const SITE_NAME = "Slug's Era";
-const BASE_URL = 'https://slugsera.com';
+const BASE_URL = 'https://www.slugsera.com';
 const DEFAULT_IMAGE = CDN.MODEL_HERO;
-const DEFAULT_DESCRIPTION = "Shop Slugsera (Slug's Era) for oversized t-shirts, custom shirts & hoodies crafted for slow living. Premium 240 GSM cotton. Free shipping across India. MOVEMENT. not merch.";
+const DEFAULT_DESCRIPTION = "Shop Slug's Era for premium oversized t-shirts, printed shirts and hoodies. Designed for slow living and delivered across India, including Delhi NCR.";
+const DEFAULT_KEYWORDS = [
+  'Slugsera',
+  "Slug's Era",
+  'Indian streetwear',
+  'oversized t-shirts India',
+  'slow fashion clothing',
+];
 
 export default function SEOHead({
   title,
   description = DEFAULT_DESCRIPTION,
   url,
   image = DEFAULT_IMAGE,
+  keywords = DEFAULT_KEYWORDS,
   type = 'website',
   noindex = false,
   product,
@@ -41,22 +50,30 @@ export default function SEOHead({
   const fullTitle = title 
     ? (isBrandIncluded ? title : `${title} | ${SITE_NAME} (Slugsera)`) 
     : `${SITE_NAME} (Slugsera) — Premium Slow Fashion Streetwear | MOVEMENT. not merch`;
-  const fullUrl = url ? `${BASE_URL}${url}` : BASE_URL;
+  const fullUrl = url
+    ? (url.startsWith('http') ? url : `${BASE_URL}${url}`)
+    : BASE_URL;
+  const imageUrl = image.startsWith('http') ? image : `${BASE_URL}${image}`;
+  const keywordContent = [...new Set([...DEFAULT_KEYWORDS, ...keywords])]
+    .map((keyword) => keyword.trim())
+    .filter(Boolean)
+    .join(', ');
 
   return (
     <Helmet>
       {/* Primary */}
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
+      <meta name="keywords" content={keywordContent} />
       <link rel="canonical" href={fullUrl} />
       {noindex && <meta name="robots" content="noindex, nofollow" />}
 
       {/* Open Graph */}
-      <meta property="og:type" content={type === 'product' ? 'product' : 'website'} />
+      <meta property="og:type" content={type} />
       <meta property="og:url" content={fullUrl} />
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description} />
-      <meta property="og:image" content={image.startsWith('http') ? image : `${BASE_URL}${image}`} />
+      <meta property="og:image" content={imageUrl} />
       <meta property="og:site_name" content={SITE_NAME} />
       <meta property="og:locale" content="en_IN" />
 
@@ -64,7 +81,7 @@ export default function SEOHead({
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={image.startsWith('http') ? image : `${BASE_URL}${image}`} />
+      <meta name="twitter:image" content={imageUrl} />
 
       {/* Product JSON-LD */}
       {product && (
@@ -74,8 +91,9 @@ export default function SEOHead({
             '@type': 'Product',
             name: product.name,
             description: product.description || description,
-            image: product.image ? (product.image.startsWith('http') ? product.image : `${BASE_URL}${product.image}`) : image,
+            image: product.image ? (product.image.startsWith('http') ? product.image : `${BASE_URL}${product.image}`) : imageUrl,
             sku: product.sku || '',
+            category: product.category,
             brand: {
               '@type': 'Brand',
               name: SITE_NAME,
@@ -84,8 +102,9 @@ export default function SEOHead({
               '@type': 'Offer',
               url: fullUrl,
               priceCurrency: product.currency || 'INR',
-              price: product.price,
+              price: String(product.price),
               availability: `https://schema.org/${product.availability || 'InStock'}`,
+              itemCondition: 'https://schema.org/NewCondition',
               seller: {
                 '@type': 'Organization',
                 name: SITE_NAME,

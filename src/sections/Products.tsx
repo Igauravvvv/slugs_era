@@ -22,7 +22,7 @@ export default function Products() {
 
   const viewAll = () => {
     setCollectionFilter('tshirts', null);
-    navigate('/collections');
+    navigate('/collections/tshirts');
   };
 
   const getCardVariants = (index: number) => {

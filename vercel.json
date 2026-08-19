@@ -15,6 +15,7 @@
     }
   ],
   "rewrites": [
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/api/cron", "destination": "/api/cron" },
     { "source": "/api/payment/create-order", "destination": "/api/payment/create-order" },
     { "source": "/api/payment/verify", "destination": "/api/payment/verify" },

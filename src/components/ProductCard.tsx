@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionTemplate, useMotionValue, useSpring } from 'framer-motion';
 import { useStore } from '@/store';
 import type { Product } from '@/types';
@@ -27,6 +27,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
   const images = product.images && product.images.length > 0
     ? product.images
     : [product.image];
+  const productUrl = `/product/${product.slug || generateSlug(product.name)}`;
 
   const showPreviousImage = () => {
     setImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
@@ -53,7 +54,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
       e.preventDefault();
       e.stopPropagation();
     }
-    navigate(`/product/${product.slug || generateSlug(product.name)}`);
+    navigate(productUrl);
     void trackCustomerEvent('product_clicked', {
       productId: product.id,
       properties: { product_name: product.name, category: product.category, source: 'product_card' },
@@ -153,7 +154,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
   };
 
   return (
-    <motion.div
+    <motion.article
       ref={ref}
       variants={customVariants || defaultVariants}
       initial={customVariants ? "hidden" : "hidden"}
@@ -279,7 +280,19 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
 
       <div className={`pt-3 lg:pt-4 px-1 lg:px-0.5 text-center lg:text-left cursor-pointer ${isComingSoon ? 'px-1.5 pb-1' : ''}`} onClick={goToProduct}>
         <h3 className="font-display text-[15px] lg:text-[21px] font-bold lg:font-normal mb-0.5 lg:mb-1 line-clamp-1 text-[#1A1A1A]">
-          {product.name}
+          <Link
+            to={productUrl}
+            onClick={(e) => {
+              e.stopPropagation();
+              void trackCustomerEvent('product_clicked', {
+                productId: product.id,
+                properties: { product_name: product.name, category: product.category, source: 'product_card_title' },
+              });
+            }}
+            className="hover:text-[#C0132A] transition-colors"
+          >
+            {product.name}
+          </Link>
         </h3>
         {isComingSoon ? (
           <div className="flex items-center justify-between pt-2 border-t border-[#E8E4E0] text-[10px] font-medium tracking-[0.14em] uppercase text-[#888880]">
@@ -323,6 +336,6 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
         )}
       </div>
       </motion.div>
-    </motion.div>
+    </motion.article>
   );
 }

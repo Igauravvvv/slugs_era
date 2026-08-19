@@ -244,13 +244,15 @@ export default function Hero() {
           <span>{section?.subtitle || 'MOVEMENT. NOT MERCH — NEW SEASON'}</span>
         </motion.div>
 
-        {/* Title Logo */}
-        <motion.img 
-          layout
-          src="/images/texttttlogo.webp" 
-          alt="Slugsera Logo" 
-          className="w-[160px] sm:w-[200px] md:w-[320px] lg:w-[420px] h-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.3)]"
-        />
+        {/* The logo is the page's primary visual heading. */}
+        <h1>
+          <motion.img
+            layout
+            src="/images/texttttlogo.webp"
+            alt="Slugsera — premium slow fashion streetwear"
+            className="w-[160px] sm:w-[200px] md:w-[320px] lg:w-[420px] h-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.3)]"
+          />
+        </h1>
       </motion.div>
 
       {/* Bottom Left Content Block */}

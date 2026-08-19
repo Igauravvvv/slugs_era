@@ -83,6 +83,25 @@ export default function ProductDetail() {
   const isComingSoon = selectedProduct.status === 'coming_soon';
   const isFullPreBook = selectedProduct.status === 'pre_book';
   const isSoldOut = selectedProduct.status === 'sold_out';
+  const productSlug = selectedProduct.slug || generateSlug(selectedProduct.name);
+  const productCategoryLabel = selectedProduct.category === 'tshirts'
+    ? 'Oversized T-Shirt'
+    : selectedProduct.category === 'shirts'
+      ? 'Printed Streetwear Shirt'
+      : selectedProduct.category === 'hoodies'
+        ? 'Premium Streetwear Hoodie'
+        : 'Streetwear Accessory';
+  const productDescription = [selectedProduct.description, selectedProduct.material, selectedProduct.fit]
+    .filter(Boolean)
+    .join(' ')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const productAvailability = isComingSoon || isFullPreBook
+    ? 'PreOrder'
+    : isSoldOut || !selectedProduct.inStock
+      ? 'OutOfStock'
+      : 'InStock';
 
   const getSizeLabel = (size: string): { label: string; className: string; disabled: boolean; outOfStock: boolean } => {
     const ss = getSizeStock(selectedProduct, size);
@@ -158,6 +177,31 @@ export default function ProductDetail() {
 
   return (
     <div className="min-h-screen bg-white">
+      <SEOHead
+        title={`${selectedProduct.name} | ${productCategoryLabel}`}
+        description={productDescription || `${selectedProduct.name} by Slug's Era. Premium ${productCategoryLabel.toLowerCase()} available online in Delhi NCR and across India.`}
+        keywords={[
+          selectedProduct.name,
+          productCategoryLabel,
+          `${selectedProduct.category} India`,
+          `${selectedProduct.category} Delhi`,
+          `${selectedProduct.category} Noida`,
+          `${selectedProduct.category} Gurugram`,
+          'Slugsera clothing',
+        ]}
+        url={`/product/${productSlug}`}
+        image={selectedProduct.images[0] || selectedProduct.image}
+        type="product"
+        product={{
+          name: selectedProduct.name,
+          price: selectedProduct.price,
+          availability: productAvailability,
+          category: selectedProduct.category,
+          image: selectedProduct.images[0] || selectedProduct.image,
+          description: productDescription,
+          sku: selectedProduct.id,
+        }}
+      />
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8 pb-24">
         {/* Breadcrumb */}
         <button onClick={goBack}
@@ -237,7 +281,7 @@ export default function ProductDetail() {
               {isComingSoon && <span className="ml-2 px-2 py-0.5 bg-blue-50 text-blue-600">COMING SOON</span>}
             </div>
 
-            <h1 className="font-display text-[clamp(32px,4vw,48px)] font-light text-[#1A1A1A] mb-2">
+            <h1 id="product-title" className="font-display text-[clamp(32px,4vw,48px)] font-light text-[#1A1A1A] mb-2">
               {selectedProduct.name}
             </h1>
             <p className="font-display text-base italic text-[#888880] mb-4">{selectedProduct.slogan}</p>

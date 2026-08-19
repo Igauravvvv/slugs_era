@@ -1,9 +1,11 @@
-# Slug's Era — robots.txt
+# Slug's Era — crawl directives
 User-agent: *
 Allow: /
-Allow: /blog
 Disallow: /admin
-Disallow: /checkout
+Disallow: /dashboard
+Disallow: /cart
+Disallow: /checkout/
+Disallow: /profile
 Disallow: /api/
 
-Sitemap: https://slugsera.com/sitemap.xml
+Sitemap: https://www.slugsera.com/sitemap.xml

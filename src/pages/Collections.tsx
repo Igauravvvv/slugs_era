@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useStore } from '@/store';
 import ProductCard from '@/components/ProductCard';
+import SEOHead from '@/components/SEOHead';
 
 const COLLECTION_CATEGORY_ORDER = ['tshirts', 'shirts', 'hoodies', 'accessories'];
 const COLLECTION_CATEGORY_LABELS: Record<string, string> = {
@@ -11,6 +12,29 @@ const COLLECTION_CATEGORY_LABELS: Record<string, string> = {
   shirts: 'Shirts',
   hoodies: 'Hoodies',
   accessories: 'Accessories',
+};
+
+const COLLECTION_SEO: Record<string, { title: string; description: string; keywords: string[] }> = {
+  tshirts: {
+    title: 'Oversized T-Shirts for Men & Women',
+    description: "Shop premium oversized graphic T-shirts from Slug's Era. Heavyweight streetwear tees designed for everyday wear in Delhi, Noida, Gurugram and across India.",
+    keywords: ['oversized t-shirts Delhi', 'graphic t-shirts Noida', 'streetwear t-shirts Gurugram', 'heavyweight t-shirts India'],
+  },
+  shirts: {
+    title: 'Printed Streetwear Shirts',
+    description: "Explore Slug's Era printed shirts: relaxed streetwear fits made for creative everyday style. Available online in Delhi NCR and delivered across India.",
+    keywords: ['printed shirts Delhi', 'streetwear shirts Noida', 'relaxed fit shirts Gurugram', 'Indian streetwear shirts'],
+  },
+  hoodies: {
+    title: 'Premium Streetwear Hoodies',
+    description: "Discover heavyweight hoodies from Slug's Era—premium streetwear layers for Delhi winters, Noida, Gurugram and every city across India.",
+    keywords: ['hoodies Delhi', 'streetwear hoodies Noida', 'premium hoodies Gurugram', 'heavyweight hoodies India'],
+  },
+  accessories: {
+    title: 'Streetwear Accessories',
+    description: "Explore limited Slug's Era accessories designed to complete your slow-fashion streetwear rotation.",
+    keywords: ['streetwear accessories India', 'Slugsera accessories'],
+  },
 };
 
 export default function Collections() {
@@ -30,18 +54,21 @@ export default function Collections() {
 
   const navigate = useNavigate();
   const { category: urlCategory } = useParams<{ category?: string }>();
+  const categoryMap: Record<string, string> = {
+    tshirts: 'tshirts',
+    't-shirts': 'tshirts',
+    shirts: 'shirts',
+    hoodies: 'hoodies',
+    accessories: 'accessories',
+  };
+  const seoCategory = urlCategory ? categoryMap[urlCategory.toLowerCase()] : selectedCategory;
+  const seo = seoCategory ? COLLECTION_SEO[seoCategory] : undefined;
+  const canonicalCategory = seoCategory === 'tshirts' ? 'tshirts' : seoCategory;
 
   // Sync URL param → Zustand store on mount or when URL changes
   useEffect(() => {
     if (urlCategory) {
       // Map user-friendly URL slugs to internal category names
-      const categoryMap: Record<string, string> = {
-        'tshirts': 'tshirts',
-        't-shirts': 'tshirts',
-        'shirts': 'shirts',
-        'hoodies': 'hoodies',
-        'accessories': 'accessories',
-      };
       const mapped = categoryMap[urlCategory.toLowerCase()] || urlCategory.toLowerCase();
       if (mapped !== selectedCategory) {
         setCollectionFilter(mapped, null);
@@ -117,7 +144,14 @@ export default function Collections() {
   };
 
   return (
-    <div className="bg-[#F9F7F5] min-h-screen pb-24 pt-4 sm:pt-6 px-3 sm:px-6 lg:px-16" id="collections">
+    <>
+      <SEOHead
+        title={seo?.title || 'Streetwear Clothing Collections'}
+        description={seo?.description || "Browse Slug's Era collections of premium oversized T-shirts, printed shirts and hoodies. Streetwear for Delhi NCR and across India."}
+        keywords={seo?.keywords || ['streetwear Delhi NCR', 'oversized t-shirts India', 'printed shirts India', 'premium hoodies India']}
+        url={canonicalCategory ? `/collections/${canonicalCategory}` : '/collections'}
+      />
+      <div className="bg-[#F9F7F5] min-h-screen pb-24 pt-4 sm:pt-6 px-3 sm:px-6 lg:px-16" id="collections">
       <div className="max-w-[2000px] mx-auto">
 
         {/* Top Bar with Back Button */}
@@ -205,6 +239,7 @@ export default function Collections() {
           </motion.div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }

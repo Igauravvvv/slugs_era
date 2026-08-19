@@ -189,7 +189,8 @@ function HomeView() {
     <div className="flex flex-col">
       <SEOHead
         title=""
-        description="Shop oversized t-shirts, custom shirts & hoodies crafted for slow living. Premium 240 GSM cotton. Free shipping across India. Join the slow fashion movement."
+        description="Slug's Era is an Indian slow-fashion streetwear brand for oversized T-shirts, printed shirts and hoodies. Shop online in Delhi, Noida, Gurugram and across India."
+        keywords={['streetwear Delhi', 'streetwear Noida', 'streetwear Gurugram', 'oversized t-shirts Delhi NCR', 'Indian slow fashion brand']}
         url="/"
       />
       <Hero />
@@ -356,7 +357,7 @@ function App() {
               {/* Collections */}
               <Route path="/collections" element={
                 <StorefrontLayout minimal showFooter>
-                  <SEOHead title="Shop All Collections" description="Browse our curated collection of oversized tees, printed shirts & hoodies. Premium streetwear for the slow life. Free shipping across India." url="/collections" />
+                  <SEOHead title="Shop All Collections" description="Browse premium oversized T-shirts, printed shirts and hoodies from Slug's Era. Streetwear for Delhi NCR and delivery across India." keywords={['streetwear Delhi NCR', 'oversized t-shirts India', 'printed shirts India', 'hoodies India']} url="/collections" />
                   <Collections />
                 </StorefrontLayout>
               } />
@@ -422,37 +423,37 @@ function App() {
               {/* Info Pages */}
               <Route path="/about" element={
                 <StorefrontLayout minimal showFooter>
-                  <SEOHead title="Our Story" description="We're not a brand — we're a movement. Learn about Slug's Era and our commitment to slow fashion, premium quality, and intentional living." url="/about" />
+                  <SEOHead title="Our Story" description="Meet Slug's Era, an Indian slow-fashion streetwear movement built around premium quality, thoughtful design and intentional living." keywords={['Slugsera story', 'Indian slow fashion brand', 'streetwear brand Delhi NCR']} url="/about" />
                   <AboutPage />
                 </StorefrontLayout>
               } />
               <Route path="/faq" element={
                 <StorefrontLayout minimal showFooter>
-                  <SEOHead title="Frequently Asked Questions" description="Common questions about shipping, returns, sizing, and orders at Slug's Era. Free shipping, 7-day exchange policy." url="/faq" />
+                  <SEOHead title="Frequently Asked Questions" description="Find answers about Slug's Era sizing, shipping, returns and orders for our oversized streetwear clothing." keywords={['Slugsera size guide', 'streetwear shipping India', 't-shirt exchange policy']} url="/faq" />
                   <FAQ />
                 </StorefrontLayout>
               } />
               <Route path="/contact" element={
                 <StorefrontLayout minimal showFooter>
-                  <SEOHead title="Contact Us" description="Get in touch with Slug's Era. WhatsApp: 7701815002. We're here to help with orders, sizing, and everything slow." url="/contact" />
+                  <SEOHead title="Contact Us" description="Contact Slug's Era for help with orders, sizing or our premium streetwear collection. We support customers in Delhi NCR and across India." keywords={['contact Slugsera', 'streetwear customer support Delhi NCR', 'Slugsera WhatsApp']} url="/contact" />
                   <Contact />
                 </StorefrontLayout>
               } />
               <Route path="/lookbook" element={
                 <StorefrontLayout minimal showFooter>
-                  <SEOHead title="Lookbook" description="Explore Slug's Era styled looks. Premium slow fashion streetwear — oversized tees, custom shirts, heavyweight hoodies." url="/lookbook" />
+                  <SEOHead title="Streetwear Lookbook" description="Explore Slug's Era streetwear looks and outfit ideas featuring oversized tees, printed shirts and heavyweight hoodies." keywords={['streetwear lookbook India', 'oversized t-shirt outfits', 'Delhi NCR streetwear style']} url="/lookbook" />
                   <Lookbook />
                 </StorefrontLayout>
               } />
               <Route path="/shipping-policy" element={
                 <StorefrontLayout minimal showFooter>
-                  <SEOHead title="Shipping Policy" description="Free shipping on all orders. 3-5 business day delivery across India. Track your order anytime." url="/shipping-policy" />
+                  <SEOHead title="Shipping Policy" description="Read Slug's Era shipping information, delivery timelines and order tracking details for customers across India." keywords={['Slugsera shipping policy', 'streetwear delivery India', 'Delhi NCR clothing delivery']} url="/shipping-policy" />
                   <ShippingPolicy />
                 </StorefrontLayout>
               } />
               <Route path="/return-policy" element={
                 <StorefrontLayout minimal showFooter>
-                  <SEOHead title="Return & Exchange Policy" description="Easy exchanges within 7 days for fit, color, or defects. Hassle-free process via WhatsApp. Slug's Era customer promise." url="/return-policy" />
+                  <SEOHead title="Return & Exchange Policy" description="Read the Slug's Era return and exchange policy for eligible streetwear orders, sizing issues and product concerns." keywords={['Slugsera return policy', 't-shirt exchange India', 'streetwear returns']} url="/return-policy" />
                   <ReturnPolicy />
                 </StorefrontLayout>
               } />

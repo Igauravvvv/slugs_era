@@ -16,6 +16,7 @@ export default function BlogList() {
       <SEOHead 
         title="Blog — Slugsera | Slow Fashion Stories" 
         description="Read the latest from Slugsera. Dive into our brand story, styling guides for oversized t-shirts, and our philosophy on slow fashion streetwear." 
+        keywords={['slow fashion blog India', 'oversized t-shirt styling guide', 'Indian streetwear culture', 'Slugsera blog']}
         url="/blog" 
       />
       
