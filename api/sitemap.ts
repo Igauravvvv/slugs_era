@@ -37,32 +37,50 @@ const productSlug = (product: { slug?: string | null; name: string }) => product
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
 
-function sitemapUrl(path: string, priority: string, changefreq: string) {
-  return `  <url>\n    <loc>${escapeXml(`${SITE_URL}${path}`)}</loc>\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n  </url>`;
+function sitemapUrl(path: string, priority: string, changefreq: string, lastmod?: string | null) {
+  const modified = lastmod && !Number.isNaN(Date.parse(lastmod))
+    ? `\n    <lastmod>${new Date(lastmod).toISOString()}</lastmod>`
+    : '';
+  return `  <url>\n    <loc>${escapeXml(`${SITE_URL}${path}`)}</loc>${modified}\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n  </url>`;
 }
 
 export default async function handler(_req: VercelRequest, res: VercelResponse) {
   const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
   const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
-  let products: Array<{ slug?: string | null; name: string }> = [];
+  let products: Array<{
+    slug?: string | null;
+    name: string;
+    status?: string | null;
+    updated_at?: string | null;
+  }> = [];
 
   if (supabaseUrl && supabaseKey) {
     const supabase = createClient(supabaseUrl, supabaseKey);
     const { data, error } = await supabase
       .from('products')
-      .select('slug,name')
+      .select('slug,name,status,updated_at')
       .eq('is_published', true);
 
     if (error) {
       console.error('Could not add products to sitemap:', error.message);
     } else {
-      products = data || [];
+      // Only submit live product pages. Coming-soon/pre-book cards are
+      // collection teasers and should not compete with purchasable products
+      // for Google Search or Merchant Center discovery.
+      products = (data || []).filter((product) => (
+        product.status !== 'coming_soon' && product.status !== 'pre_book'
+      ));
     }
   }
 
   const urls = [
     ...STATIC_PAGES.map((page) => sitemapUrl(page.path, page.priority, page.changefreq)),
-    ...products.map((product) => sitemapUrl(`/product/${productSlug(product)}`, '0.8', 'weekly')),
+    ...products.map((product) => sitemapUrl(
+      `/product/${productSlug(product)}`,
+      '0.8',
+      'weekly',
+      product.updated_at,
+    )),
   ];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>`;

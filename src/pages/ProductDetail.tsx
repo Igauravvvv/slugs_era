@@ -192,7 +192,10 @@ export default function ProductDetail() {
         url={`/product/${productSlug}`}
         image={selectedProduct.images[0] || selectedProduct.image}
         type="product"
-        product={{
+        // Keep collection teasers out of Google product rich results until they
+        // have a real launch date and can be bought. This matches the Merchant
+        // Center feed and avoids treating "Coming Soon" cards as preorder SKUs.
+        product={isComingSoon || isFullPreBook ? undefined : {
           name: selectedProduct.name,
           price: selectedProduct.price,
           availability: productAvailability,
