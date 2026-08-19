@@ -16,6 +16,7 @@
   ],
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    { "source": "/merchant-feed.xml", "destination": "/api/merchant-feed" },
     { "source": "/api/cron", "destination": "/api/cron" },
     { "source": "/api/payment/create-order", "destination": "/api/payment/create-order" },
     { "source": "/api/payment/verify", "destination": "/api/payment/verify" },
