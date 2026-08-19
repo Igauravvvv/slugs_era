@@ -36,8 +36,8 @@ export const CDN = {
   /** Text logo for marquee / footer (PNG, 86 KB) */
   TEXT_LOGO: cdnUrl('TEXT-LOGO.webp'),
 
-  /** Hero model image (PNG, 8.3 MB) */
-  MODEL_HERO: cdnUrl('MODEL-WITH-SHIRT.webp'),
+  /** First image in the live homepage hero slider. */
+  MODEL_HERO: cdnUrl('Female_model_vinyl.webp'),
 
   // ── Product Images ───────────────────────────────
 
