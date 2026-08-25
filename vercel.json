@@ -31,7 +31,14 @@
     { "source": "/api/cron", "destination": "/api/cron" },
     { "source": "/api/payment/create-order", "destination": "/api/payment/create-order" },
     { "source": "/api/payment/verify", "destination": "/api/payment/verify" },
-    { "source": "/(.*)", "destination": "/index" }
+    { "source": "/product/(.*)", "destination": "/index" },
+    { "source": "/cart", "destination": "/index" },
+    { "source": "/checkout/(.*)", "destination": "/index" },
+    { "source": "/order-success", "destination": "/index" },
+    { "source": "/profile", "destination": "/index" },
+    { "source": "/dashboard", "destination": "/index" },
+    { "source": "/dashboard/(.*)", "destination": "/index" },
+    { "source": "/admin/(.*)", "destination": "/index" }
   ],
   "crons": [
     {

@@ -19,6 +19,7 @@ const analytics = read('src/lib/analytics.ts');
 const contact = read('src/pages/Contact.tsx');
 const productCard = read('src/components/ProductCard.tsx');
 const productDetail = read('src/pages/ProductDetail.tsx');
+const vercel = read('vercel.json');
 const seoPages = JSON.parse(read('src/data/seo-pages.json'));
 
 for (const route of ['/privacy-policy', '/terms', '/faq']) {
@@ -27,6 +28,7 @@ for (const route of ['/privacy-policy', '/terms', '/faq']) {
 }
 check(app.includes('path="*"'), 'custom 404 route exists');
 check(existsSync(resolve(root, 'public/404.html')), 'static custom 404 fallback exists');
+check(!vercel.includes('"source": "/(.*)"'), 'unknown URLs can return a real HTTP 404');
 check(robots.includes('Sitemap: https://www.slugsera.com/sitemap.xml'), 'robots.txt points to sitemap');
 check(existsSync(resolve(root, 'public/favicon.svg')), 'favicon exists');
 check(existsSync(resolve(root, 'public/favicon.ico')) && existsSync(resolve(root, 'public/apple-touch-icon.png')), 'multi-format favicon set exists');
