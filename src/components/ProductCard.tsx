@@ -21,7 +21,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
   const { addToCart } = useStore();
   const navigate = useNavigate();
   const [imageIndex, setImageIndex] = useState(0);
-  const pointerStart = useRef<{ x: number; y: number; id: number } | null>(null);
+  const touchStartX = useRef<number | null>(null);
   const didSwipeImage = useRef(false);
   const lastArrowPointerAt = useRef(0);
   const isComingSoon = product.status === 'coming_soon';
@@ -74,18 +74,18 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
     });
   };
 
-  const handleImagePointerStart = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (isComingSoon || images.length < 2 || (event.target as HTMLElement).closest('button')) return;
-    pointerStart.current = { x: event.clientX, y: event.clientY, id: event.pointerId };
+  const handleImageTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (isComingSoon || images.length < 2) return;
+    touchStartX.current = event.touches[0]?.clientX ?? null;
   };
 
-  const handleImagePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
-    const start = pointerStart.current;
-    pointerStart.current = null;
-    if (!start || start.id !== event.pointerId || isComingSoon || images.length < 2) return;
-    const distanceX = event.clientX - start.x;
-    const distanceY = event.clientY - start.y;
-    if (Math.abs(distanceX) < 44 || Math.abs(distanceX) <= Math.abs(distanceY)) return;
+  const handleImageTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+    const startX = touchStartX.current;
+    const endX = event.changedTouches[0]?.clientX;
+    touchStartX.current = null;
+    if (startX === null || endX === undefined || isComingSoon || images.length < 2) return;
+    const distanceX = endX - startX;
+    if (Math.abs(distanceX) < 44) return;
 
     didSwipeImage.current = true;
     if (distanceX > 0) showPreviousImage();
@@ -138,9 +138,9 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
         <div
           className="image-wrapper group/slider relative overflow-hidden rounded-md cursor-pointer"
           style={{ willChange: 'transform', touchAction: 'pan-y' }}
-          onPointerDown={handleImagePointerStart}
-          onPointerUp={handleImagePointerEnd}
-          onPointerCancel={() => { pointerStart.current = null; }}
+          onTouchStart={handleImageTouchStart}
+          onTouchEnd={handleImageTouchEnd}
+          onTouchCancel={() => { touchStartX.current = null; }}
         >
         {(product.badge || isComingSoon) && (
           <span className={`badge ${product.badge === 'New' ? 'badge-dark' : ''} z-[25]`}>
