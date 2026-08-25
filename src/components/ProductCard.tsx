@@ -142,9 +142,15 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
           onPointerUp={handleImagePointerEnd}
           onPointerCancel={() => { pointerStart.current = null; }}
         >
+        {(product.badge || isComingSoon) && (
+          <span className={`badge ${product.badge === 'New' ? 'badge-dark' : ''} z-[25]`}>
+            {isComingSoon ? 'Soon' : product.badge}
+          </span>
+        )}
         <Link
           to={productUrl}
           aria-label={`View ${product.name}`}
+          className="block w-full h-full"
           onClick={(event) => {
             if (didSwipeImage.current) {
               event.preventDefault();
@@ -157,13 +163,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
               properties: { product_name: product.name, category: product.category, source: 'product_card_image' },
             });
           }}
-          className="absolute inset-0 z-20 cursor-pointer"
-        />
-        {(product.badge || isComingSoon) && (
-          <span className={`badge ${product.badge === 'New' ? 'badge-dark' : ''} z-[25]`}>
-            {isComingSoon ? 'Soon' : product.badge}
-          </span>
-        )}
+        >
         <AnimatePresence initial={false} mode="popLayout">
           {isVideoMedia(images[imageIndex]) ? (
             <motion.video
@@ -203,6 +203,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
             />
           )}
         </AnimatePresence>
+        </Link>
 
         {/* Mirror Glass Overlay for Coming Soon */}
         {isComingSoon && (
