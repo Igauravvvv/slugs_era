@@ -40,7 +40,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .toBuffer();
 
     res.setHeader('Content-Type', 'image/webp');
-    res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=31536000, stale-while-revalidate=604800');
+    // Product filenames are immutable timestamped uploads, so browsers and the
+    // Vercel edge can safely reuse transformed variants for a full year.
+    res.setHeader('Cache-Control', 'public, max-age=31536000, s-maxage=31536000, immutable');
     res.setHeader('Content-Length', String(image.length));
     res.setHeader('X-Content-Type-Options', 'nosniff');
     return req.method === 'HEAD' ? res.status(200).end() : res.status(200).send(image);

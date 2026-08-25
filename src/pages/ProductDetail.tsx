@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Check, ShoppingBag, Heart, Share2, Truck, RotateCcw, Shield, Clock, Bell, AlertTriangle, Info, ChevronDown, ChevronUp, Copy, X, Play } from 'lucide-react';
@@ -10,7 +10,7 @@ import { trackViewItem, trackAddToCart } from '@/lib/analytics';
 import { trackCustomerEvent } from '@/lib/customerAnalytics';
 import { supabase } from '@/lib/supabase';
 import ProductPrice from '@/components/ProductPrice';
-import { isVideoMedia, optimizedProductImageSrcSet, optimizedProductImageUrl } from '@/lib/cdn';
+import { isVideoMedia, optimizedProductImageSrcSet, optimizedProductImageUrl, preloadProductImage } from '@/lib/cdn';
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -38,6 +38,9 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [openPolicy, setOpenPolicy] = useState<'shipping' | 'returns' | 'payment' | null>(null);
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
+  const productMedia = useMemo(() => selectedProduct
+    ? (selectedProduct.images?.length ? selectedProduct.images : [selectedProduct.image].filter(Boolean))
+    : [], [selectedProduct]);
 
   useEffect(() => {
     if (selectedProduct) {
@@ -61,6 +64,14 @@ export default function ProductDetail() {
     const preferredSlug = generateSlug(selectedProduct.name);
     if (slug !== preferredSlug) navigate(`/product/${preferredSlug}`, { replace: true });
   }, [navigate, selectedProduct, slug]);
+
+  useEffect(() => {
+    if (productMedia.length < 2) return;
+    const nextIndex = currentImageIndex === productMedia.length - 1 ? 0 : currentImageIndex + 1;
+    const previousIndex = currentImageIndex === 0 ? productMedia.length - 1 : currentImageIndex - 1;
+    preloadProductImage(productMedia[nextIndex], '(min-width: 1024px) 50vw, 100vw');
+    if (previousIndex !== nextIndex) preloadProductImage(productMedia[previousIndex], '(min-width: 1024px) 50vw, 100vw');
+  }, [currentImageIndex, productMedia]);
 
   // Show 404 instead of silently redirecting home
   if (!selectedProduct) {
@@ -117,7 +128,6 @@ export default function ProductDetail() {
     : isSoldOut || !selectedProduct.inStock
       ? 'OutOfStock'
       : 'InStock';
-  const productMedia = selectedProduct.images?.length ? selectedProduct.images : [selectedProduct.image].filter(Boolean);
   const productImages = productMedia.filter((url) => !isVideoMedia(url));
   const seoImage = productImages[0] || selectedProduct.image;
   const currentMedia = productMedia[currentImageIndex] || productMedia[0];
@@ -194,13 +204,15 @@ export default function ProductDetail() {
   const nextImage = () => setCurrentImageIndex((prev) => prev === productMedia.length - 1 ? 0 : prev + 1);
   const prevImage = () => setCurrentImageIndex((prev) => prev === 0 ? productMedia.length - 1 : prev - 1);
   const handleSwipeStart = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (productMedia.length < 2) return;
+    if (productMedia.length < 2 || (event.target as HTMLElement).closest('button, video[controls]')) return;
     swipeStart.current = { x: event.clientX, y: event.clientY };
+    event.currentTarget.setPointerCapture?.(event.pointerId);
   };
   const handleSwipeEnd = (event: React.PointerEvent<HTMLDivElement>) => {
     const start = swipeStart.current;
     swipeStart.current = null;
     if (!start || productMedia.length < 2) return;
+    event.currentTarget.releasePointerCapture?.(event.pointerId);
     const distanceX = event.clientX - start.x;
     const distanceY = event.clientY - start.y;
     if (Math.abs(distanceX) < 48 || Math.abs(distanceX) <= Math.abs(distanceY)) return;
@@ -262,7 +274,7 @@ export default function ProductDetail() {
           <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}>
             <div
-              className="relative bg-[#F9F7F5] aspect-square mb-4 overflow-hidden select-none"
+              className="relative bg-[#F9F7F5] aspect-square mb-4 overflow-hidden select-none cursor-grab active:cursor-grabbing"
               style={{ touchAction: 'pan-y' }}
               role="group"
               aria-roledescription="carousel"
@@ -276,7 +288,7 @@ export default function ProductDetail() {
                 if (event.key === 'ArrowRight') { event.preventDefault(); nextImage(); }
               }}
             >
-              <AnimatePresence mode="wait" initial={false}>
+              <AnimatePresence mode="popLayout" initial={false}>
                 {currentMediaIsVideo ? (
                   <motion.video
                     key={currentImageIndex}
@@ -290,12 +302,13 @@ export default function ProductDetail() {
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.25 }}
                     className="w-full h-full object-cover bg-black"
+                    draggable={false}
                   />
                 ) : (
                   <motion.img key={currentImageIndex} src={optimizedProductImageUrl(currentMedia, 960)}
                     srcSet={optimizedProductImageSrcSet(currentMedia)} sizes="(min-width: 1024px) 50vw, 100vw"
                     alt={`${selectedProduct.name} — product view ${currentImageIndex + 1} of ${productMedia.length}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="w-full h-full object-cover" decoding="async" fetchPriority="high" width="960" height="960" />
+                    exit={{ opacity: 0 }} transition={{ duration: 0.1 }} className="w-full h-full object-cover" decoding="async" fetchPriority="high" draggable={false} width="960" height="960" />
                 )}
               </AnimatePresence>
 

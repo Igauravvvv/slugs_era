@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import type { Variants } from 'framer-motion';
@@ -8,7 +8,7 @@ import { generateSlug } from '@/types';
 import { ShoppingBag, ChevronLeft, ChevronRight, Eye, LockKeyhole } from 'lucide-react';
 import { trackCustomerEvent } from '@/lib/customerAnalytics';
 import ProductPrice from '@/components/ProductPrice';
-import { isVideoMedia, optimizedProductImageSrcSet, optimizedProductImageUrl } from '@/lib/cdn';
+import { isVideoMedia, optimizedProductImageSrcSet, optimizedProductImageUrl, preloadProductImage } from '@/lib/cdn';
 
 interface ProductCardProps {
   product: Product;
@@ -21,15 +21,23 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
   const { addToCart } = useStore();
   const navigate = useNavigate();
   const [imageIndex, setImageIndex] = useState(0);
-  const touchStartX = useRef<number | null>(null);
+  const pointerStart = useRef<{ x: number; y: number; id: number } | null>(null);
   const didSwipeImage = useRef(false);
   const isComingSoon = product.status === 'coming_soon';
 
   // Use the product's actual images array; fall back to just the primary image
-  const images = product.images && product.images.length > 0
+  const images = useMemo(() => product.images && product.images.length > 0
     ? product.images
-    : [product.image];
+    : [product.image], [product.image, product.images]);
   const productUrl = `/product/${generateSlug(product.name)}`;
+
+  useEffect(() => {
+    if (images.length < 2) return;
+    const nextIndex = imageIndex === images.length - 1 ? 0 : imageIndex + 1;
+    const previousIndex = imageIndex === 0 ? images.length - 1 : imageIndex - 1;
+    preloadProductImage(images[nextIndex], '(min-width: 1024px) 20vw, 50vw');
+    if (previousIndex !== nextIndex) preloadProductImage(images[previousIndex], '(min-width: 1024px) 20vw, 50vw');
+  }, [imageIndex, images]);
 
   const showPreviousImage = () => {
     setImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
@@ -42,12 +50,14 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
   const handlePrevImage = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    didSwipeImage.current = false;
     showPreviousImage();
   };
 
   const handleNextImage = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    didSwipeImage.current = false;
     showNextImage();
   };
 
@@ -75,23 +85,23 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
     goToProduct(e);
   };
 
-  const handleImageTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (isComingSoon || images.length < 2) return;
-    touchStartX.current = e.touches[0]?.clientX ?? null;
+  const handleImagePointerStart = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (isComingSoon || images.length < 2 || (event.target as HTMLElement).closest('button')) return;
+    pointerStart.current = { x: event.clientX, y: event.clientY, id: event.pointerId };
+    event.currentTarget.setPointerCapture?.(event.pointerId);
   };
 
-  const handleImageTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
-    const startX = touchStartX.current;
-    const endX = e.changedTouches[0]?.clientX;
-    touchStartX.current = null;
-
-    if (isComingSoon || images.length < 2 || startX === null || endX === undefined) return;
-
-    const distance = endX - startX;
-    if (Math.abs(distance) < 44) return;
+  const handleImagePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
+    const start = pointerStart.current;
+    pointerStart.current = null;
+    if (!start || start.id !== event.pointerId || isComingSoon || images.length < 2) return;
+    event.currentTarget.releasePointerCapture?.(event.pointerId);
+    const distanceX = event.clientX - start.x;
+    const distanceY = event.clientY - start.y;
+    if (Math.abs(distanceX) < 44 || Math.abs(distanceX) <= Math.abs(distanceY)) return;
 
     didSwipeImage.current = true;
-    if (distance > 0) showPreviousImage();
+    if (distanceX > 0) showPreviousImage();
     else showNextImage();
   };
 
@@ -183,26 +193,18 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
       >
         <div
           className="image-wrapper group/slider relative overflow-hidden rounded-md cursor-pointer"
-          style={{ willChange: 'transform' }}
+          style={{ willChange: 'transform', touchAction: 'pan-y' }}
           onClick={handleImageClick}
-          onTouchStart={handleImageTouchStart}
-          onTouchEnd={handleImageTouchEnd}
+          onPointerDown={handleImagePointerStart}
+          onPointerUp={handleImagePointerEnd}
+          onPointerCancel={() => { pointerStart.current = null; }}
         >
-        <Link
-          to={productUrl}
-          aria-label={`View ${product.name}`}
-          onClick={(event) => {
-            event.stopPropagation();
-            void trackCustomerEvent('product_clicked', { productId: product.id, properties: { product_name: product.name, category: product.category, source: 'product_card_image' } });
-          }}
-          className="absolute inset-0 z-20"
-        />
         {(product.badge || isComingSoon) && (
           <span className={`badge ${product.badge === 'New' ? 'badge-dark' : ''} z-[25]`}>
             {isComingSoon ? 'Soon' : product.badge}
           </span>
         )}
-        <AnimatePresence mode="wait">
+        <AnimatePresence initial={false} mode="popLayout">
           {isVideoMedia(images[imageIndex]) ? (
             <motion.video
               key={imageIndex}
@@ -214,6 +216,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
               playsInline
               preload="metadata"
               className={`w-full h-full object-cover transition-all duration-700 ${isComingSoon ? 'filter grayscale-[40%] blur-[8px] scale-105' : ''}`}
+              draggable={false}
               initial={{ opacity: 0.8 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0.8 }}
@@ -231,10 +234,11 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
               width="640"
               height="640"
               className={`w-full h-full object-cover transition-all duration-700 ${isComingSoon ? 'filter grayscale-[40%] blur-[8px] scale-105' : ''}`}
+              draggable={false}
               initial={{ opacity: 0.8 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0.8 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.1 }}
               whileHover={{ scale: 1.05, transition: { duration: 0.8, ease: 'easeOut' } }}
             />
           )}

@@ -34,6 +34,17 @@ export function optimizedProductImageSrcSet(source: string): string | undefined 
     .join(', ');
 }
 
+/** Warm the browser cache for the next gallery image at the size it will use. */
+export function preloadProductImage(source: string, sizes: string): void {
+  if (typeof window === 'undefined' || !source || isVideoMedia(source)) return;
+  const image = new Image();
+  const srcSet = optimizedProductImageSrcSet(source);
+  if (srcSet) image.srcset = srcSet;
+  image.sizes = sizes;
+  image.src = optimizedProductImageUrl(source, 960);
+  image.decoding = 'async';
+}
+
 /** Detect product videos stored alongside images in the product media array. */
 export function isVideoMedia(source = ''): boolean {
   const pathname = source.split(/[?#]/, 1)[0].toLowerCase();
