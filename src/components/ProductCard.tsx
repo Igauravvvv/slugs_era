@@ -47,14 +47,14 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
     setImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
 
-  const handlePrevImage = (e: React.MouseEvent) => {
+  const handlePrevImage = (e: React.SyntheticEvent) => {
     e.preventDefault();
     e.stopPropagation();
     didSwipeImage.current = false;
     showPreviousImage();
   };
 
-  const handleNextImage = (e: React.MouseEvent) => {
+  const handleNextImage = (e: React.SyntheticEvent) => {
     e.preventDefault();
     e.stopPropagation();
     didSwipeImage.current = false;
@@ -270,7 +270,12 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
             <button 
               type="button"
               aria-label="Previous product image"
-              onClick={handlePrevImage}
+              onPointerDown={handlePrevImage}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                if (event.detail === 0) showPreviousImage();
+              }}
               className="absolute left-3 top-1/2 -translate-y-1/2 hidden lg:flex w-8 h-8 items-center justify-center bg-white/90 rounded-full z-30 hover:bg-white text-black drop-shadow-md"
             >
               <ChevronLeft size={18} />
@@ -278,7 +283,12 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
             <button 
               type="button"
               aria-label="Next product image"
-              onClick={handleNextImage}
+              onPointerDown={handleNextImage}
+              onClick={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                if (event.detail === 0) showNextImage();
+              }}
               className="absolute right-3 top-1/2 -translate-y-1/2 hidden lg:flex w-8 h-8 items-center justify-center bg-white/90 rounded-full z-30 hover:bg-white text-black drop-shadow-md"
             >
               <ChevronRight size={18} />
