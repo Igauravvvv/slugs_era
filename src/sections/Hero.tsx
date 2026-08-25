@@ -16,6 +16,18 @@ const HERO_ALT: Record<(typeof HERO_IMAGES)[number], string> = {
   '/images/slow_down_model.webp': 'Model wearing the green Slugsera Slow Down heavyweight oversized T-shirt',
   '/images/seedhe%20pahad%20se%20model.webp': 'Model wearing the Slugsera Seedhe Pahad Se graphic streetwear T-shirt',
 };
+const HERO_RESPONSIVE: Record<(typeof HERO_IMAGES)[number], string> = {
+  '/images/Female_model_vinyl.webp': 'hero-vinyl',
+  '/images/turtlemodelimage.webp': 'hero-tortoise',
+  '/images/slow_down_model.webp': 'hero-slow-down',
+  '/images/seedhe%20pahad%20se%20model.webp': 'hero-pahad',
+};
+const HERO_DIMENSIONS: Record<(typeof HERO_IMAGES)[number], { width: number; height: number }> = {
+  '/images/Female_model_vinyl.webp': { width: 2000, height: 1186 },
+  '/images/turtlemodelimage.webp': { width: 2000, height: 1116 },
+  '/images/slow_down_model.webp': { width: 2000, height: 1116 },
+  '/images/seedhe%20pahad%20se%20model.webp': { width: 2000, height: 848 },
+};
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -44,7 +56,7 @@ export default function Hero() {
         const currentIndex = HERO_IMAGES.indexOf(prev);
         return HERO_IMAGES[(currentIndex + 1) % HERO_IMAGES.length];
       });
-    }, 3500);
+    }, 8000);
     return () => clearInterval(timer);
   }, []);
 
@@ -148,7 +160,11 @@ export default function Hero() {
           <motion.img
             key={currentImage}
             src={currentImage}
+            srcSet={`/images/cdn/${HERO_RESPONSIVE[currentImage]}-640.webp 640w, /images/cdn/${HERO_RESPONSIVE[currentImage]}-1280.webp 1280w, /images/cdn/${HERO_RESPONSIVE[currentImage]}-1920.webp 1920w`}
+            sizes="100vw"
             alt={HERO_ALT[currentImage]}
+            width={HERO_DIMENSIONS[currentImage].width}
+            height={HERO_DIMENSIONS[currentImage].height}
             className={`absolute inset-0 w-full h-full object-cover ${currentImage === '/images/turtlemodelimage.webp' || currentImage === '/images/seedhe%20pahad%20se%20model.webp' ? 'object-[80%_center] sm:object-center' : 'object-center'}`}
             initial={{ opacity: 0, scale: 1.025 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -251,6 +267,8 @@ export default function Hero() {
             src="/images/texttttlogo.webp"
             alt=""
             aria-hidden="true"
+            width="612"
+            height="273"
             className="w-[160px] sm:w-[200px] md:w-[320px] lg:w-[420px] h-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.3)]"
           />
         </h1>

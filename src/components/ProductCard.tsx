@@ -8,6 +8,7 @@ import { generateSlug } from '@/types';
 import { ShoppingBag, ChevronLeft, ChevronRight, Eye, LockKeyhole } from 'lucide-react';
 import { trackCustomerEvent } from '@/lib/customerAnalytics';
 import ProductPrice from '@/components/ProductPrice';
+import { optimizedProductImageSrcSet, optimizedProductImageUrl } from '@/lib/cdn';
 
 interface ProductCardProps {
   product: Product;
@@ -204,10 +205,14 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
         <AnimatePresence mode="wait">
           <motion.img
             key={imageIndex}
-            src={images[imageIndex]}
+            src={optimizedProductImageUrl(images[imageIndex], 640)}
+            srcSet={optimizedProductImageSrcSet(images[imageIndex])}
+            sizes="(min-width: 1024px) 20vw, 50vw"
             alt={product.name}
             loading="lazy"
             decoding="async"
+            width="640"
+            height="640"
             className={`w-full h-full object-cover transition-all duration-700 ${
               isComingSoon ? 'filter grayscale-[40%] blur-[8px] scale-105' : ''
             }`}

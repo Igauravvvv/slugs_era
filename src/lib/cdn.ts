@@ -8,19 +8,45 @@
  * Filenames are sanitized (spaces→hyphens, &→and, apostrophes removed).
  */
 
-const env = typeof process !== 'undefined' && process.env.VITE_SUPABASE_URL ? process.env : (import.meta as any).env || {};
-const isPlaceholder = !env.VITE_SUPABASE_URL || env.VITE_SUPABASE_URL.includes('your-project.supabase.co');
-
-const SUPABASE_CDN_BASE = isPlaceholder 
-  ? '/images'
-  : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/assets`;
-
 // Use Vercel's edge network for static assets (automatically served from /public/images)
 const ACTIVE_CDN_BASE = '/images';
 
 /** Build a CDN URL for any file in the assets bucket */
 export function cdnUrl(filename: string): string {
   return `${ACTIVE_CDN_BASE}/${filename}`;
+}
+
+/**
+ * Deliver dynamic Supabase product uploads through the site's cached WebP
+ * image endpoint. Static brand assets already use Vercel's edge CDN.
+ */
+export function optimizedProductImageUrl(source: string, width = 640, quality = 72): string {
+  if (!source.includes('usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/')) return source;
+  return `/api/image?src=${encodeURIComponent(source)}&w=${width}&q=${quality}`;
+}
+
+export function optimizedProductImageSrcSet(source: string): string | undefined {
+  if (!source.includes('usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/')) return undefined;
+  return [320, 640, 960]
+    .map((width) => `${optimizedProductImageUrl(source, width)} ${width}w`)
+    .join(', ');
+}
+
+const STATIC_RESPONSIVE_IMAGES: Record<string, string> = {
+  'Fluidfits.webp': 'value-fluid-fits',
+  'transparency.webp': 'value-transparency',
+  'ArtWork.webp': 'value-artwork',
+  'Red_on_table.webp': 'value-print',
+  'fabricloading.webp': 'value-sourcing',
+  'community.webp': 'value-community',
+};
+
+export function responsiveStaticImageSrcSet(source: string): string | undefined {
+  const filename = source.split('/').pop() || '';
+  const optimizedName = STATIC_RESPONSIVE_IMAGES[filename];
+  return optimizedName
+    ? `/images/cdn/${optimizedName}-480.webp 480w, /images/cdn/${optimizedName}-960.webp 960w`
+    : undefined;
 }
 
 /**

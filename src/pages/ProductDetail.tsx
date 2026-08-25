@@ -10,6 +10,7 @@ import { trackViewItem, trackAddToCart } from '@/lib/analytics';
 import { trackCustomerEvent } from '@/lib/customerAnalytics';
 import { supabase } from '@/lib/supabase';
 import ProductPrice from '@/components/ProductPrice';
+import { optimizedProductImageSrcSet, optimizedProductImageUrl } from '@/lib/cdn';
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -240,9 +241,10 @@ export default function ProductDetail() {
           <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}>
             <div className="relative bg-[#F9F7F5] aspect-square mb-4 overflow-hidden">
-              <motion.img key={currentImageIndex} src={selectedProduct.images[currentImageIndex]}
+              <motion.img key={currentImageIndex} src={optimizedProductImageUrl(selectedProduct.images[currentImageIndex], 960)}
+                srcSet={optimizedProductImageSrcSet(selectedProduct.images[currentImageIndex])} sizes="(min-width: 1024px) 50vw, 100vw"
                 alt={`${selectedProduct.name} — product view ${currentImageIndex + 1} of ${selectedProduct.images.length}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                transition={{ duration: 0.4 }} className="w-full h-full object-cover" decoding="async" fetchPriority="high" />
+                transition={{ duration: 0.4 }} className="w-full h-full object-cover" decoding="async" fetchPriority="high" width="960" height="960" />
 
               {selectedProduct.images.length > 1 && (
                 <>
@@ -289,7 +291,7 @@ export default function ProductDetail() {
                 {selectedProduct.images.map((img, index) => (
                   <button key={index} onClick={() => setCurrentImageIndex(index)}
                     className={`w-20 h-20 bg-[#F9F7F5] overflow-hidden border-2 transition-colors ${index === currentImageIndex ? 'border-[#1A1A1A]' : 'border-transparent'}`}>
-                    <img src={img} alt={`${selectedProduct.name} — product thumbnail ${index + 1} of ${selectedProduct.images.length}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                    <img src={optimizedProductImageUrl(img, 160)} alt={`${selectedProduct.name} — product thumbnail ${index + 1} of ${selectedProduct.images.length}`} className="w-full h-full object-cover" loading="lazy" decoding="async" width="160" height="160" />
                   </button>
                 ))}
               </div>

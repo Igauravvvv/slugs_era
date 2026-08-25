@@ -13,11 +13,21 @@
           "value": "public, max-age=31536000, immutable"
         }
       ]
+    },
+    {
+      "source": "/fonts/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     }
   ],
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/merchant-feed.xml", "destination": "/api/merchant-feed" },
+    { "source": "/api/image", "destination": "/api/image" },
     { "source": "/api/cron", "destination": "/api/cron" },
     { "source": "/api/payment/create-order", "destination": "/api/payment/create-order" },
     { "source": "/api/payment/verify", "destination": "/api/payment/verify" },

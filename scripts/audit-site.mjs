@@ -26,8 +26,10 @@ for (const route of ['/privacy-policy', '/terms', '/faq']) {
   check(sitemap.includes(`path: '${route}'`), `sitemap includes: ${route}`);
 }
 check(app.includes('path="*"'), 'custom 404 route exists');
+check(existsSync(resolve(root, 'public/404.html')), 'static custom 404 fallback exists');
 check(robots.includes('Sitemap: https://www.slugsera.com/sitemap.xml'), 'robots.txt points to sitemap');
 check(existsSync(resolve(root, 'public/favicon.svg')), 'favicon exists');
+check(existsSync(resolve(root, 'public/favicon.ico')) && existsSync(resolve(root, 'public/apple-touch-icon.png')), 'multi-format favicon set exists');
 check(index.includes('google-site-verification'), 'search verification remains configured');
 check(!index.includes('googletagmanager.com/gtag/js'), 'analytics is not loaded before consent');
 check(analytics.includes("=== 'accepted'"), 'analytics is gated by explicit consent');
@@ -39,6 +41,11 @@ check(productCard.includes('to={productUrl}'), 'product cards expose crawlable p
 check(productDetail.includes("generateSlug(selectedProduct.name)"), 'product canonicals use descriptive name slugs');
 check(sitemap.includes('xmlns:image='), 'XML sitemap includes image discovery markup');
 check(read('package.json').includes('generate-seo-pages.mjs'), 'build generates route-specific HTML metadata');
+check(!index.includes('fonts.googleapis.com') && !read('src/index.css').includes('fonts.googleapis.com'), 'landing fonts are self-hosted and non-blocking');
+check(!app.includes('<Loader isLoading='), 'landing page has no artificial loading overlay');
+check(read('src/sections/Hero.tsx').includes('srcSet='), 'hero uses responsive CDN image variants');
+check(read('src/components/ui/expand-cards.tsx').includes('IntersectionObserver') && read('src/components/ui/expand-cards.tsx').includes('loading="lazy"'), 'below-fold value images load only near the viewport');
+check(existsSync(resolve(root, 'api/image.ts')) && productCard.includes('optimizedProductImageUrl'), 'dynamic product images use the cached WebP CDN endpoint');
 
 const titles = seoPages.map((page) => page.title.trim().toLowerCase());
 const descriptions = seoPages.map((page) => page.description.trim().toLowerCase());

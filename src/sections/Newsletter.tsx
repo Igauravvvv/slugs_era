@@ -76,6 +76,7 @@ export default function Newsletter() {
               loop
               muted
               playsInline
+              preload="none"
               className="w-[180px] sm:w-[200px] md:w-[320px] max-w-none h-auto object-left object-contain"
             />
           </div>

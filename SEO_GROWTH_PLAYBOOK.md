@@ -60,3 +60,10 @@ Repeat the cycle around four topic clusters:
 ## Content quality gate
 
 Every new article must answer one real search question, include first-hand Slugsera knowledge, link to at least two relevant internal pages, use original or properly licensed imagery, have one descriptive H1, and receive a unique title/description/sitemap entry. Do not publish merely to hit a word count or keyword frequency.
+
+## DNS and analytics account actions
+
+These settings live outside the repository and must be completed in the accounts that own the domain and analytics property:
+
+- **SPF:** the current SMTP sender is Gmail and the website does not send mail as `@slugsera.com`. In GoDaddy DNS, add a TXT record at host `@` with `v=spf1 -all` to state that no server is authorized to send as the domain. If custom-domain mail is introduced later, replace this policy with that provider's documented SPF include before sending mail.
+- **Google Analytics:** create or select the production GA4 web stream for `https://www.slugsera.com`, then set `VITE_GA4_MEASUREMENT_ID` in the Slugsera Vercel project to the real `G-...` value and redeploy. `G-XXXXXXXXXX` is only a placeholder. The application already loads GA4 only after cookie consent and tracks page views plus ecommerce events.

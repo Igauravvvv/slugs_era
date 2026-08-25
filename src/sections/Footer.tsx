@@ -46,6 +46,10 @@ export default function Footer() {
               key={i}
               src="/images/TEXT-LOGO.webp" 
               alt=""
+              loading="lazy"
+              decoding="async"
+              width="612"
+              height="273"
               style={{ 
                 width: '600px', 
                 height: 'auto', 

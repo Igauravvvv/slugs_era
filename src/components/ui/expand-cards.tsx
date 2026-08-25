@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { LucideIcon } from "lucide-react";
+import { responsiveStaticImageSrcSet } from '@/lib/cdn';
 
 export interface ExpandCardItem {
   image: string;
@@ -10,6 +11,32 @@ export interface ExpandCardItem {
   description: string;
   icon: LucideIcon;
   objectPosition?: string;
+}
+
+const TRANSPARENT_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
+
+function DeferredImage({ item, className, width, height }: { item: ExpandCardItem; className: string; width: number; height: number }) {
+  const imageRef = useRef<HTMLImageElement>(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
+
+  useEffect(() => {
+    const image = imageRef.current;
+    if (!image) return;
+    if (!('IntersectionObserver' in window)) {
+      setShouldLoad(true);
+      return;
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setShouldLoad(true);
+        observer.disconnect();
+      }
+    }, { rootMargin: '120px' });
+    observer.observe(image);
+    return () => observer.disconnect();
+  }, []);
+
+  return <img ref={imageRef} className={className} src={shouldLoad ? item.image : TRANSPARENT_PIXEL} srcSet={shouldLoad ? responsiveStaticImageSrcSet(item.image) : undefined} sizes="(min-width: 1024px) 50vw, 75vw" alt={item.title} loading="lazy" decoding="async" width={width} height={height} />;
 }
 
 export const ExpandOnHover = ({ items }: { items: ExpandCardItem[] }) => {
@@ -127,11 +154,7 @@ export const ExpandOnHover = ({ items }: { items: ExpandCardItem[] }) => {
                 key={idx}
                 className="relative w-[75vw] min-w-[260px] max-w-[320px] aspect-[3/4] rounded-2xl overflow-hidden flex-shrink-0 snap-center"
               >
-                <img
-                  className={`absolute inset-0 w-full h-full object-cover ${item.objectPosition || 'object-center'}`}
-                  src={item.image}
-                  alt={item.title}
-                />
+                <DeferredImage item={item} className={`absolute inset-0 w-full h-full object-cover ${item.objectPosition || 'object-center'}`} width={640} height={853} />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
                 
                 <div className="absolute inset-x-0 bottom-0 p-4 flex flex-col justify-end">
@@ -190,11 +213,7 @@ export const ExpandOnHover = ({ items }: { items: ExpandCardItem[] }) => {
                     }}
                     onMouseEnter={() => setExpandedIndex(idx)}
                   >
-                    <img
-                      className={`absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 ${item.objectPosition || 'object-center'}`}
-                      src={item.image}
-                      alt={item.title}
-                    />
+                    <DeferredImage item={item} className={`absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 ${item.objectPosition || 'object-center'}`} width={960} height={640} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10 transition-opacity duration-700" />
                     
                     <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col justify-end transition-all duration-700">

@@ -1,4 +1,4 @@
-import { useEffect, useState, lazy, Suspense } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '@/store';
@@ -20,7 +20,6 @@ import Footer from '@/sections/Footer';
 
 // Components — kept eager (always visible)
 import CustomCursor from '@/components/CustomCursor';
-import Loader from '@/components/Loader';
 import TornEdge from '@/components/TornEdge';
 
 import ToastContainer from '@/components/Toast';
@@ -281,8 +280,6 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
-  const [isLoading, setIsLoading] = useState(true);
-
   const location = useLocation();
 
   const { data: dbProducts } = useProducts();
@@ -293,13 +290,6 @@ function App() {
       setProducts(dbProducts);
     }
   }, [dbProducts, setProducts]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1200);
-    return () => clearTimeout(timer);
-  }, []);
 
   // Track page views on route change
   useEffect(() => {
@@ -336,7 +326,6 @@ function App() {
 
   return (
     <>
-      <Loader isLoading={isLoading} />
       <CustomCursor />
 
       <AnimatePresence mode="wait">
