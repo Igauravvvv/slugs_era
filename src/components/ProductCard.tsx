@@ -178,7 +178,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
               autoPlay
               playsInline
               preload="metadata"
-              className={`w-full h-full object-cover transition-all duration-700 ${isComingSoon ? 'filter grayscale-[40%] blur-[8px] scale-105' : ''}`}
+              className={`pointer-events-none w-full h-full object-cover transition-all duration-700 ${isComingSoon ? 'filter grayscale-[40%] blur-[8px] scale-105' : ''}`}
               draggable={false}
               initial={{ opacity: 0.8 }}
               animate={{ opacity: 1 }}
@@ -196,7 +196,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
               decoding="async"
               width="640"
               height="640"
-              className={`w-full h-full object-cover transition-all duration-700 ${isComingSoon ? 'filter grayscale-[40%] blur-[8px] scale-105' : ''}`}
+              className={`pointer-events-none w-full h-full object-cover transition-all duration-700 ${isComingSoon ? 'filter grayscale-[40%] blur-[8px] scale-105' : ''}`}
               draggable={false}
               initial={{ opacity: 0.8 }}
               animate={{ opacity: 1 }}
