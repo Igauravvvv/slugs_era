@@ -86,7 +86,8 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
   };
 
   const handleImagePointerStart = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (isComingSoon || images.length < 2 || (event.target as HTMLElement).closest('button')) return;
+    const targetButton = (event.target as HTMLElement).closest('button');
+    if (isComingSoon || images.length < 2 || (targetButton && !targetButton.hasAttribute('data-card-open'))) return;
     pointerStart.current = { x: event.clientX, y: event.clientY, id: event.pointerId };
     event.currentTarget.setPointerCapture?.(event.pointerId);
   };
@@ -194,11 +195,17 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
         <div
           className="image-wrapper group/slider relative overflow-hidden rounded-md cursor-pointer"
           style={{ willChange: 'transform', touchAction: 'pan-y' }}
-          onClick={handleImageClick}
           onPointerDown={handleImagePointerStart}
           onPointerUp={handleImagePointerEnd}
           onPointerCancel={() => { pointerStart.current = null; }}
         >
+        <button
+          type="button"
+          data-card-open
+          aria-label={`View ${product.name}`}
+          onClick={handleImageClick}
+          className="absolute inset-0 z-20 cursor-pointer"
+        />
         {(product.badge || isComingSoon) && (
           <span className={`badge ${product.badge === 'New' ? 'badge-dark' : ''} z-[25]`}>
             {isComingSoon ? 'Soon' : product.badge}
