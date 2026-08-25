@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import { useStore } from '@/store';
 import type { Product } from '@/types';
@@ -132,31 +132,6 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
     }, 1400);
   };
 
-  // 3D Tilt Effect
-  const ref = useRef<HTMLDivElement>(null);
-  const mouseX = useSpring(useMotionValue(0), { stiffness: 300, damping: 30 });
-  const mouseY = useSpring(useMotionValue(0), { stiffness: 300, damping: 30 });
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
-    const mouseXPos = e.clientX - rect.left;
-    const mouseYPos = e.clientY - rect.top;
-    const xPct = mouseXPos / width - 0.5;
-    const yPct = mouseYPos / height - 0.5;
-    mouseX.set(xPct);
-    mouseY.set(yPct);
-  };
-
-  const handleMouseLeave = () => {
-    mouseX.set(0);
-    mouseY.set(0);
-  };
-
-  const zeroRotation = useMotionValue(0);
-
   const defaultVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: { 
@@ -168,31 +143,13 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
 
   return (
     <motion.article
-      ref={ref}
       variants={customVariants || defaultVariants}
       initial={customVariants ? "hidden" : "hidden"}
       whileInView={customVariants ? "visible" : "visible"}
       viewport={{ once: true, margin: '-20px' }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
       className={`product-card group relative ${isComingSoon ? 'bg-white border border-[#E8E4E0] p-3' : ''}`}
-      style={{
-        transformStyle: "preserve-3d",
-        perspective: "1000px",
-      }}
     >
-      <motion.div 
-        className="w-full h-full"
-        style={{
-          rotateX: zeroRotation,
-        }}
-        animate={{
-          rotateX: mouseY.get() * -8,
-          rotateY: mouseX.get() * 8,
-          boxShadow: mouseX.get() === 0 ? "0px 10px 30px rgba(0,0,0,0)" : "0px 15px 35px rgba(0,0,0,0.06)",
-        }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      >
+      <div className="w-full h-full">
         <div
           className="image-wrapper group/slider relative overflow-hidden rounded-md cursor-pointer"
           style={{ willChange: 'transform', touchAction: 'pan-y' }}
@@ -393,7 +350,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
         </>
         )}
       </div>
-      </motion.div>
+      </div>
     </motion.article>
   );
 }
