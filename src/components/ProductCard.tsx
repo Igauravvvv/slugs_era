@@ -87,8 +87,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
   };
 
   const handleImagePointerStart = (event: React.PointerEvent<HTMLDivElement>) => {
-    const targetButton = (event.target as HTMLElement).closest('button');
-    if (isComingSoon || images.length < 2 || (targetButton && !targetButton.hasAttribute('data-card-open'))) return;
+    if (isComingSoon || images.length < 2 || (event.target as HTMLElement).closest('button')) return;
     pointerStart.current = { x: event.clientX, y: event.clientY, id: event.pointerId };
     event.currentTarget.setPointerCapture?.(event.pointerId);
   };
@@ -157,13 +156,6 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
           onPointerUp={handleImagePointerEnd}
           onPointerCancel={() => { pointerStart.current = null; }}
         >
-        <button
-          type="button"
-          data-card-open
-          aria-label={`View ${product.name}`}
-          onClick={handleImageClick}
-          className="absolute inset-0 z-20 cursor-pointer"
-        />
         {(product.badge || isComingSoon) && (
           <span className={`badge ${product.badge === 'New' ? 'badge-dark' : ''} z-[25]`}>
             {isComingSoon ? 'Soon' : product.badge}
@@ -182,6 +174,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
               preload="metadata"
               className={`w-full h-full object-cover transition-all duration-700 ${isComingSoon ? 'filter grayscale-[40%] blur-[8px] scale-105' : ''}`}
               draggable={false}
+              onClick={handleImageClick}
               initial={{ opacity: 0.8 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0.8 }}
@@ -200,6 +193,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
               height="640"
               className={`w-full h-full object-cover transition-all duration-700 ${isComingSoon ? 'filter grayscale-[40%] blur-[8px] scale-105' : ''}`}
               draggable={false}
+              onClick={handleImageClick}
               initial={{ opacity: 0.8 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0.8 }}
