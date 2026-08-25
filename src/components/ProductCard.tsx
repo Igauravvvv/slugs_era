@@ -256,7 +256,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
           </button>
           {onQuickView && (
             <button
-              className="w-9 h-9 flex items-center justify-center bg-white text-[#1A1A1A] hover:bg-[#C0132A] hover:text-white transition-all duration-200"
+              className="pointer-events-auto w-9 h-9 flex items-center justify-center bg-white text-[#1A1A1A] hover:bg-[#C0132A] hover:text-white transition-all duration-200"
               onClick={(e) => { e.stopPropagation(); onQuickView(product); }}
             >
               <Eye size={14} />

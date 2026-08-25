@@ -176,11 +176,11 @@
   }
 
   .quick-add {
-    @apply absolute inset-0 bg-black/0 flex items-end justify-center p-5 transition-all duration-300;
+    @apply absolute inset-0 bg-black/0 flex items-end justify-center p-5 transition-all duration-300 pointer-events-none;
   }
 
   .quick-add-btn {
-    @apply bg-[#1A1A1A] text-white border-none text-[10px] font-medium tracking-[0.16em] uppercase px-6 py-3.5 cursor-pointer whitespace-nowrap translate-y-3.5 opacity-0 transition-all duration-300;
+    @apply bg-[#1A1A1A] text-white border-none text-[10px] font-medium tracking-[0.16em] uppercase px-6 py-3.5 cursor-pointer whitespace-nowrap translate-y-3.5 opacity-0 transition-all duration-300 pointer-events-auto;
     transition-timing-function: var(--ease);
   }
 
