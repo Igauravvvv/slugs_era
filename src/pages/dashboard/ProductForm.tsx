@@ -26,7 +26,12 @@ const productSchema = z.object({
   sizes: z.array(z.string()).nullable(),
   size_stock: z.array(z.object({ size: z.string(), stock: z.number().int().min(0) })).default([]),
   colors: z.array(z.object({ name: z.string(), hex: z.string() })).default([]),
-  images: z.array(z.object({ url: z.string(), alt: z.string(), isPrimary: z.boolean() })).default([]),
+  images: z.array(z.object({
+    url: z.string(),
+    alt: z.string(),
+    isPrimary: z.boolean(),
+    mediaType: z.enum(['image', 'video']).optional(),
+  })).default([]),
   is_published: z.boolean(),
   is_featured: z.boolean(),
   status: z.enum(['active', 'coming_soon', 'sold_out']),

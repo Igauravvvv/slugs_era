@@ -58,7 +58,7 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
     status?: string | null;
     updated_at?: string | null;
     image?: string | null;
-    images?: Array<{ url?: string; isPrimary?: boolean } | string> | null;
+    images?: Array<{ url?: string; isPrimary?: boolean; mediaType?: 'image' | 'video' } | string> | null;
   }> = [];
 
   if (supabaseUrl && supabaseKey) {
@@ -88,6 +88,9 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
       'weekly',
       product.updated_at,
       (product.images || [])
+        .filter((image) => typeof image === 'string'
+          ? !/\.(mp4|webm|mov|m4v|ogv)(?:[?#]|$)/i.test(image)
+          : image.mediaType !== 'video' && !/\.(mp4|webm|mov|m4v|ogv)(?:[?#]|$)/i.test(image.url || ''))
         .map((image) => typeof image === 'string' ? image : image.url || '')
         .filter(Boolean)
         .slice(0, 5)

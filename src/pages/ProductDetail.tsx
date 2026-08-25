@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Check, ShoppingBag, Heart, Share2, Truck, RotateCcw, Shield, Clock, Bell, AlertTriangle, Info, ChevronDown, ChevronUp, Copy, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, ShoppingBag, Heart, Share2, Truck, RotateCcw, Shield, Clock, Bell, AlertTriangle, Info, ChevronDown, ChevronUp, Copy, X, Play } from 'lucide-react';
 import { useStore } from '@/store';
 import { getSizeStock } from '@/types';
 import { generateSlug } from '@/types';
@@ -10,7 +10,7 @@ import { trackViewItem, trackAddToCart } from '@/lib/analytics';
 import { trackCustomerEvent } from '@/lib/customerAnalytics';
 import { supabase } from '@/lib/supabase';
 import ProductPrice from '@/components/ProductPrice';
-import { optimizedProductImageSrcSet, optimizedProductImageUrl } from '@/lib/cdn';
+import { isVideoMedia, optimizedProductImageSrcSet, optimizedProductImageUrl } from '@/lib/cdn';
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -37,6 +37,7 @@ export default function ProductDetail() {
   const [notifySubmitted, setNotifySubmitted] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [openPolicy, setOpenPolicy] = useState<'shipping' | 'returns' | 'payment' | null>(null);
+  const swipeStart = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     if (selectedProduct) {
@@ -51,6 +52,7 @@ export default function ProductDetail() {
       setSelectedSize(firstAvailable?.size || selectedProduct.sizes[0]);
       setSelectedColor(selectedProduct.colors[0]);
       setQuantity(1);
+      setCurrentImageIndex(0);
     }
   }, [selectedProduct]);
 
@@ -115,6 +117,11 @@ export default function ProductDetail() {
     : isSoldOut || !selectedProduct.inStock
       ? 'OutOfStock'
       : 'InStock';
+  const productMedia = selectedProduct.images?.length ? selectedProduct.images : [selectedProduct.image].filter(Boolean);
+  const productImages = productMedia.filter((url) => !isVideoMedia(url));
+  const seoImage = productImages[0] || selectedProduct.image;
+  const currentMedia = productMedia[currentImageIndex] || productMedia[0];
+  const currentMediaIsVideo = isVideoMedia(currentMedia);
 
   const getSizeLabel = (size: string): { label: string; className: string; disabled: boolean; outOfStock: boolean } => {
     const ss = getSizeStock(selectedProduct, size);
@@ -184,8 +191,22 @@ export default function ProductDetail() {
     }
   };
 
-  const nextImage = () => setCurrentImageIndex((prev) => prev === selectedProduct.images.length - 1 ? 0 : prev + 1);
-  const prevImage = () => setCurrentImageIndex((prev) => prev === 0 ? selectedProduct.images.length - 1 : prev - 1);
+  const nextImage = () => setCurrentImageIndex((prev) => prev === productMedia.length - 1 ? 0 : prev + 1);
+  const prevImage = () => setCurrentImageIndex((prev) => prev === 0 ? productMedia.length - 1 : prev - 1);
+  const handleSwipeStart = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (productMedia.length < 2) return;
+    swipeStart.current = { x: event.clientX, y: event.clientY };
+  };
+  const handleSwipeEnd = (event: React.PointerEvent<HTMLDivElement>) => {
+    const start = swipeStart.current;
+    swipeStart.current = null;
+    if (!start || productMedia.length < 2) return;
+    const distanceX = event.clientX - start.x;
+    const distanceY = event.clientY - start.y;
+    if (Math.abs(distanceX) < 48 || Math.abs(distanceX) <= Math.abs(distanceY)) return;
+    if (distanceX > 0) prevImage();
+    else nextImage();
+  };
   return (
     <div className="min-h-screen bg-white">
       <SEOHead
@@ -201,7 +222,7 @@ export default function ProductDetail() {
           'Slugsera clothing',
         ]}
         url={`/product/${productSlug}`}
-        image={selectedProduct.images[0] || selectedProduct.image}
+        image={seoImage}
         type="product"
         // Keep collection teasers out of Google product rich results until they
         // have a real launch date and can be bought. This matches the Merchant
@@ -211,8 +232,8 @@ export default function ProductDetail() {
           price: selectedProduct.price,
           availability: productAvailability,
           category: selectedProduct.category,
-          image: selectedProduct.images[0] || selectedProduct.image,
-          images: selectedProduct.images,
+          image: seoImage,
+          images: productImages,
           colors: selectedProduct.colors,
           sizes: selectedProduct.sizes,
           material: selectedProduct.material,
@@ -240,18 +261,50 @@ export default function ProductDetail() {
           {/* Left - Images */}
           <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}>
-            <div className="relative bg-[#F9F7F5] aspect-square mb-4 overflow-hidden">
-              <motion.img key={currentImageIndex} src={optimizedProductImageUrl(selectedProduct.images[currentImageIndex], 960)}
-                srcSet={optimizedProductImageSrcSet(selectedProduct.images[currentImageIndex])} sizes="(min-width: 1024px) 50vw, 100vw"
-                alt={`${selectedProduct.name} — product view ${currentImageIndex + 1} of ${selectedProduct.images.length}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                transition={{ duration: 0.4 }} className="w-full h-full object-cover" decoding="async" fetchPriority="high" width="960" height="960" />
+            <div
+              className="relative bg-[#F9F7F5] aspect-square mb-4 overflow-hidden select-none"
+              style={{ touchAction: 'pan-y' }}
+              role="group"
+              aria-roledescription="carousel"
+              aria-label={`${selectedProduct.name} product media`}
+              tabIndex={0}
+              onPointerDown={handleSwipeStart}
+              onPointerUp={handleSwipeEnd}
+              onPointerCancel={() => { swipeStart.current = null; }}
+              onKeyDown={(event) => {
+                if (event.key === 'ArrowLeft') { event.preventDefault(); prevImage(); }
+                if (event.key === 'ArrowRight') { event.preventDefault(); nextImage(); }
+              }}
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                {currentMediaIsVideo ? (
+                  <motion.video
+                    key={currentImageIndex}
+                    src={currentMedia}
+                    aria-label={`${selectedProduct.name} — product video ${currentImageIndex + 1} of ${productMedia.length}`}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="w-full h-full object-cover bg-black"
+                  />
+                ) : (
+                  <motion.img key={currentImageIndex} src={optimizedProductImageUrl(currentMedia, 960)}
+                    srcSet={optimizedProductImageSrcSet(currentMedia)} sizes="(min-width: 1024px) 50vw, 100vw"
+                    alt={`${selectedProduct.name} — product view ${currentImageIndex + 1} of ${productMedia.length}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }} transition={{ duration: 0.3 }} className="w-full h-full object-cover" decoding="async" fetchPriority="high" width="960" height="960" />
+                )}
+              </AnimatePresence>
 
-              {selectedProduct.images.length > 1 && (
+              {productMedia.length > 1 && (
                 <>
-                  <button aria-label="Previous image" onClick={prevImage} className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors">
+                  <button aria-label="Previous product media" onClick={prevImage} className="absolute z-20 left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors">
                     <ArrowLeft size={18} />
                   </button>
-                  <button aria-label="Next image" onClick={nextImage} className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors">
+                  <button aria-label="Next product media" onClick={nextImage} className="absolute z-20 right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors">
                     <ArrowRight size={18} />
                   </button>
                 </>
@@ -286,12 +339,18 @@ export default function ProductDetail() {
               )}
             </div>
 
-            {selectedProduct.images.length > 1 && (
-              <div className="flex gap-3">
-                {selectedProduct.images.map((img, index) => (
+            {productMedia.length > 1 && (
+              <div className="flex gap-3 overflow-x-auto pb-1" aria-label="Choose product media">
+                {productMedia.map((media, index) => (
                   <button key={index} onClick={() => setCurrentImageIndex(index)}
-                    className={`w-20 h-20 bg-[#F9F7F5] overflow-hidden border-2 transition-colors ${index === currentImageIndex ? 'border-[#1A1A1A]' : 'border-transparent'}`}>
-                    <img src={optimizedProductImageUrl(img, 160)} alt={`${selectedProduct.name} — product thumbnail ${index + 1} of ${selectedProduct.images.length}`} className="w-full h-full object-cover" loading="lazy" decoding="async" width="160" height="160" />
+                    aria-label={`Show ${isVideoMedia(media) ? 'video' : 'image'} ${index + 1} of ${productMedia.length}`}
+                    aria-current={index === currentImageIndex ? 'true' : undefined}
+                    className={`relative shrink-0 w-20 h-20 bg-[#F9F7F5] overflow-hidden border-2 transition-colors ${index === currentImageIndex ? 'border-[#1A1A1A]' : 'border-transparent'}`}>
+                    {isVideoMedia(media) ? (
+                      <><video src={media} muted playsInline preload="metadata" className="w-full h-full object-cover" /><span className="absolute inset-0 flex items-center justify-center bg-black/20 text-white"><Play size={18} fill="currentColor" /></span></>
+                    ) : (
+                      <img src={optimizedProductImageUrl(media, 160)} alt={`${selectedProduct.name} — product thumbnail ${index + 1} of ${productMedia.length}`} className="w-full h-full object-cover" loading="lazy" decoding="async" width="160" height="160" />
+                    )}
                   </button>
                 ))}
               </div>

@@ -25,7 +25,7 @@ export async function uploadImage(
 
   if (error) {
     console.error(`Upload failed for ${file.name}:`, error);
-    throw new Error(`Failed to upload image: ${error.message}`);
+    throw new Error(`Failed to upload media: ${error.message}`);
   }
 
   const { data } = supabase.storage.from(bucket).getPublicUrl(fileName);
@@ -90,6 +90,9 @@ export async function uploadMultipleImages(
 
   return urls;
 }
+
+/** Alias used by the mixed image/video product uploader. */
+export const uploadMultipleMedia = uploadMultipleImages;
 
 /**
  * List all files in a Supabase Storage bucket.

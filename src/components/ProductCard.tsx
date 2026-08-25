@@ -8,7 +8,7 @@ import { generateSlug } from '@/types';
 import { ShoppingBag, ChevronLeft, ChevronRight, Eye, LockKeyhole } from 'lucide-react';
 import { trackCustomerEvent } from '@/lib/customerAnalytics';
 import ProductPrice from '@/components/ProductPrice';
-import { optimizedProductImageSrcSet, optimizedProductImageUrl } from '@/lib/cdn';
+import { isVideoMedia, optimizedProductImageSrcSet, optimizedProductImageUrl } from '@/lib/cdn';
 
 interface ProductCardProps {
   product: Product;
@@ -203,28 +203,41 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
           </span>
         )}
         <AnimatePresence mode="wait">
-          <motion.img
-            key={imageIndex}
-            src={optimizedProductImageUrl(images[imageIndex], 640)}
-            srcSet={optimizedProductImageSrcSet(images[imageIndex])}
-            sizes="(min-width: 1024px) 20vw, 50vw"
-            alt={product.name}
-            loading="lazy"
-            decoding="async"
-            width="640"
-            height="640"
-            className={`w-full h-full object-cover transition-all duration-700 ${
-              isComingSoon ? 'filter grayscale-[40%] blur-[8px] scale-105' : ''
-            }`}
-            initial={{ opacity: 0.8 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0.8 }}
-            transition={{ duration: 0.2 }}
-            whileHover={{
-              scale: 1.05,
-              transition: { duration: 0.8, ease: 'easeOut' },
-            }}
-          />
+          {isVideoMedia(images[imageIndex]) ? (
+            <motion.video
+              key={imageIndex}
+              src={images[imageIndex]}
+              aria-label={`${product.name} product video`}
+              muted
+              loop
+              autoPlay
+              playsInline
+              preload="metadata"
+              className={`w-full h-full object-cover transition-all duration-700 ${isComingSoon ? 'filter grayscale-[40%] blur-[8px] scale-105' : ''}`}
+              initial={{ opacity: 0.8 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0.8 }}
+              transition={{ duration: 0.2 }}
+            />
+          ) : (
+            <motion.img
+              key={imageIndex}
+              src={optimizedProductImageUrl(images[imageIndex], 640)}
+              srcSet={optimizedProductImageSrcSet(images[imageIndex])}
+              sizes="(min-width: 1024px) 20vw, 50vw"
+              alt={product.name}
+              loading="lazy"
+              decoding="async"
+              width="640"
+              height="640"
+              className={`w-full h-full object-cover transition-all duration-700 ${isComingSoon ? 'filter grayscale-[40%] blur-[8px] scale-105' : ''}`}
+              initial={{ opacity: 0.8 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0.8 }}
+              transition={{ duration: 0.2 }}
+              whileHover={{ scale: 1.05, transition: { duration: 0.8, ease: 'easeOut' } }}
+            />
+          )}
         </AnimatePresence>
 
         {/* Mirror Glass Overlay for Coming Soon */}

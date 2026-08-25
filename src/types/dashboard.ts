@@ -10,6 +10,7 @@ export interface ProductImage {
   url: string;
   alt: string;
   isPrimary: boolean;
+  mediaType?: 'image' | 'video';
 }
 
 export interface ProductColor {

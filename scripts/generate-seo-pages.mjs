@@ -98,7 +98,14 @@ for (const product of products) {
         ? 'Printed Shirt'
         : 'Oversized T-Shirt';
   const description = stripHtml(product.description) || `${product.name}, a premium ${category.toLowerCase()} by Slugsera.`;
-  const productImage = product.image || product.images?.find?.((image) => image.isPrimary)?.url || product.images?.[0]?.url || '';
+  const productImages = (product.images || []).filter((image) => {
+    const url = typeof image === 'string' ? image : image?.url || '';
+    return image?.mediaType !== 'video' && !/\.(mp4|webm|mov|m4v|ogv)(?:[?#]|$)/i.test(url);
+  });
+  const primaryMedia = productImages.find((image) => typeof image !== 'string' && image.isPrimary) || productImages[0];
+  const productImage = (typeof primaryMedia === 'string' ? primaryMedia : primaryMedia?.url)
+    || (!/\.(mp4|webm|mov|m4v|ogv)(?:[?#]|$)/i.test(product.image || '') ? product.image : '')
+    || '';
   writePage({
     path: `/product/${slug}`,
     title: `${product.name} ${category} | Slugsera`,

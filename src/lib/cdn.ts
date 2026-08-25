@@ -21,15 +21,23 @@ export function cdnUrl(filename: string): string {
  * image endpoint. Static brand assets already use Vercel's edge CDN.
  */
 export function optimizedProductImageUrl(source: string, width = 640, quality = 72): string {
+  if (isVideoMedia(source)) return source;
   if (!source.includes('usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/')) return source;
   return `/api/image?src=${encodeURIComponent(source)}&w=${width}&q=${quality}`;
 }
 
 export function optimizedProductImageSrcSet(source: string): string | undefined {
+  if (isVideoMedia(source)) return undefined;
   if (!source.includes('usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/')) return undefined;
   return [320, 640, 960]
     .map((width) => `${optimizedProductImageUrl(source, width)} ${width}w`)
     .join(', ');
+}
+
+/** Detect product videos stored alongside images in the product media array. */
+export function isVideoMedia(source = ''): boolean {
+  const pathname = source.split(/[?#]/, 1)[0].toLowerCase();
+  return /\.(mp4|webm|mov|m4v|ogv)$/.test(pathname);
 }
 
 const STATIC_RESPONSIVE_IMAGES: Record<string, string> = {

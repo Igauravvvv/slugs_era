@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const SITE_URL = 'https://www.slugsera.com';
 
-type ProductImage = { url?: string; isPrimary?: boolean };
+type ProductImage = { url?: string; isPrimary?: boolean; mediaType?: 'image' | 'video' };
 type SizeStock = { stock?: number; preOrder?: boolean };
 
 type DbProduct = {
@@ -43,6 +43,7 @@ const productSlug = (product: DbProduct) => (product.name || 'product')
     .replace(/(^-|-$)/g, '');
 
 const absoluteUrl = (url: string) => url.startsWith('http') ? url : `${SITE_URL}${url}`;
+const isVideo = (image: ProductImage) => image.mediaType === 'video' || /\.(mp4|webm|mov|m4v|ogv)(?:[?#]|$)/i.test(image.url || '');
 
 const categoryLabel = (category: string | null | undefined) => ({
   tshirts: 'T-Shirts',
@@ -68,7 +69,7 @@ function tag(name: string, value: string | number | null | undefined) {
 }
 
 function itemXml(product: DbProduct) {
-  const images = Array.isArray(product.images) ? product.images : [];
+  const images = Array.isArray(product.images) ? product.images.filter((image) => !isVideo(image)) : [];
   const primaryImage = images.find((image) => image.isPrimary)?.url || images[0]?.url || product.image || '';
   const additionalImages = images
     .map((image) => image.url)
