@@ -90,14 +90,12 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
     const button = (event.target as HTMLElement).closest('button');
     if (isComingSoon || images.length < 2 || (button && !button.hasAttribute('data-card-open'))) return;
     pointerStart.current = { x: event.clientX, y: event.clientY, id: event.pointerId };
-    event.currentTarget.setPointerCapture?.(event.pointerId);
   };
 
   const handleImagePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
     const start = pointerStart.current;
     pointerStart.current = null;
     if (!start || start.id !== event.pointerId || isComingSoon || images.length < 2) return;
-    event.currentTarget.releasePointerCapture?.(event.pointerId);
     const distanceX = event.clientX - start.x;
     const distanceY = event.clientY - start.y;
     if (Math.abs(distanceX) < 44 || Math.abs(distanceX) <= Math.abs(distanceY)) return;
