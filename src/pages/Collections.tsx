@@ -157,7 +157,7 @@ export default function Collections() {
     <>
       <SEOHead
         title={seo?.title || 'Shop Indian Streetwear: Oversized Tees, Shirts & Hoodies'}
-        description={seo?.description || 'Explore Slugsera streetwear collections: heavyweight oversized T-shirts, relaxed printed shirts and premium hoodies made for expressive everyday wear in India.'}
+        description={seo?.description || 'Explore Slugsera heavyweight oversized T-shirts, relaxed printed shirts and premium hoodies made for expressive everyday streetwear in India.'}
         keywords={seo?.keywords || ['streetwear Delhi NCR', 'oversized t-shirts India', 'printed shirts India', 'premium hoodies India']}
         url={canonicalCategory ? `/collections/${canonicalCategory}` : '/collections'}
         structuredData={[

@@ -55,10 +55,15 @@ check(new Set(titles).size === titles.length, 'all indexable page titles are uni
 check(new Set(descriptions).size === descriptions.length, 'all indexable page descriptions are unique');
 for (const page of seoPages) {
   check(page.title.length >= 30 && page.title.length <= 70, `${page.path} title is descriptive and concise`);
-  check(page.description.length >= 110 && page.description.length <= 170, `${page.path} description has useful search context`);
+  check(page.description.length >= 110 && page.description.length <= 150, `${page.path} description has useful search context and safe display width`);
   if (page.path.startsWith('/blog/')) check(sitemap.includes(`path: '${page.path}'`), `sitemap includes article: ${page.path}`);
   if (!page.path.startsWith('/product/')) check(sitemap.includes(`path: '${page.path}'`), `sitemap includes page: ${page.path}`);
 }
+
+const generator = read('scripts/generate-seo-pages.mjs');
+check(generator.includes('crawlMarkup(page)'), 'generated HTML includes crawl-time page content');
+check(generator.includes('<h1>') && generator.includes('<h2>'), 'generated HTML includes semantic H1 and H2 headings');
+check(generator.includes('crawlLinks') && generator.includes('<a href='), 'generated HTML includes crawlable internal links');
 
 const sourceFiles = ['src/App.tsx', 'src/sections/Footer.tsx', 'src/pages/Contact.tsx'];
 for (const file of sourceFiles) {

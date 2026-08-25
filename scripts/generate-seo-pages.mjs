@@ -15,6 +15,28 @@ const summarize = (value, max = 132) => {
 };
 const slugify = (value = '') => value.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 const absolute = (value = '') => value.startsWith('http') ? value : `${siteUrl}${value}`;
+const crawlLinks = [
+  ['/', 'Slugsera home'],
+  ['/collections', 'Shop all streetwear'],
+  ['/collections/tshirts', 'Oversized T-shirts'],
+  ['/collections/shirts', 'Printed shirts'],
+  ['/collections/hoodies', 'Oversized hoodies'],
+  ['/about', 'About Slugsera'],
+  ['/lookbook', 'Streetwear lookbook'],
+  ['/blog', 'Streetwear journal'],
+  ['/faq', 'Sizing and order FAQ'],
+  ['/shipping-policy', 'Shipping across India'],
+  ['/return-policy', 'Returns and exchanges'],
+  ['/contact', 'Contact Slugsera'],
+];
+
+function crawlMarkup(page) {
+  const links = crawlLinks
+    .filter(([path]) => path !== page.path)
+    .map(([path, label]) => `<a href="${path}">${escapeHtml(label)}</a>`)
+    .join('');
+  return `<style data-crawl-shell>body{margin:0;color:#1a1a1a;background:#fff;font-family:Arial,sans-serif}.crawl-shell{max-width:1120px;margin:auto;padding:64px 24px}.crawl-shell h1{font-family:Georgia,serif;font-size:clamp(36px,7vw,72px);font-weight:400;line-height:1.05}.crawl-shell h2{margin-top:42px;font-family:Georgia,serif;font-size:30px;font-weight:400}.crawl-shell p{max-width:760px;color:#555;line-height:1.75}.crawl-links{display:flex;flex-wrap:wrap;gap:12px;margin-top:20px}.crawl-links a{border:1px solid #ddd;padding:11px 14px;color:#1a1a1a;text-decoration:none}.crawl-brand{color:#c0132a;font-size:12px;letter-spacing:.18em;text-transform:uppercase}</style><main class="crawl-shell" data-crawl-content><p class="crawl-brand">Slugsera · Movement, not merch</p><h1>${escapeHtml(page.h1 || page.title)}</h1><p>${escapeHtml(page.description)}</p><section><h2>Explore Slugsera streetwear</h2><nav class="crawl-links" aria-label="Slugsera pages">${links}</nav></section><section><h2>Indian streetwear, sizing and order help</h2><p>Explore heavyweight oversized T-shirts, printed shirts, hoodies, original artwork, fit guidance, shipping information and the story behind Slugsera.</p></section></main>`;
+}
 
 function headMarkup(page) {
   const url = `${siteUrl}${page.path === '/' ? '/' : page.path}`;
@@ -31,7 +53,8 @@ function renderPage(page) {
   const base = page.path === '/' ? cleanTemplate : cleanTemplate.replace(/\s*<script type="application\/ld\+json">[\s\S]*?<\/script>/g, (block) => block.includes('#homepage') ? '' : block);
   return base
     .replace(/<title(?:\s+[^>]*)?>[\s\S]*?<\/title>/, `<title data-rh="true">${escapeHtml(page.title)}</title>`)
-    .replace('    <meta name="author"', `${headMarkup(page)}\n    <meta name="author"`);
+    .replace('    <meta name="author"', `${headMarkup(page)}\n    <meta name="author"`)
+    .replace('<div id="root"></div>', `<div id="root">${crawlMarkup(page)}</div>`);
 }
 
 function writePage(page) {
@@ -79,7 +102,7 @@ for (const product of products) {
   writePage({
     path: `/product/${slug}`,
     title: `${product.name} ${category} | Slugsera`,
-    description: `${summarize(description)} Shop online in India.`,
+    description: `${summarize(description, 124)} Shop online in India.`,
     h1: product.name,
     image: productImage,
     type: 'product',

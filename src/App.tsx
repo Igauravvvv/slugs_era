@@ -189,7 +189,7 @@ function HomeView() {
     <div className="flex flex-col">
       <SEOHead
         title="Slugsera | Premium Oversized Streetwear Made in India"
-        description="Shop Slugsera heavyweight oversized T-shirts, graphic hoodies and printed shirts. Independent slow-fashion streetwear designed in Delhi and delivered across India."
+        description="Shop Slugsera heavyweight oversized T-shirts, graphic hoodies and printed shirts—independent slow-fashion streetwear designed in Delhi for India."
         keywords={['streetwear Delhi', 'streetwear Noida', 'streetwear Gurugram', 'oversized t-shirts Delhi NCR', 'Indian slow fashion brand']}
         url="/"
       />
@@ -430,7 +430,7 @@ function App() {
               } />
               <Route path="/contact" element={
                 <StorefrontLayout minimal showFooter>
-                  <SEOHead title="Contact Slugsera | Order, Sizing & Streetwear Support" description="Contact Slugsera for order help, sizing advice, product questions or collaborations. Reach our Indian streetwear support team by form, email or WhatsApp." keywords={['contact Slugsera', 'streetwear customer support Delhi NCR', 'Slugsera WhatsApp']} url="/contact" />
+                  <SEOHead title="Contact Slugsera | Order, Sizing & Streetwear Support" description="Contact Slugsera for order help, sizing advice, product questions or collaborations through our support form, email or WhatsApp." keywords={['contact Slugsera', 'streetwear customer support Delhi NCR', 'Slugsera WhatsApp']} url="/contact" />
                   <Contact />
                 </StorefrontLayout>
               } />

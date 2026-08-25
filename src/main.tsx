@@ -18,7 +18,12 @@ const queryClient = new QueryClient({
   },
 })
 
-createRoot(document.getElementById('root')!).render(
+const rootElement = document.getElementById('root')!;
+// Build-generated route HTML gives non-JavaScript crawlers useful semantic
+// content. The interactive application replaces that fallback immediately.
+rootElement.replaceChildren();
+
+createRoot(rootElement).render(
   <StrictMode>
     <ErrorBoundary>
       <HelmetProvider>
