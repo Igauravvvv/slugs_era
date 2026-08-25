@@ -23,6 +23,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
   const [imageIndex, setImageIndex] = useState(0);
   const pointerStart = useRef<{ x: number; y: number; id: number } | null>(null);
   const didSwipeImage = useRef(false);
+  const lastArrowPointerAt = useRef(0);
   const isComingSoon = product.status === 'coming_soon';
 
   // Use the product's actual images array; fall back to just the primary image
@@ -270,11 +271,14 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
             <button 
               type="button"
               aria-label="Previous product image"
-              onPointerDown={handlePrevImage}
+              onPointerDown={(event) => {
+                lastArrowPointerAt.current = Date.now();
+                handlePrevImage(event);
+              }}
               onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
-                if (event.detail === 0) showPreviousImage();
+                if (Date.now() - lastArrowPointerAt.current > 400) showPreviousImage();
               }}
               className="absolute left-3 top-1/2 -translate-y-1/2 hidden lg:flex w-8 h-8 items-center justify-center bg-white/90 rounded-full z-30 hover:bg-white text-black drop-shadow-md"
             >
@@ -283,11 +287,14 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
             <button 
               type="button"
               aria-label="Next product image"
-              onPointerDown={handleNextImage}
+              onPointerDown={(event) => {
+                lastArrowPointerAt.current = Date.now();
+                handleNextImage(event);
+              }}
               onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
-                if (event.detail === 0) showNextImage();
+                if (Date.now() - lastArrowPointerAt.current > 400) showNextImage();
               }}
               className="absolute right-3 top-1/2 -translate-y-1/2 hidden lg:flex w-8 h-8 items-center justify-center bg-white/90 rounded-full z-30 hover:bg-white text-black drop-shadow-md"
             >
