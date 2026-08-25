@@ -9,6 +9,7 @@ interface SEOHeadProps {
   keywords?: string[];
   type?: 'website' | 'product' | 'article';
   noindex?: boolean;
+  structuredData?: Record<string, unknown> | Record<string, unknown>[];
   // Product-specific
   product?: {
     name: string;
@@ -49,6 +50,7 @@ export default function SEOHead({
   keywords = DEFAULT_KEYWORDS,
   type = 'website',
   noindex = false,
+  structuredData,
   product,
 }: SEOHeadProps) {
   const isBrandIncluded = title?.toLowerCase().includes('slugs') || title?.toLowerCase().includes('slugsera');
@@ -72,7 +74,7 @@ export default function SEOHead({
       <meta name="description" content={description} />
       <meta name="keywords" content={keywordContent} />
       <link rel="canonical" href={fullUrl} />
-      {noindex && <meta name="robots" content="noindex, nofollow" />}
+      <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow'} />
 
       {/* Open Graph */}
       <meta property="og:type" content={type} />
@@ -88,6 +90,11 @@ export default function SEOHead({
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={description} />
       <meta name="twitter:image" content={imageUrl} />
+      <meta name="twitter:url" content={fullUrl} />
+
+      {structuredData && (
+        <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
+      )}
 
       {/* Product JSON-LD */}
       {product && (

@@ -315,6 +315,8 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
           <div className="flex gap-1.5 hidden lg:flex">
             {product.colors.slice(0, 3).map((color, i) => (
               <button
+                type="button"
+                aria-label={`Colour option ${i + 1}: ${color}`}
                 key={i}
                 className="w-2.5 h-2.5 rounded-full border border-[#E8E4E0] cursor-pointer transition-transform duration-200 hover:scale-130"
                 style={{ backgroundColor: color }}

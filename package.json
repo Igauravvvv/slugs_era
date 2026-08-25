@@ -9,7 +9,8 @@
     "dev:all": "npx concurrently \"npm run dev\" \"npm run dev:backend\"",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "audit:site": "node scripts/audit-site.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

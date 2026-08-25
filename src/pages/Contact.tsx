@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MessageCircle, Mail, MapPin, Clock, Send, Instagram, Phone } from 'lucide-react';
+import { MessageCircle, Mail, Clock, Send, Instagram } from 'lucide-react';
+
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3000');
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -9,14 +11,28 @@ export default function Contact() {
     subject: '',
     message: '',
   });
-  const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In production, send to backend/API
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 5000);
-    setFormData({ name: '', email: '', subject: '', message: '' });
+    setIsSubmitting(true);
+    setFeedback(null);
+    try {
+      const response = await fetch(`${API_URL}/api/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.message || 'Unable to send your message.');
+      setFeedback({ type: 'success', message: "Message sent. We'll get back to you soon." });
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (error) {
+      setFeedback({ type: 'error', message: error instanceof Error ? error.message : 'Unable to send your message.' });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const fadeUp = {
@@ -134,7 +150,8 @@ export default function Contact() {
               </h3>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <input
+                  <label className="sr-only" htmlFor="contact-name">Your name</label>
+                  <input id="contact-name" name="name" autoComplete="name" maxLength={100}
                     type="text"
                     placeholder="Your Name"
                     value={formData.name}
@@ -142,7 +159,8 @@ export default function Contact() {
                     required
                     className="input-field bg-white"
                   />
-                  <input
+                  <label className="sr-only" htmlFor="contact-email">Email address</label>
+                  <input id="contact-email" name="email" autoComplete="email" maxLength={254}
                     type="email"
                     placeholder="Email Address"
                     value={formData.email}
@@ -151,7 +169,8 @@ export default function Contact() {
                     className="input-field bg-white"
                   />
                 </div>
-                <input
+                <label className="sr-only" htmlFor="contact-subject">Subject</label>
+                <input id="contact-subject" name="subject" maxLength={150}
                   type="text"
                   placeholder="Subject"
                   value={formData.subject}
@@ -159,7 +178,8 @@ export default function Contact() {
                   required
                   className="input-field bg-white"
                 />
-                <textarea
+                <label className="sr-only" htmlFor="contact-message">Your message</label>
+                <textarea id="contact-message" name="message" minLength={10} maxLength={5000}
                   placeholder="Your message..."
                   rows={5}
                   value={formData.message}
@@ -167,16 +187,18 @@ export default function Contact() {
                   required
                   className="input-field bg-white resize-none"
                 />
-                <button type="submit" className="btn-dark w-full justify-center">
-                  <Send size={14} /> Send Message
+                <button type="submit" disabled={isSubmitting} className="btn-dark w-full justify-center disabled:cursor-wait disabled:opacity-60">
+                  <Send size={14} aria-hidden="true" /> {isSubmitting ? 'Sending…' : 'Send Message'}
                 </button>
-                {submitted && (
+                {feedback && (
                   <motion.p
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="text-[#C0132A] text-[13px] text-center font-medium"
+                    role="status"
+                    aria-live="polite"
+                    className={`${feedback.type === 'success' ? 'text-[#387A3B]' : 'text-[#C0132A]'} text-[13px] text-center font-medium`}
                   >
-                    ✓ Message sent! We'll get back to you soon.
+                    {feedback.message}
                   </motion.p>
                 )}
               </form>

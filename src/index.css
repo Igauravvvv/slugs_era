@@ -328,3 +328,33 @@
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+:focus-visible {
+  outline: 3px solid #C0132A;
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 10001;
+  transform: translateY(-180%);
+  background: #ffffff;
+  color: #1A1A1A;
+  padding: 0.75rem 1rem;
+  border: 2px solid #C0132A;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

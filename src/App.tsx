@@ -3,7 +3,7 @@ import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '@/store';
 import { useAuth } from '@/context/AuthContext';
-import { trackPageView } from '@/lib/analytics';
+import { initAnalytics, trackPageView } from '@/lib/analytics';
 import { trackCustomerEvent } from '@/lib/customerAnalytics';
 
 // Sections — kept eager (above-the-fold on home page)
@@ -25,6 +25,7 @@ import TornEdge from '@/components/TornEdge';
 
 import ToastContainer from '@/components/Toast';
 import SEOHead from '@/components/SEOHead';
+import CookieConsent from '@/components/CookieConsent';
 import { useProducts } from '@/hooks/useProducts';
 
 
@@ -42,12 +43,11 @@ const Contact = lazy(() => import('@/pages/Contact'));
 const Lookbook = lazy(() => import('@/pages/Lookbook'));
 const ShippingPolicy = lazy(() => import('@/pages/ShippingPolicy'));
 const ReturnPolicy = lazy(() => import('@/pages/ReturnPolicy'));
+const PrivacyPolicy = lazy(() => import('@/pages/PrivacyPolicy'));
+const Terms = lazy(() => import('@/pages/Terms'));
 const BlogList = lazy(() => import('@/pages/BlogList'));
 const BlogPost = lazy(() => import('@/pages/BlogPost'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
-
-// Admin — lazy loaded (huge bundle: recharts, 10 sub-pages)
-const AdminLayout = lazy(() => import('@/pages/admin/AdminLayout'));
 
 // New CMS Dashboard
 const DashboardLayout = lazy(() => import('@/pages/dashboard/DashboardLayout'));
@@ -55,8 +55,8 @@ const DashboardLayout = lazy(() => import('@/pages/dashboard/DashboardLayout'));
 // Minimal loading fallback for lazy routes
 function PageLoader() {
   return (
-    <div className="flex items-center justify-center min-h-[50vh]">
-      <div className="w-8 h-8 border-2 border-[#C0132A] border-t-transparent rounded-full animate-spin" />
+    <div className="flex items-center justify-center min-h-[50vh]" role="status" aria-label="Loading page">
+      <div className="w-8 h-8 border-2 border-[#C0132A] border-t-transparent rounded-full animate-spin" aria-hidden="true" />
     </div>
   );
 }
@@ -170,8 +170,9 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function StorefrontLayout({ children, minimal = false, showFooter = true, noPadding = false }: { children: React.ReactNode; minimal?: boolean; showFooter?: boolean; noPadding?: boolean }) {
   return (
     <>
+      <a href="#main-content" className="skip-link">Skip to main content</a>
       <Header minimal={minimal} />
-      <main className={noPadding ? "" : "pt-[76px]"}>
+      <main id="main-content" tabIndex={-1} className={noPadding ? "" : "pt-[76px]"}>
         {children}
       </main>
       {showFooter && (
@@ -302,6 +303,7 @@ function App() {
 
   // Track page views on route change
   useEffect(() => {
+    initAnalytics();
     trackPageView(location.pathname, document.title);
     void trackCustomerEvent('page_view', { properties: { path: location.pathname } });
   }, [location.pathname]);
@@ -429,7 +431,11 @@ function App() {
               } />
               <Route path="/faq" element={
                 <StorefrontLayout minimal showFooter>
-                  <SEOHead title="Frequently Asked Questions" description="Find answers about Slug's Era sizing, shipping, returns and orders for our oversized streetwear clothing." keywords={['Slugsera size guide', 'streetwear shipping India', 't-shirt exchange policy']} url="/faq" />
+                  <SEOHead title="Frequently Asked Questions" description="Find answers about Slug's Era sizing, shipping, returns and orders for our oversized streetwear clothing." keywords={['Slugsera size guide', 'streetwear shipping India', 't-shirt exchange policy']} url="/faq" structuredData={{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [
+                    { '@type': 'Question', name: 'How long does delivery take?', acceptedAnswer: { '@type': 'Answer', text: 'Orders are normally delivered within 3–7 business days after dispatch.' } },
+                    { '@type': 'Question', name: 'Can I return or exchange an item?', acceptedAnswer: { '@type': 'Answer', text: 'Eligible unworn items can be returned or exchanged according to our published return policy.' } },
+                    { '@type': 'Question', name: 'How do I choose my size?', acceptedAnswer: { '@type': 'Answer', text: 'Use the size guide on the product page and contact us if you need help choosing.' } },
+                  ] }} />
                   <FAQ />
                 </StorefrontLayout>
               } />
@@ -455,6 +461,18 @@ function App() {
                 <StorefrontLayout minimal showFooter>
                   <SEOHead title="Return & Exchange Policy" description="Read the Slug's Era return and exchange policy for eligible streetwear orders, sizing issues and product concerns." keywords={['Slugsera return policy', 't-shirt exchange India', 'streetwear returns']} url="/return-policy" />
                   <ReturnPolicy />
+                </StorefrontLayout>
+              } />
+              <Route path="/privacy-policy" element={
+                <StorefrontLayout minimal showFooter>
+                  <SEOHead title="Privacy Policy" description="Learn how Slug's Era collects, uses and protects your personal information." url="/privacy-policy" />
+                  <PrivacyPolicy />
+                </StorefrontLayout>
+              } />
+              <Route path="/terms" element={
+                <StorefrontLayout minimal showFooter>
+                  <SEOHead title="Terms and Conditions" description="Read the terms that govern use of the Slug's Era website and purchases." url="/terms" />
+                  <Terms />
                 </StorefrontLayout>
               } />
 
@@ -483,6 +501,7 @@ function App() {
 
       {/* Toast Notifications */}
       <ToastContainer />
+      <CookieConsent />
     </>
   );
 }

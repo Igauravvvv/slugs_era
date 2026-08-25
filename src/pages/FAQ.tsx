@@ -100,11 +100,14 @@ const faqSections: { title: string; icon: React.ElementType; items: FAQItem[] }[
   },
 ];
 
-function AccordionItem({ item, isOpen, toggle }: { item: FAQItem; isOpen: boolean; toggle: () => void }) {
+function AccordionItem({ item, isOpen, toggle, itemId }: { item: FAQItem; isOpen: boolean; toggle: () => void; itemId: string }) {
   return (
     <div className="border-b border-[#E8E4E0] last:border-0">
       <button
+        type="button"
         onClick={toggle}
+        aria-expanded={isOpen}
+        aria-controls={`${itemId}-answer`}
         className="w-full flex items-center justify-between py-5 lg:py-6 text-left group"
       >
         <span className={`text-[14px] lg:text-[16px] font-light pr-4 transition-colors duration-200 ${
@@ -123,6 +126,8 @@ function AccordionItem({ item, isOpen, toggle }: { item: FAQItem; isOpen: boolea
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            id={`${itemId}-answer`}
+            role="region"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -192,6 +197,7 @@ export default function FAQ() {
                       item={item}
                       isOpen={!!openItems[key]}
                       toggle={() => toggleItem(key)}
+                      itemId={`faq-${key}`}
                     />
                   );
                 })}

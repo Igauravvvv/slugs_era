@@ -8,7 +8,7 @@ export default function Newsletter() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-  const { section, getMeta } = useSiteSection('newsletter');
+  const { section } = useSiteSection('newsletter');
 
   const eyebrow = section?.subtitle || 'Stay in the Loop';
   const heading = section?.title || 'THE <em class="italic text-[#C0132A]">Slow</em> CLUB ,<br />Be a part of the community';
@@ -88,6 +88,9 @@ export default function Newsletter() {
         {/* Feedback message */}
         {feedback && (
           <motion.div
+            id="newsletter-feedback"
+            role="status"
+            aria-live="polite"
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
@@ -106,7 +109,12 @@ export default function Newsletter() {
           onSubmit={handleSubmit}
           className="flex flex-col sm:flex-row max-w-[456px] mx-auto border border-[#E8E4E0] bg-white mt-2"
         >
+          <label htmlFor="newsletter-email" className="sr-only">Email address</label>
           <input
+            id="newsletter-email"
+            name="email"
+            autoComplete="email"
+            aria-describedby={feedback ? 'newsletter-feedback' : undefined}
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -114,6 +122,7 @@ export default function Newsletter() {
             className="flex-1 border-none px-5 py-4 text-sm font-light text-[#1A1A1A] bg-transparent outline-none placeholder:text-[#888880]"
             required
             disabled={isSubmitted}
+            maxLength={254}
           />
           <button
             type="submit"

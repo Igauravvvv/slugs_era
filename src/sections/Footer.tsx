@@ -22,6 +22,7 @@ const footerLinks = {
     { label: 'Shipping', href: '/shipping-policy' },
     { label: 'Returns', href: '/return-policy' },
     { label: 'Size Guide', href: '/faq' },
+    { label: 'FAQ', href: '/faq' },
   ],
 };
 
@@ -182,13 +183,16 @@ export default function Footer() {
         <p className="text-[10px] lg:text-xs font-light text-white">
           © 2026 Slug's Era. All rights reserved.
         </p>
-        <div className="flex gap-5">
+        <div className="flex flex-wrap justify-center gap-5">
           <button onClick={() => navigate('/shipping-policy')} className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">
             Shipping Policy
           </button>
           <button onClick={() => navigate('/return-policy')} className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">
             Return Policy
           </button>
+          <button onClick={() => navigate('/privacy-policy')} className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">Privacy Policy</button>
+          <button onClick={() => navigate('/terms')} className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">Terms</button>
+          <button onClick={() => navigate('/privacy-policy#cookie-settings')} className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">Cookie Settings</button>
           {user && (
             <button
               onClick={() => navigate('/dashboard')}

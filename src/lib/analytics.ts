@@ -9,10 +9,48 @@ declare global {
 }
 
 const GA_ID = import.meta.env.VITE_GA4_MEASUREMENT_ID || '';
+const CONSENT_KEY = 'slugsera_cookie_consent_v1';
+let analyticsInitialized = false;
+
+function hasAnalyticsConsent() {
+  try {
+    return window.localStorage.getItem(CONSENT_KEY) === 'accepted';
+  } catch {
+    return false;
+  }
+}
+
+function hasValidMeasurementId() {
+  return /^G-[A-Z0-9]+$/i.test(GA_ID);
+}
+
+/** Load Google Analytics only after the visitor explicitly accepts analytics cookies. */
+export function initAnalytics() {
+  if (analyticsInitialized || !hasAnalyticsConsent() || !hasValidMeasurementId()) return;
+
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = (...args: unknown[]) => window.dataLayer.push(args);
+  window.gtag('consent', 'default', { analytics_storage: 'granted' });
+  window.gtag('js', new Date());
+  window.gtag('config', GA_ID, { anonymize_ip: true, send_page_view: false });
+
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(GA_ID)}`;
+  script.dataset.slugseraAnalytics = 'true';
+  document.head.appendChild(script);
+  analyticsInitialized = true;
+}
+
+export function disableAnalytics() {
+  if (!hasValidMeasurementId()) return;
+  window.gtag?.('consent', 'update', { analytics_storage: 'denied' });
+  (window as Window & Record<string, unknown>)[`ga-disable-${GA_ID}`] = true;
+}
 
 /** Track a page view */
 export function trackPageView(path: string, title?: string) {
-  if (!window.gtag || !GA_ID) return;
+  if (!window.gtag || !hasAnalyticsConsent() || !hasValidMeasurementId()) return;
   window.gtag('config', GA_ID, {
     page_path: path,
     page_title: title,
@@ -21,7 +59,7 @@ export function trackPageView(path: string, title?: string) {
 
 /** Track a custom event */
 export function trackEvent(eventName: string, params?: Record<string, unknown>) {
-  if (!window.gtag) return;
+  if (!window.gtag || !hasAnalyticsConsent()) return;
   window.gtag('event', eventName, params);
 }
 

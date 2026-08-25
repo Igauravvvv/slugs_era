@@ -188,6 +188,9 @@ export default function Header({ minimal = false }: HeaderProps) {
         <div className="flex items-center justify-start gap-3 lg:gap-11">
           {!minimal && (
             <button
+              type="button"
+              aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={isMobileMenuOpen}
               className={`lg:hidden ibtn ${textColor}`}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
@@ -248,7 +251,7 @@ export default function Header({ minimal = false }: HeaderProps) {
 
         {/* Center: Desktop & Mobile Logo */}
         <div className={`absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 flex items-center justify-center ${isTransparent ? 'opacity-0 pointer-events-none' : ''}`}>
-          <button onClick={() => scrollToSection('hero')} className="flex items-center">
+          <button type="button" aria-label="Go to Slug's Era home" onClick={() => scrollToSection('hero')} className="flex items-center">
             <motion.img
               src={CDN.LOGO}
               alt="Slug's Era Logo"
@@ -262,6 +265,8 @@ export default function Header({ minimal = false }: HeaderProps) {
         {/* Right Side: Icons */}
         <div className={`flex items-center justify-end gap-4 ${isTransparent ? 'opacity-0 pointer-events-none' : ''}`}>
           <button
+            type="button"
+            aria-label={`Open shopping cart with ${cartCount} items`}
             onClick={goToCart}
             className={`cartbtn relative lg:w-9 lg:h-9 h-auto py-1.5 px-3 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 gap-1.5 ${theme === 'white' ? 'bg-white text-[#C0132A]' : 'bg-[#C0132A] text-white'
               }`}
@@ -279,6 +284,8 @@ export default function Header({ minimal = false }: HeaderProps) {
           </button>
 
           <button
+            type="button"
+            aria-label={user ? 'Open your profile' : 'Sign in'}
             onClick={() => {
               if (user) { navigate('/profile'); window.scrollTo(0, 0); }
               else signInWithGoogle();
@@ -302,7 +309,7 @@ export default function Header({ minimal = false }: HeaderProps) {
             {/* Left: Hamburger + Desktop Nav */}
             <div className="flex items-center justify-start gap-3 lg:gap-11">
               {!minimal && (
-                <button className="lg:hidden text-[#C0132A]" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+                <button type="button" aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'} aria-expanded={isMobileMenuOpen} className="lg:hidden text-[#C0132A]" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
                   {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
                 </button>
               )}
@@ -348,7 +355,7 @@ export default function Header({ minimal = false }: HeaderProps) {
 
             {/* Center: Logo */}
             <div className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 flex items-center justify-center">
-              <button onClick={() => scrollToSection('hero')} className="flex items-center">
+              <button type="button" aria-label="Go to Slug's Era home" onClick={() => scrollToSection('hero')} className="flex items-center">
                 <motion.img
                   src={CDN.LOGO}
                   alt="Slug's Era Logo"
@@ -362,6 +369,8 @@ export default function Header({ minimal = false }: HeaderProps) {
             {/* Right: Cart + User */}
             <div className="flex items-center justify-end gap-4">
               <button
+                type="button"
+                aria-label={`Open shopping cart with ${cartCount} items`}
                 onClick={goToCart}
                 className="cartbtn relative lg:w-9 lg:h-9 h-auto py-1.5 px-3 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 gap-1.5 bg-[#C0132A] text-white"
               >
@@ -374,6 +383,8 @@ export default function Header({ minimal = false }: HeaderProps) {
                 )}
               </button>
               <button
+                type="button"
+                aria-label={user ? 'Open your profile' : 'Sign in'}
                 onClick={() => { if (user) { navigate('/profile'); window.scrollTo(0, 0); } else signInWithGoogle(); }}
                 className="ibtn hidden lg:flex w-9 h-9 rounded-full items-center justify-center transition-all duration-200 hover:scale-105 text-[#C0132A] bg-[#1A1A1A]/5 hover:bg-[#C0132A]/10"
               >

@@ -37,7 +37,7 @@ if (!process.env.VERCEL) {
   // If Vercel parsed it but didn't set it to an object for some reason, ensure it's safe
   app.use((req, res, next) => {
     if (req.body && typeof req.body === 'string') {
-      try { req.body = JSON.parse(req.body); } catch(e) {}
+      try { req.body = JSON.parse(req.body); } catch { req.body = {}; }
     }
     next();
   });
@@ -82,6 +82,39 @@ const transporter = nodemailer.createTransport({
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS
+  }
+});
+
+const escapeHtml = (value: string) => value.replace(/[&<>'"]/g, (character) => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;',
+}[character] || character));
+
+app.post('/api/contact', strictLimiter, async (req, res, next) => {
+  const { name, email, subject, message } = req.body || {};
+  if (
+    typeof name !== 'string' || !name.trim() || name.length > 100 ||
+    typeof email !== 'string' || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
+    typeof subject !== 'string' || !subject.trim() || subject.length > 150 ||
+    typeof message !== 'string' || message.trim().length < 10 || message.length > 5000
+  ) {
+    return res.status(400).json({ success: false, message: 'Please complete every field with valid information.' });
+  }
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS || process.env.SMTP_PASS.includes('YOUR_')) {
+    return res.status(503).json({ success: false, message: 'Email delivery is temporarily unavailable. Please contact us on WhatsApp.' });
+  }
+  try {
+    const destination = process.env.CONTACT_EMAIL || process.env.SMTP_USER;
+    await transporter.sendMail({
+      from: `"Slugsera Website" <${process.env.SMTP_USER}>`,
+      to: destination,
+      replyTo: email.trim(),
+      subject: `[Website] ${subject.trim()}`,
+      text: `Name: ${name.trim()}\nEmail: ${email.trim()}\n\n${message.trim()}`,
+      html: `<p><strong>Name:</strong> ${escapeHtml(name.trim())}</p><p><strong>Email:</strong> ${escapeHtml(email.trim())}</p><p><strong>Message:</strong></p><p>${escapeHtml(message.trim()).replace(/\n/g, '<br>')}</p>`,
+    });
+    return res.json({ success: true, message: 'Message sent successfully.' });
+  } catch (error) {
+    next(error);
   }
 });
 
