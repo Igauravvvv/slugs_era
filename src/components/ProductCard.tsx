@@ -271,7 +271,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
               type="button"
               aria-label="Previous product image"
               onClick={handlePrevImage}
-              className="absolute left-3 top-1/2 -translate-y-1/2 hidden lg:flex w-8 h-8 items-center justify-center bg-white/90 rounded-full opacity-0 group-hover/slider:opacity-100 transition-opacity z-30 hover:bg-white text-black drop-shadow-md"
+              className="absolute left-3 top-1/2 -translate-y-1/2 hidden lg:flex w-8 h-8 items-center justify-center bg-white/90 rounded-full z-30 hover:bg-white text-black drop-shadow-md"
             >
               <ChevronLeft size={18} />
             </button>
@@ -279,7 +279,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
               type="button"
               aria-label="Next product image"
               onClick={handleNextImage}
-              className="absolute right-3 top-1/2 -translate-y-1/2 hidden lg:flex w-8 h-8 items-center justify-center bg-white/90 rounded-full opacity-0 group-hover/slider:opacity-100 transition-opacity z-30 hover:bg-white text-black drop-shadow-md"
+              className="absolute right-3 top-1/2 -translate-y-1/2 hidden lg:flex w-8 h-8 items-center justify-center bg-white/90 rounded-full z-30 hover:bg-white text-black drop-shadow-md"
             >
               <ChevronRight size={18} />
             </button>
