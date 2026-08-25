@@ -74,21 +74,8 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
     });
   };
 
-  const handleImageClick = (e: React.MouseEvent) => {
-    // A swipe is followed by a click event on many mobile browsers. Consume that
-    // event so browsing the gallery never accidentally opens the product page.
-    if (didSwipeImage.current) {
-      e.preventDefault();
-      e.stopPropagation();
-      didSwipeImage.current = false;
-      return;
-    }
-    goToProduct(e);
-  };
-
   const handleImagePointerStart = (event: React.PointerEvent<HTMLDivElement>) => {
-    const button = (event.target as HTMLElement).closest('button');
-    if (isComingSoon || images.length < 2 || (button && !button.hasAttribute('data-card-open'))) return;
+    if (isComingSoon || images.length < 2 || (event.target as HTMLElement).closest('button')) return;
     pointerStart.current = { x: event.clientX, y: event.clientY, id: event.pointerId };
   };
 
@@ -155,11 +142,21 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
           onPointerUp={handleImagePointerEnd}
           onPointerCancel={() => { pointerStart.current = null; }}
         >
-        <button
-          type="button"
-          data-card-open
+        <Link
+          to={productUrl}
           aria-label={`View ${product.name}`}
-          onClick={handleImageClick}
+          onClick={(event) => {
+            if (didSwipeImage.current) {
+              event.preventDefault();
+              event.stopPropagation();
+              didSwipeImage.current = false;
+              return;
+            }
+            void trackCustomerEvent('product_clicked', {
+              productId: product.id,
+              properties: { product_name: product.name, category: product.category, source: 'product_card_image' },
+            });
+          }}
           className="absolute inset-0 z-20 cursor-pointer"
         />
         {(product.badge || isComingSoon) && (
