@@ -66,7 +66,14 @@ const products = await loadProducts();
 for (const product of products) {
   if (!product.name || product.status === 'coming_soon' || product.status === 'pre_book') continue;
   const slug = slugify(product.name);
-  const category = String(product.category || '').toLowerCase().includes('hood') ? 'Oversized Hoodie' : String(product.category || '').toLowerCase().includes('shirt') && !String(product.category || '').toLowerCase().includes('t-shirt') ? 'Printed Shirt' : 'Oversized T-Shirt';
+  const categoryValue = String(product.category || '').toLowerCase();
+  const category = categoryValue.includes('hood')
+    ? 'Oversized Hoodie'
+    : /\b(?:t[\s-]?shirts?|tshirts?|tees?)\b/.test(categoryValue)
+      ? 'Oversized T-Shirt'
+      : categoryValue.includes('shirt')
+        ? 'Printed Shirt'
+        : 'Oversized T-Shirt';
   const description = stripHtml(product.description) || `${product.name}, a premium ${category.toLowerCase()} by Slugsera.`;
   const productImage = product.image || product.images?.find?.((image) => image.isPrimary)?.url || product.images?.[0]?.url || '';
   writePage({
