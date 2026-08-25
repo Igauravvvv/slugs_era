@@ -4,7 +4,6 @@ import { Star, Footprints, Shirt, Scissors, Users, Eye, Leaf, Sparkles } from 'l
 import { ExpandOnHover } from '@/components/ui/expand-cards';
 import { CDN } from '@/lib/cdn';
 import { useSiteSection } from '@/context/SiteContentContext';
-import LogoAnimation from '@/components/LogoAnimation';
 
 const iconMap: Record<string, any> = { Star, Eye, Scissors, Sparkles, Footprints, Users, Leaf, Shirt };
 
@@ -91,9 +90,9 @@ export default function Values() {
             x: typeof window !== 'undefined' && window.innerWidth >= 1024 ? contentX : 0,
           }}
         >
-          <div className="font-display font-light italic text-4xl md:text-6xl lg:text-[70px] text-[#C0132A] whitespace-nowrap">
+          <h2 className="font-display font-light italic text-4xl md:text-6xl lg:text-[70px] text-[#C0132A] whitespace-nowrap">
             {eyebrow}
-          </div>
+          </h2>
         </motion.div>
       </div>
 

@@ -3,6 +3,7 @@
   "installCommand": "npm install --legacy-peer-deps",
   "outputDirectory": "dist",
   "framework": "vite",
+  "cleanUrls": true,
   "headers": [
     {
       "source": "/images/(.*)",

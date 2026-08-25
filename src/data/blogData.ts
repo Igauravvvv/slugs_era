@@ -4,6 +4,8 @@ export interface BlogPostType {
   id: string;
   slug: string;
   title: string;
+  seoTitle?: string;
+  seoDescription?: string;
   excerpt: string;
   content: string;
   date: string;
@@ -18,6 +20,8 @@ export const blogPosts: BlogPostType[] = [
     id: "1",
     slug: "what-is-slugsera-slow-fashion-movement",
     title: "What is Slugsera? The Story Behind India's Slow Fashion Movement",
+    seoTitle: "What Is Slugsera? India’s Slow-Fashion Streetwear Movement",
+    seoDescription: "Learn what Slugsera means, why the independent Indian streetwear brand chooses slow fashion and how its heavyweight clothing is made to last.",
     excerpt: "Discover what Slugsera really is, why we're not just another clothing brand, and how the Slug's Era movement is redefining premium streetwear in India.",
     date: "2026-07-05",
     readTime: "5 min read",
@@ -52,6 +56,8 @@ export const blogPosts: BlogPostType[] = [
     id: "2",
     slug: "why-were-called-slugs-era",
     title: "Why We're Called Slug's Era — The Meaning Behind Our Name",
+    seoTitle: "Why We’re Called Slug’s Era | The Slugsera Name Story",
+    seoDescription: "Discover the meaning behind Slugsera and Slug’s Era: a Delhi-born streetwear movement built around intentional living, patience and slow fashion.",
     excerpt: "Unpacking the deep meaning behind the name Slugsera, how it differentiates us from fast fashion, and why it's a lifestyle, not just a brand.",
     date: "2026-06-28",
     readTime: "4 min read",
@@ -83,6 +89,8 @@ export const blogPosts: BlogPostType[] = [
     id: "3",
     slug: "slugsera-guide-oversized-t-shirts",
     title: "Slugsera's Guide to Oversized T-Shirts: Finding Your Perfect Fit",
+    seoTitle: "How to Choose an Oversized T-Shirt Fit in India",
+    seoDescription: "Use this Slugsera guide to choose an oversized T-shirt size, understand dropped shoulders and boxy proportions, and style heavyweight tees in India.",
     excerpt: "Everything you need to know about styling, sizing, and choosing the perfect oversized streetwear tee from the Slugsera collection.",
     date: "2026-06-15",
     readTime: "6 min read",
@@ -115,6 +123,8 @@ export const blogPosts: BlogPostType[] = [
     id: "4",
     slug: "slow-fashion-vs-fast-fashion-slugsera",
     title: "Slow Fashion vs Fast Fashion: Why Slugsera Chose to Go Slow",
+    seoTitle: "Slow Fashion vs Fast Fashion in India | Slugsera Guide",
+    seoDescription: "Compare slow fashion and fast fashion by materials, production, durability and cost per wear, and learn why Slugsera produces clothing in small batches.",
     excerpt: "An in-depth look at the environmental and social impact of fast fashion, and why Slugsera is committed to the slow fashion movement in India.",
     date: "2026-05-22",
     readTime: "7 min read",
@@ -147,6 +157,8 @@ export const blogPosts: BlogPostType[] = [
     id: "5",
     slug: "slugsera-lookbook-styling-streetwear",
     title: "Slugsera Lookbook 2026: How to Style Oversized Streetwear",
+    seoTitle: "How to Style Oversized Streetwear | Slugsera Lookbook",
+    seoDescription: "Build everyday outfits with oversized T-shirts, relaxed printed shirts, heavyweight hoodies, wide-leg trousers and sneakers in this Indian streetwear guide.",
     excerpt: "Get inspired by the official Slugsera lookbook. Visual guides and outfit breakdowns featuring our signature oversized t-shirts, custom shirts, and hoodies.",
     date: "2026-05-10",
     readTime: "3 min read",
@@ -175,6 +187,84 @@ export const blogPosts: BlogPostType[] = [
 
 <h2>Share Your Slugsera Fits</h2>
 <p>We love seeing how the community styles their Slugsera pieces. Tag us on Instagram @slugsera and use the hashtag #SlugsEra to be featured in our next community lookbook. Remember, it's not just merch; it's a movement.</p>
+    `
+  },
+  {
+    id: "6",
+    slug: "what-is-gsm-tshirt-guide-india",
+    title: "What Is GSM in T-Shirts? 180 vs 240 GSM Explained",
+    seoTitle: "What Is GSM in T-Shirts? 180 vs 240 GSM Explained",
+    seoDescription: "Understand T-shirt GSM, compare lightweight and heavyweight cotton, and learn when a structured 240 GSM oversized tee is the better choice for Indian weather.",
+    excerpt: "A practical guide to T-shirt fabric weight, how GSM changes drape and durability, and when a heavyweight 240 GSM oversized tee makes sense in India.",
+    date: "2026-08-25",
+    readTime: "6 min read",
+    category: "Fabric Guide",
+    image: CDN.FABRIC_LOADING_BG,
+    author: "Slug's Era Team",
+    content: `
+<p>GSM means grams per square metre. It measures fabric weight, not quality by itself. Yarn, knit, finishing and construction still matter, but GSM gives you a useful starting point when comparing T-shirts online.</p>
+<h2>How different T-shirt weights feel</h2>
+<p>A lightweight 140–180 GSM tee is airy and easy to layer, but it can cling to the body and may become translucent in pale colours. Midweight fabric around 180–220 GSM balances breathability and structure. A heavyweight 240 GSM T-shirt has a denser hand, cleaner drape and enough body to hold a boxy oversized silhouette.</p>
+<h2>Is 240 GSM too hot for India?</h2>
+<p>Not automatically. Fabric weight is only one factor; fibre, knit and fit change airflow. A roomy 240 GSM cotton tee can feel more comfortable than a tight synthetic top because air can move around the body. For peak summer afternoons, choose lighter colours and an open fit. For evenings, air-conditioned spaces and transitional weather, heavyweight cotton works especially well.</p>
+<h2>Why Slugsera uses heavyweight cotton</h2>
+<p>Our oversized T-shirts are designed with dropped shoulders and controlled length. Heavier cotton helps that pattern keep its shape instead of collapsing against the body. It also creates a substantial surface for original graphic artwork. Explore the <a href="/collections/tshirts">Slugsera oversized T-shirt collection</a> to compare fits and product details.</p>
+<h2>What to check beyond GSM</h2>
+<ul><li><strong>Fibre:</strong> combed cotton removes shorter fibres for a smoother hand.</li><li><strong>Construction:</strong> reinforced neck rib and clean seams affect longevity.</li><li><strong>Fit:</strong> shoulder width, chest ease and garment length create the silhouette.</li><li><strong>Care:</strong> cold washing and gentle drying help dense cotton retain colour and shape.</li></ul>
+<p>If you are choosing between sizes, use our <a href="/faq">sizing and product-care FAQ</a> or contact the team for a measurement recommendation.</p>
+    `
+  },
+  {
+    id: "7",
+    slug: "how-to-wash-graphic-tshirts-hoodies",
+    title: "How to Wash Graphic T-Shirts and Hoodies Without Fading",
+    seoTitle: "How to Wash Graphic T-Shirts & Hoodies Without Fading",
+    seoDescription: "Follow a practical wash-care routine for printed T-shirts and hoodies: water temperature, turning garments inside out, drying and safe ironing.",
+    excerpt: "Use this simple wash-care routine to protect printed streetwear, heavyweight cotton, hoodie graphics and garment shape for longer.",
+    date: "2026-08-25",
+    readTime: "5 min read",
+    category: "Product Care",
+    image: CDN.RED_ON_TABLE,
+    author: "Slug's Era Team",
+    content: `
+<p>Good streetwear should improve with wear, not be damaged by an aggressive wash cycle. The safest routine for most graphic T-shirts and hoodies is simple: reduce heat, friction and direct contact with the print.</p>
+<h2>Before the wash</h2>
+<p>Read the garment label first. Close zips, empty pockets and turn printed garments inside out. Separate dark, light and strongly coloured clothing. Washing a hoodie only when it needs cleaning also reduces unnecessary fibre wear.</p>
+<h2>Choose cold water and a gentle cycle</h2>
+<p>Cold water helps protect colour and print adhesion. Use a mild detergent and avoid chlorine bleach. Do not overload the machine: garments need enough room to rinse properly. For patchwork, embroidery or a delicate finish, a laundry bag or hand wash may be preferable.</p>
+<h2>Dry without damaging the graphic</h2>
+<p>Air-dry in shade whenever practical. Strong heat can shrink cotton and stress a print, while direct sunlight may fade dark colours. Reshape heavyweight T-shirts before drying and support wet hoodies so their weight does not stretch the shoulders.</p>
+<h2>Iron from the reverse side</h2>
+<p>Never place a hot iron directly on a graphic, vinyl detail or embroidery. Turn the garment inside out, use a low setting and place a clean cotton cloth between the iron and fabric when needed.</p>
+<h2>A five-step streetwear care checklist</h2>
+<ol><li>Turn the garment inside out.</li><li>Wash cold with similar colours.</li><li>Use mild detergent; skip bleach.</li><li>Air-dry in shade.</li><li>Iron inside out and away from artwork.</li></ol>
+<p>Specific materials can need different treatment, so check the care instructions on each <a href="/collections">Slugsera product page</a>. For exchanges or a product concern, read our <a href="/return-policy">return and exchange policy</a>.</p>
+    `
+  },
+  {
+    id: "8",
+    slug: "delhi-streetwear-guide",
+    title: "Delhi Streetwear Guide: What to Wear Through Every Season",
+    seoTitle: "Delhi Streetwear Guide | What to Wear Through Every Season",
+    seoDescription: "Learn how to style oversized tees, printed shirts and heavyweight hoodies for Delhi NCR weather, from hot summers and monsoon days to winter layering.",
+    excerpt: "A practical Delhi NCR streetwear guide for styling oversized tees, relaxed shirts and heavyweight hoodies through summer, monsoon and winter.",
+    date: "2026-08-25",
+    readTime: "7 min read",
+    category: "Delhi Style",
+    image: CDN.COMMUNITY_BG,
+    author: "Slug's Era Team",
+    content: `
+<p>Delhi streetwear has to do more than look good. It needs to move between intense summer heat, humid monsoon days, air-conditioned interiors and genuinely cold winter evenings. A useful wardrobe starts with proportion and layering rather than chasing a new trend every week.</p>
+<h2>Summer: keep the silhouette open</h2>
+<p>Choose an oversized T-shirt with space through the chest and sleeves, then balance it with relaxed trousers or breathable shorts. A boxy fit creates airflow and keeps the outfit intentional. Lighter colours work well in direct sun; a graphic tee can carry the outfit without extra layers.</p>
+<h2>Monsoon: use simple, quick layers</h2>
+<p>During humid weather, pair a tee with an open printed shirt that can be removed easily. Avoid trouser hems that drag on wet ground and choose washable footwear. The <a href="/collections/shirts">Slugsera printed-shirt collection</a> is built around relaxed shapes that work as a light overshirt.</p>
+<h2>Winter: build warmth without losing shape</h2>
+<p>Start with a heavyweight tee, add a roomy hoodie and finish with a jacket only when the temperature drops further. Let a small amount of the base layer show below the hoodie to create depth. Browse <a href="/collections/hoodies">oversized streetwear hoodies</a> for printed and patchwork options.</p>
+<h2>Make the outfit feel like yours</h2>
+<p>Delhi style is strongest when it mixes references: vintage denim, clean trousers, local graphics, sneakers, boots and one personal accessory. Use one statement piece and let the rest of the outfit support it. Our <a href="/lookbook">Indian streetwear lookbook</a> has more combinations for oversized proportions.</p>
+<h2>Buy fewer pieces that work harder</h2>
+<p>A small rotation of well-made tees, one expressive shirt and a heavyweight winter layer can create many outfits. That is the practical side of slow fashion: repeat good clothing, care for it properly and style it differently instead of treating every post as a reason to replace your wardrobe.</p>
     `
   }
 ];

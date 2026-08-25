@@ -17,6 +17,9 @@ const STATIC_PAGES = [
   { path: '/blog/slugsera-guide-oversized-t-shirts', priority: '0.7', changefreq: 'monthly' },
   { path: '/blog/slow-fashion-vs-fast-fashion-slugsera', priority: '0.7', changefreq: 'monthly' },
   { path: '/blog/slugsera-lookbook-styling-streetwear', priority: '0.7', changefreq: 'monthly' },
+  { path: '/blog/what-is-gsm-tshirt-guide-india', priority: '0.8', changefreq: 'monthly' },
+  { path: '/blog/how-to-wash-graphic-tshirts-hoodies', priority: '0.7', changefreq: 'monthly' },
+  { path: '/blog/delhi-streetwear-guide', priority: '0.7', changefreq: 'monthly' },
   { path: '/faq', priority: '0.5', changefreq: 'monthly' },
   { path: '/contact', priority: '0.5', changefreq: 'monthly' },
   { path: '/shipping-policy', priority: '0.4', changefreq: 'monthly' },
@@ -32,18 +35,18 @@ const escapeXml = (value: string) => value
   .replace(/"/g, '&quot;')
   .replace(/'/g, '&apos;');
 
-const productSlug = (product: { slug?: string | null; name: string }) => product.slug
-  || product.name
+const productSlug = (product: { slug?: string | null; name: string }) => product.name
     .toLowerCase()
     .replace(/&/g, 'and')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
 
-function sitemapUrl(path: string, priority: string, changefreq: string, lastmod?: string | null) {
+function sitemapUrl(path: string, priority: string, changefreq: string, lastmod?: string | null, images: Array<{ url: string; caption?: string }> = []) {
   const modified = lastmod && !Number.isNaN(Date.parse(lastmod))
     ? `\n    <lastmod>${new Date(lastmod).toISOString()}</lastmod>`
     : '';
-  return `  <url>\n    <loc>${escapeXml(`${SITE_URL}${path}`)}</loc>${modified}\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n  </url>`;
+  const imageXml = images.map((image) => `\n    <image:image>\n      <image:loc>${escapeXml(image.url.startsWith('http') ? image.url : `${SITE_URL}${image.url}`)}</image:loc>${image.caption ? `\n      <image:caption>${escapeXml(image.caption)}</image:caption>` : ''}\n    </image:image>`).join('');
+  return `  <url>\n    <loc>${escapeXml(`${SITE_URL}${path}`)}</loc>${modified}${imageXml}\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n  </url>`;
 }
 
 export default async function handler(_req: VercelRequest, res: VercelResponse) {
@@ -54,13 +57,15 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
     name: string;
     status?: string | null;
     updated_at?: string | null;
+    image?: string | null;
+    images?: Array<{ url?: string; isPrimary?: boolean } | string> | null;
   }> = [];
 
   if (supabaseUrl && supabaseKey) {
     const supabase = createClient(supabaseUrl, supabaseKey);
     const { data, error } = await supabase
       .from('products')
-      .select('slug,name,status,updated_at')
+      .select('slug,name,status,updated_at,image,images')
       .eq('is_published', true);
 
     if (error) {
@@ -82,10 +87,16 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
       '0.8',
       'weekly',
       product.updated_at,
+      (product.images || [])
+        .map((image) => typeof image === 'string' ? image : image.url || '')
+        .filter(Boolean)
+        .slice(0, 5)
+        .map((url) => ({ url, caption: `${product.name} by Slugsera` }))
+        .concat(product.image && !(product.images || []).length ? [{ url: product.image, caption: `${product.name} by Slugsera` }] : []),
     )),
   ];
 
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>`;
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n${urls.join('\n')}\n</urlset>`;
 
   res.setHeader('Content-Type', 'application/xml; charset=utf-8');
   res.setHeader('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');

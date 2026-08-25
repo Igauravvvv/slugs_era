@@ -1,21 +1,20 @@
 import { Instagram } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useStore } from '@/store';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CDN } from '@/lib/cdn';
 import { useAuth } from '@/context/AuthContext';
 
 const footerLinks = {
   shop: [
-    { label: 'T-Shirts', href: '/collections', category: 'tshirts' },
-    { label: 'Shirts', href: '/collections', category: 'shirts' },
-    { label: 'Hoodies', href: '/collections', category: 'hoodies' },
-    { label: 'New Arrivals', href: '/collections', category: null },
+    { label: 'T-Shirts', href: '/collections/tshirts' },
+    { label: 'Shirts', href: '/collections/shirts' },
+    { label: 'Hoodies', href: '/collections/hoodies' },
+    { label: 'New Arrivals', href: '/collections' },
   ],
   company: [
     { label: 'Our Story', href: '/about' },
     { label: 'Blog', href: '/blog' },
-    { label: 'Values', href: '#values' },
+    { label: 'Values', href: '/#values' },
   ],
   support: [
     { label: 'Contact Us', href: '/contact' },
@@ -31,34 +30,7 @@ const socialLinks = [
 ];
 
 export default function Footer() {
-  const { setCollectionFilter } = useStore();
-  const navigate = useNavigate();
-  const location = useLocation();
   const { user } = useAuth();
-
-  const handleLink = (href: string, category?: string | null) => {
-    if (href.startsWith('#')) {
-      if (href === '#') return;
-      const id = href.slice(1);
-      if (location.pathname !== '/') {
-        navigate('/');
-        setTimeout(() => {
-          const element = document.getElementById(id);
-          if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 100);
-      } else {
-        const element = document.getElementById(id);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }
-    } else if (href === '/collections' && category !== undefined) {
-      setCollectionFilter(category, null);
-      navigate('/collections');
-    } else {
-      navigate(href);
-    }
-  };
 
   return (
     <footer className="bg-black pt-12 lg:pt-20 pb-6 lg:pb-10 px-5 lg:px-20 relative overflow-hidden">
@@ -93,7 +65,7 @@ export default function Footer() {
         {/* Brand */}
         <div>
           <div className="mb-4">
-            <img src={CDN.LOGO} alt="Slug's Era Logo" className="h-9 lg:h-12 w-auto object-contain brightness-0 invert" />
+            <Link to="/" aria-label="Slugsera home"><img src={CDN.LOGO} alt="Slug's Era Logo" className="h-9 lg:h-12 w-auto object-contain brightness-0 invert" loading="lazy" decoding="async" /></Link>
           </div>
           <p className="font-display text-[11px] lg:text-[13px] italic font-light text-white mb-4 lg:mb-5">
             MOVEMENT. not Merch
@@ -122,18 +94,18 @@ export default function Footer() {
 
         {/* Shop Links */}
         <div>
-          <h4 className="text-[9px] lg:text-[10px] font-medium tracking-[0.18em] uppercase text-white mb-3 lg:mb-5">
+          <h2 className="text-[9px] lg:text-[10px] font-medium tracking-[0.18em] uppercase text-white mb-3 lg:mb-5">
             Shop
-          </h4>
+          </h2>
           <ul className="flex flex-col gap-2 lg:gap-2.5">
             {footerLinks.shop.map((link) => (
               <li key={link.label}>
-                <button
-                  onClick={() => handleLink(link.href, link.category)}
+                <Link
+                  to={link.href}
                   className="text-[11px] lg:text-[13px] font-light text-white transition-colors duration-200 hover:text-gray-300"
                 >
                   {link.label}
-                </button>
+                </Link>
               </li>
             ))}
           </ul>
@@ -141,18 +113,18 @@ export default function Footer() {
 
         {/* Company Links */}
         <div>
-          <h4 className="text-[9px] lg:text-[10px] font-medium tracking-[0.18em] uppercase text-white mb-3 lg:mb-5">
+          <h2 className="text-[9px] lg:text-[10px] font-medium tracking-[0.18em] uppercase text-white mb-3 lg:mb-5">
             Company
-          </h4>
+          </h2>
           <ul className="flex flex-col gap-2 lg:gap-2.5">
             {footerLinks.company.map((link) => (
               <li key={link.label}>
-                <button
-                  onClick={() => handleLink(link.href)}
+                <Link
+                  to={link.href}
                   className="text-[11px] lg:text-[13px] font-light text-white transition-colors duration-200 hover:text-gray-300"
                 >
                   {link.label}
-                </button>
+                </Link>
               </li>
             ))}
           </ul>
@@ -160,18 +132,18 @@ export default function Footer() {
 
         {/* Support Links */}
         <div>
-          <h4 className="text-[9px] lg:text-[10px] font-medium tracking-[0.18em] uppercase text-white mb-3 lg:mb-5">
+          <h2 className="text-[9px] lg:text-[10px] font-medium tracking-[0.18em] uppercase text-white mb-3 lg:mb-5">
             Support
-          </h4>
+          </h2>
           <ul className="flex flex-col gap-2 lg:gap-2.5">
             {footerLinks.support.map((link) => (
               <li key={link.label}>
-                <button
-                  onClick={() => handleLink(link.href)}
+                <Link
+                  to={link.href}
                   className="text-[11px] lg:text-[13px] font-light text-white transition-colors duration-200 hover:text-gray-300"
                 >
                   {link.label}
-                </button>
+                </Link>
               </li>
             ))}
           </ul>
@@ -184,22 +156,18 @@ export default function Footer() {
           © 2026 Slug's Era. All rights reserved.
         </p>
         <div className="flex flex-wrap justify-center gap-5">
-          <button onClick={() => navigate('/shipping-policy')} className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">
-            Shipping Policy
-          </button>
-          <button onClick={() => navigate('/return-policy')} className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">
-            Return Policy
-          </button>
-          <button onClick={() => navigate('/privacy-policy')} className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">Privacy Policy</button>
-          <button onClick={() => navigate('/terms')} className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">Terms</button>
-          <button onClick={() => navigate('/privacy-policy#cookie-settings')} className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">Cookie Settings</button>
+          <Link to="/shipping-policy" className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">Shipping Policy</Link>
+          <Link to="/return-policy" className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">Return Policy</Link>
+          <Link to="/privacy-policy" className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">Privacy Policy</Link>
+          <Link to="/terms" className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">Terms</Link>
+          <Link to="/privacy-policy#cookie-settings" className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">Cookie Settings</Link>
           {user && (
-            <button
-              onClick={() => navigate('/dashboard')}
+            <Link
+              to="/dashboard"
               className="text-[10px] lg:text-[11px] font-light text-white/40 transition-colors duration-200 hover:text-[#C0132A]"
             >
               Admin
-            </button>
+            </Link>
           )}
         </div>
       </div>

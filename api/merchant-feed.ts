@@ -36,8 +36,7 @@ const plainText = (value: string | null | undefined) => (value || '')
   .replace(/\s+/g, ' ')
   .trim();
 
-const productSlug = (product: DbProduct) => product.slug
-  || (product.name || 'product')
+const productSlug = (product: DbProduct) => (product.name || 'product')
     .toLowerCase()
     .replace(/&/g, 'and')
     .replace(/[^a-z0-9]+/g, '-')

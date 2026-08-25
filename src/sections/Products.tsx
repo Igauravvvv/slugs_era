@@ -1,14 +1,13 @@
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useStore } from '@/store';
 import ProductCard from '@/components/ProductCard';
 
 import { useSiteSection } from '@/context/SiteContentContext';
 
 export default function Products() {
-  const { setCollectionFilter, products } = useStore();
-  const navigate = useNavigate();
+  const { products } = useStore();
   const { section } = useSiteSection('products');
 
   const title = section?.title || 'The Essential Five';
@@ -19,11 +18,6 @@ export default function Products() {
   // A dashboard editor controls the home shelf. Preserve the original T-shirt
   // shelf as a sensible fallback until at least one product is featured.
   const homeProducts = featuredProducts.length > 0 ? featuredProducts : tshirts;
-
-  const viewAll = () => {
-    setCollectionFilter('tshirts', null);
-    navigate('/collections/tshirts');
-  };
 
   const getCardVariants = (index: number) => {
     return {
@@ -58,13 +52,13 @@ export default function Products() {
             )}
           </h2>
         </div>
-        <button
-          onClick={viewAll}
+        <Link
+          to="/collections/tshirts"
           className="hidden lg:flex items-center gap-2 text-[12px] font-medium tracking-[0.15em] uppercase text-[#1A1A1A] border-b border-[#1A1A1A] pb-1 transition-all duration-200 hover:text-[#888880] hover:border-[#888880]"
         >
           View All
           <ArrowRight size={14} />
-        </button>
+        </Link>
       </motion.div>
 
       {/* Products Grid - Desktop & Mobile */}
@@ -77,13 +71,13 @@ export default function Products() {
       </div>
       
       <div className="mt-10 flex justify-center lg:hidden">
-        <button
-          onClick={viewAll}
+        <Link
+          to="/collections/tshirts"
           className="flex items-center gap-2 text-[12px] font-medium tracking-[0.15em] uppercase text-[#1A1A1A] border-b border-[#1A1A1A] pb-1"
         >
           View All
           <ArrowRight size={14} />
-        </button>
+        </Link>
       </div>
     </section>
   );

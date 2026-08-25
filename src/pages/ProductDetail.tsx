@@ -5,7 +5,6 @@ import { ArrowLeft, ArrowRight, Check, ShoppingBag, Heart, Share2, Truck, Rotate
 import { useStore } from '@/store';
 import { getSizeStock } from '@/types';
 import { generateSlug } from '@/types';
-import type { SizeStock } from '@/types';
 import SEOHead from '@/components/SEOHead';
 import { trackViewItem, trackAddToCart } from '@/lib/analytics';
 import { trackCustomerEvent } from '@/lib/customerAnalytics';
@@ -20,7 +19,7 @@ export default function ProductDetail() {
   // Find product by slug — try multiple strategies:
   // 1. Match by DB slug field (if mapped)
   // 2. Fallback: match by generated slug from product name
-  const selectedProduct = products.find(p => (p as any).slug === slug)
+  const selectedProduct = products.find(p => p.slug === slug)
     || products.find(p => generateSlug(p.name) === slug)
     || null;
   
@@ -54,10 +53,17 @@ export default function ProductDetail() {
     }
   }, [selectedProduct]);
 
+  useEffect(() => {
+    if (!selectedProduct || !slug) return;
+    const preferredSlug = generateSlug(selectedProduct.name);
+    if (slug !== preferredSlug) navigate(`/product/${preferredSlug}`, { replace: true });
+  }, [navigate, selectedProduct, slug]);
+
   // Show 404 instead of silently redirecting home
   if (!selectedProduct) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center px-6 py-16 text-center">
+        <SEOHead title="Product Not Found" description="The requested Slugsera product could not be found. Browse the current streetwear collection." noindex url={`/product/${slug || 'not-found'}`} />
         <div className="w-20 h-20 rounded-full bg-[#F9F7F5] flex items-center justify-center mb-6">
           <span className="text-3xl">🔍</span>
         </div>
@@ -83,7 +89,7 @@ export default function ProductDetail() {
   const isComingSoon = selectedProduct.status === 'coming_soon';
   const isFullPreBook = selectedProduct.status === 'pre_book';
   const isSoldOut = selectedProduct.status === 'sold_out';
-  const productSlug = selectedProduct.slug || generateSlug(selectedProduct.name);
+  const productSlug = generateSlug(selectedProduct.name);
   const productCategoryLabel = selectedProduct.category === 'tshirts'
     ? 'Oversized T-Shirt'
     : selectedProduct.category === 'shirts'
@@ -97,6 +103,12 @@ export default function ProductDetail() {
     .replace(/<[^>]*>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+  const productMetaSummary = (() => {
+    const clean = (productDescription || `${selectedProduct.name}, a premium ${productCategoryLabel.toLowerCase()} by Slugsera`).replace(/["“”]/g, '');
+    if (clean.length <= 132) return clean.replace(/[.,;:]?$/, '.');
+    const clipped = clean.slice(0, 133);
+    return `${clipped.slice(0, clipped.lastIndexOf(' ')).replace(/[.,;:]?$/, '')}…`;
+  })();
   const productAvailability = isComingSoon || isFullPreBook
     ? 'PreOrder'
     : isSoldOut || !selectedProduct.inStock
@@ -173,13 +185,11 @@ export default function ProductDetail() {
 
   const nextImage = () => setCurrentImageIndex((prev) => prev === selectedProduct.images.length - 1 ? 0 : prev + 1);
   const prevImage = () => setCurrentImageIndex((prev) => prev === 0 ? selectedProduct.images.length - 1 : prev - 1);
-  const goBack = () => { navigate(-1); };
-
   return (
     <div className="min-h-screen bg-white">
       <SEOHead
-        title={`${selectedProduct.name} | ${productCategoryLabel}`}
-        description={productDescription || `${selectedProduct.name} by Slug's Era. Premium ${productCategoryLabel.toLowerCase()} available online in Delhi NCR and across India.`}
+        title={`${selectedProduct.name} ${productCategoryLabel} | Slugsera`}
+        description={`${productMetaSummary} Shop online in India.`}
         keywords={[
           selectedProduct.name,
           productCategoryLabel,
@@ -209,13 +219,21 @@ export default function ProductDetail() {
           description: productDescription,
           sku: selectedProduct.id,
         }}
+        structuredData={{ '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.slugsera.com/' },
+          { '@type': 'ListItem', position: 2, name: productCategoryLabel, item: `https://www.slugsera.com/collections/${selectedProduct.category}` },
+          { '@type': 'ListItem', position: 3, name: selectedProduct.name, item: `https://www.slugsera.com/product/${productSlug}` },
+        ] }}
       />
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8 pb-24">
         {/* Breadcrumb */}
-        <button onClick={goBack}
-          className="flex items-center gap-2 text-sm text-[#888880] hover:text-[#1A1A1A] transition-colors mb-8">
-          <ArrowLeft size={16} /> Back to Collection
-        </button>
+        <nav aria-label="Breadcrumb" className="mb-8">
+          <ol className="flex flex-wrap items-center gap-2 text-sm text-[#888880]">
+            <li><Link to="/" className="hover:text-[#1A1A1A]">Home</Link></li><li aria-hidden="true">/</li>
+            <li><Link to={`/collections/${selectedProduct.category}`} className="hover:text-[#1A1A1A]">{productCategoryLabel}</Link></li><li aria-hidden="true">/</li>
+            <li aria-current="page" className="text-[#1A1A1A]">{selectedProduct.name}</li>
+          </ol>
+        </nav>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
           {/* Left - Images */}
@@ -224,7 +242,7 @@ export default function ProductDetail() {
             <div className="relative bg-[#F9F7F5] aspect-square mb-4 overflow-hidden">
               <motion.img key={currentImageIndex} src={selectedProduct.images[currentImageIndex]}
                 alt={`${selectedProduct.name} — product view ${currentImageIndex + 1} of ${selectedProduct.images.length}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                transition={{ duration: 0.4 }} className="w-full h-full object-cover" />
+                transition={{ duration: 0.4 }} className="w-full h-full object-cover" decoding="async" fetchPriority="high" />
 
               {selectedProduct.images.length > 1 && (
                 <>
@@ -271,7 +289,7 @@ export default function ProductDetail() {
                 {selectedProduct.images.map((img, index) => (
                   <button key={index} onClick={() => setCurrentImageIndex(index)}
                     className={`w-20 h-20 bg-[#F9F7F5] overflow-hidden border-2 transition-colors ${index === currentImageIndex ? 'border-[#1A1A1A]' : 'border-transparent'}`}>
-                    <img src={img} alt={`${selectedProduct.name} — product thumbnail ${index + 1} of ${selectedProduct.images.length}`} className="w-full h-full object-cover" />
+                    <img src={img} alt={`${selectedProduct.name} — product thumbnail ${index + 1} of ${selectedProduct.images.length}`} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                   </button>
                 ))}
               </div>

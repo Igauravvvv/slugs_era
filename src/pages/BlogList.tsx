@@ -3,21 +3,16 @@ import { Link } from 'react-router-dom';
 import { blogPosts } from '@/data/blogData';
 import SEOHead from '@/components/SEOHead';
 
-const fadeUp = {
-  initial: { opacity: 0, y: 20 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: '-40px' },
-  transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
-};
-
 export default function BlogList() {
+  const orderedPosts = [...blogPosts].sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
   return (
     <div className="bg-[#F9F7F5] min-h-screen pb-20">
       <SEOHead 
-        title="Blog — Slugsera | Slow Fashion Stories" 
-        description="Read the latest from Slugsera. Dive into our brand story, styling guides for oversized t-shirts, and our philosophy on slow fashion streetwear." 
+        title="Indian Streetwear & Slow Fashion Journal | Slugsera"
+        description="Read practical guides to oversized T-shirt fit, fabric GSM, garment care, Indian streetwear styling and the ideas behind the Slugsera movement."
         keywords={['slow fashion blog India', 'oversized t-shirt styling guide', 'Indian streetwear culture', 'Slugsera blog']}
         url="/blog" 
+        structuredData={{ '@context': 'https://schema.org', '@type': 'Blog', name: "The Slugsera Streetwear Journal", url: 'https://www.slugsera.com/blog', blogPost: orderedPosts.map((post) => ({ '@type': 'BlogPosting', headline: post.title, url: `https://www.slugsera.com/blog/${post.slug}`, datePublished: post.date })) }}
       />
       
       {/* Header */}
@@ -41,7 +36,7 @@ export default function BlogList() {
       {/* Blog Grid */}
       <section className="py-16 px-5 lg:px-20 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
-          {blogPosts.map((post, i) => (
+          {orderedPosts.map((post, i) => (
             <motion.div
               key={post.id}
               initial={{ opacity: 0, y: 20 }}
@@ -54,6 +49,8 @@ export default function BlogList() {
                   <img 
                     src={post.image} 
                     alt={post.title} 
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 text-[10px] uppercase tracking-wider font-semibold text-[#1A1A1A]">

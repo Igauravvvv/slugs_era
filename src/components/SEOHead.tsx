@@ -1,4 +1,5 @@
 import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import { CDN } from '@/lib/cdn';
 
 interface SEOHeadProps {
@@ -53,6 +54,13 @@ export default function SEOHead({
   structuredData,
   product,
 }: SEOHeadProps) {
+  // Route HTML includes crawlable build-time tags. Once React owns the page,
+  // remove only those static copies so client-side navigation never leaves
+  // stale canonicals, robots directives, social cards, or page schemas behind.
+  useEffect(() => {
+    document.head.querySelectorAll('[data-static-seo="true"]').forEach((element) => element.remove());
+  }, []);
+
   const isBrandIncluded = title?.toLowerCase().includes('slugs') || title?.toLowerCase().includes('slugsera');
   const fullTitle = title 
     ? (isBrandIncluded ? title : `${title} | ${SITE_NAME} (Slugsera)`) 
@@ -66,6 +74,20 @@ export default function SEOHead({
     .map((keyword) => keyword.trim())
     .filter(Boolean)
     .join(', ');
+  const structuredDataItems = structuredData
+    ? (Array.isArray(structuredData) ? structuredData : [structuredData])
+    : [];
+  const webPageSchema = {
+    '@context': 'https://schema.org',
+    '@type': type === 'product' ? 'ItemPage' : 'WebPage',
+    '@id': `${fullUrl}#webpage`,
+    url: fullUrl,
+    name: fullTitle,
+    description,
+    isPartOf: { '@id': `${BASE_URL}/#website` },
+    about: { '@id': `${BASE_URL}/#organization` },
+    primaryImageOfPage: { '@type': 'ImageObject', url: imageUrl },
+  };
 
   return (
     <Helmet>
@@ -74,7 +96,9 @@ export default function SEOHead({
       <meta name="description" content={description} />
       <meta name="keywords" content={keywordContent} />
       <link rel="canonical" href={fullUrl} />
-      <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow'} />
+      <link rel="alternate" hrefLang="en-IN" href={fullUrl} />
+      <link rel="alternate" hrefLang="x-default" href={fullUrl} />
+      <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large'} />
 
       {/* Open Graph */}
       <meta property="og:type" content={type} />
@@ -92,9 +116,10 @@ export default function SEOHead({
       <meta name="twitter:image" content={imageUrl} />
       <meta name="twitter:url" content={fullUrl} />
 
-      {structuredData && (
-        <script type="application/ld+json">{JSON.stringify(structuredData)}</script>
-      )}
+      {!noindex && <script type="application/ld+json">{JSON.stringify(webPageSchema)}</script>}
+      {structuredDataItems.map((item, index) => (
+        <script key={`structured-data-${index}`} type="application/ld+json">{JSON.stringify(item)}</script>
+      ))}
 
       {/* Product JSON-LD */}
       {product && (
@@ -139,6 +164,14 @@ export default function SEOHead({
               seller: {
                 '@type': 'Organization',
                 name: SITE_NAME,
+              },
+              hasMerchantReturnPolicy: {
+                '@type': 'MerchantReturnPolicy',
+                applicableCountry: 'IN',
+                returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+                merchantReturnDays: 7,
+                returnMethod: 'https://schema.org/ReturnByMail',
+                returnFees: 'https://schema.org/ReturnShippingFees',
               },
               shippingDetails: {
                 '@type': 'OfferShippingDetails',

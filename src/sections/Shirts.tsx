@@ -154,6 +154,8 @@ export default function Shirts() {
                   <img
                     src={image}
                     alt={shirtNames[index]}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full aspect-square object-cover p-[6%] transition-all duration-700 filter grayscale-[30%] blur-[6px] group-hover:blur-[4px] group-hover:grayscale-[10%]"
                   />
 

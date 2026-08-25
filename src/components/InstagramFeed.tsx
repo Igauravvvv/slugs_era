@@ -73,7 +73,7 @@ export default function InstagramFeed({ className = '' }: InstagramFeedProps) {
                 transition={{ duration: 0.4, delay: index * 0.06 }}
                 className="group relative aspect-square sm:aspect-[4/5] overflow-hidden bg-[#F9F7F5]"
               >
-                {imageSource && <img src={imageSource} alt="Slugsera Instagram post" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />}
+                {imageSource && <img src={imageSource} alt={`Slugsera community streetwear post ${index + 1}`} loading="lazy" decoding="async" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />}
                 {post.mediaType === 'VIDEO' && (
                   <span className="absolute inset-0 flex items-center justify-center bg-black/10 text-white">
                     <span className="w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center"><Play size={16} fill="currentColor" /></span>

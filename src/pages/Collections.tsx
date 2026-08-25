@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useStore } from '@/store';
 import ProductCard from '@/components/ProductCard';
 import SEOHead from '@/components/SEOHead';
@@ -16,24 +16,39 @@ const COLLECTION_CATEGORY_LABELS: Record<string, string> = {
 
 const COLLECTION_SEO: Record<string, { title: string; description: string; keywords: string[] }> = {
   tshirts: {
-    title: 'Oversized T-Shirts for Men & Women',
-    description: "Shop premium oversized graphic T-shirts from Slug's Era. Heavyweight streetwear tees designed for everyday wear in Delhi, Noida, Gurugram and across India.",
+    title: 'Oversized T-Shirts in India | 240 GSM Graphic Tees',
+    description: 'Shop heavyweight oversized T-shirts in India. Discover Slugsera 240 GSM cotton graphic tees with dropped shoulders, relaxed fits and original artwork.',
     keywords: ['oversized t-shirts Delhi', 'graphic t-shirts Noida', 'streetwear t-shirts Gurugram', 'heavyweight t-shirts India'],
   },
   shirts: {
-    title: 'Printed Streetwear Shirts',
-    description: "Explore Slug's Era printed shirts: relaxed streetwear fits made for creative everyday style. Available online in Delhi NCR and delivered across India.",
+    title: 'Printed Shirts in India | Relaxed Streetwear Shirts',
+    description: 'Discover relaxed printed shirts by Slugsera, with expressive artwork, breathable fabrics and streetwear fits designed for Indian proportions.',
     keywords: ['printed shirts Delhi', 'streetwear shirts Noida', 'relaxed fit shirts Gurugram', 'Indian streetwear shirts'],
   },
   hoodies: {
-    title: 'Premium Streetwear Hoodies',
-    description: "Discover heavyweight hoodies from Slug's Era—premium streetwear layers for Delhi winters, Noida, Gurugram and every city across India.",
+    title: 'Oversized Hoodies in India | Heavyweight Streetwear',
+    description: 'Shop Slugsera oversized hoodies in India. Explore heavyweight printed, embroidered and patchwork streetwear layers built for comfort and long wear.',
     keywords: ['hoodies Delhi', 'streetwear hoodies Noida', 'premium hoodies Gurugram', 'heavyweight hoodies India'],
   },
   accessories: {
     title: 'Streetwear Accessories',
     description: "Explore limited Slug's Era accessories designed to complete your slow-fashion streetwear rotation.",
     keywords: ['streetwear accessories India', 'Slugsera accessories'],
+  },
+};
+
+const COLLECTION_COPY: Record<string, { heading: string; paragraphs: string[] }> = {
+  tshirts: {
+    heading: 'How Slugsera oversized T-shirts are built',
+    paragraphs: ['Our heavyweight graphic tees use dense cotton and a pattern designed as oversized from the first cut—not a standard T-shirt made several sizes larger. Dropped shoulders, a wider chest and controlled body length create structure without unnecessary bulk.', 'Choose your usual size for the intended relaxed silhouette. Compare fabric weight in our GSM guide, then use the product measurements or FAQ when deciding between sizes.'],
+  },
+  shirts: {
+    heading: 'Printed shirts for expressive everyday layering',
+    paragraphs: ['Slugsera printed shirts combine breathable fabric, relaxed proportions and original artwork. Wear one buttoned with straight trousers or open over a heavyweight tee for a lighter Delhi NCR layer.', 'Each product page lists its material, fit and availability. Small-batch releases keep the collection focused and reduce unnecessary overproduction.'],
+  },
+  hoodies: {
+    heading: 'Heavyweight hoodies made for repeat wear',
+    paragraphs: ['Our oversized streetwear hoodies use substantial fleece and cotton blends to hold their shape through winter layering. Printed, embroidered and patchwork details are applied as part of the garment design rather than as disposable trend decoration.', 'Check the product page for exact GSM, fit, colour and size availability, and follow the garment-care guidance to protect artwork and texture.'],
   },
 };
 
@@ -99,11 +114,6 @@ export default function Collections() {
     return COLLECTION_CATEGORY_ORDER.indexOf(a.category) - COLLECTION_CATEGORY_ORDER.indexOf(b.category);
   });
 
-  const goBack = () => {
-    navigate('/');
-    window.scrollTo(0, 0);
-  };
-
   // Handle category filter click — also update the URL
   const handleCategoryFilter = (cat: string | null) => {
     setCollectionFilter(cat, null);
@@ -146,25 +156,32 @@ export default function Collections() {
   return (
     <>
       <SEOHead
-        title={seo?.title || 'Streetwear Clothing Collections'}
-        description={seo?.description || "Browse Slug's Era collections of premium oversized T-shirts, printed shirts and hoodies. Streetwear for Delhi NCR and across India."}
+        title={seo?.title || 'Shop Indian Streetwear: Oversized Tees, Shirts & Hoodies'}
+        description={seo?.description || 'Explore Slugsera streetwear collections: heavyweight oversized T-shirts, relaxed printed shirts and premium hoodies made for expressive everyday wear in India.'}
         keywords={seo?.keywords || ['streetwear Delhi NCR', 'oversized t-shirts India', 'printed shirts India', 'premium hoodies India']}
         url={canonicalCategory ? `/collections/${canonicalCategory}` : '/collections'}
+        structuredData={[
+          { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.slugsera.com/' },
+            { '@type': 'ListItem', position: 2, name: title, item: `https://www.slugsera.com${canonicalCategory ? `/collections/${canonicalCategory}` : '/collections'}` },
+          ] },
+          { '@context': 'https://schema.org', '@type': 'ItemList', name: title, itemListElement: filteredProducts.map((product, index) => ({ '@type': 'ListItem', position: index + 1, name: product.name, url: `https://www.slugsera.com/product/${product.name.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}` })) },
+        ]}
       />
       <div className="bg-[#F9F7F5] min-h-screen pb-24 pt-4 sm:pt-6 px-3 sm:px-6 lg:px-16" id="collections">
       <div className="max-w-[2000px] mx-auto">
 
         {/* Top Bar with Back Button */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6 mb-8 sm:mb-16 border-b border-[#E8E4E0] pb-6 sm:pb-8">
-          <button
-            onClick={goBack}
+          <Link
+            to="/"
             className="group flex items-center gap-3 text-[11px] font-medium tracking-[0.2em] uppercase text-[#888880] hover:text-[#C0132A] transition-colors"
           >
             <div className="w-8 h-8 rounded-full border border-[#E8E4E0] flex items-center justify-center group-hover:border-[#C0132A] transition-colors">
               <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
             </div>
             Back to Home
-          </button>
+          </Link>
 
           <div className="flex items-center gap-6 overflow-x-auto no-scrollbar pb-2 lg:pb-0">
             {categoriesList.map((cat) => {
@@ -172,14 +189,15 @@ export default function Collections() {
               const isActive = (!selectedCategory && cat === 'All') || (selectedCategory === mappedCat);
 
               return (
-                <button
+                <Link
                   key={cat}
+                  to={cat === 'All' ? '/collections' : `/collections/${mappedCat}`}
                   onClick={() => handleCategoryFilter(cat === 'All' ? null : mappedCat)}
                   className={`text-[10px] font-medium tracking-[0.15em] uppercase whitespace-nowrap transition-colors ${isActive ? 'text-[#C0132A] border-b border-[#C0132A] pb-1' : 'text-[#888880] hover:text-[#1A1A1A]'
                     }`}
                 >
                   {cat}
-                </button>
+                </Link>
               );
             })}
           </div>
@@ -237,6 +255,15 @@ export default function Collections() {
               Clear Filters
             </button>
           </motion.div>
+        )}
+        {seoCategory && COLLECTION_COPY[seoCategory] && (
+          <section aria-labelledby="collection-guide-heading" className="mx-auto mt-20 max-w-4xl border-t border-[#E8E4E0] pt-12 sm:mt-28 sm:pt-16">
+            <h2 id="collection-guide-heading" className="font-display text-3xl font-light text-[#1A1A1A] sm:text-4xl">{COLLECTION_COPY[seoCategory].heading}</h2>
+            <div className="mt-6 grid gap-5 text-sm font-light leading-7 text-[#666660] md:grid-cols-2">
+              {COLLECTION_COPY[seoCategory].paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+            </div>
+            <p className="mt-7 text-sm text-[#666660]">Learn more in our <Link className="text-[#C0132A] underline underline-offset-4" to="/blog/what-is-gsm-tshirt-guide-india">T-shirt GSM guide</Link>, browse the <Link className="text-[#C0132A] underline underline-offset-4" to="/lookbook">streetwear lookbook</Link>, or read the <Link className="text-[#C0132A] underline underline-offset-4" to="/faq">sizing FAQ</Link>.</p>
+          </section>
         )}
       </div>
       </div>

@@ -77,8 +77,10 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <motion.div {...fadeUp}>
             <img
-              src="https://images.unsplash.com/photo-1558171813-4c088753af8f?w=800&h=900&fit=crop"
-              alt="Our workshop"
+              src="https://images.unsplash.com/photo-1558171813-4c088753af8f?w=800&h=900&fit=crop&auto=format&q=75"
+              alt="Independent fashion studio where Slugsera develops small-batch streetwear"
+              loading="lazy"
+              decoding="async"
               className="w-full aspect-[4/5] object-cover bg-[#F9F7F5]"
             />
           </motion.div>

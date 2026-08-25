@@ -189,8 +189,8 @@ function HomeView() {
   return (
     <div className="flex flex-col">
       <SEOHead
-        title=""
-        description="MOVEMENT. not merch. Slugsera is an Indian slow-fashion streetwear label built for people who move at their own pace — heavyweight oversized T-shirts, printed shirts and hoodies, made for Delhi NCR and shipped across India."
+        title="Slugsera | Premium Oversized Streetwear Made in India"
+        description="Shop Slugsera heavyweight oversized T-shirts, graphic hoodies and printed shirts. Independent slow-fashion streetwear designed in Delhi and delivered across India."
         keywords={['streetwear Delhi', 'streetwear Noida', 'streetwear Gurugram', 'oversized t-shirts Delhi NCR', 'Indian slow fashion brand']}
         url="/"
       />
@@ -326,6 +326,7 @@ function App() {
   if (isDashboard) {
     return (
       <Suspense fallback={<PageLoader />}>
+        <SEOHead title="Slugsera Store Dashboard" description="Private Slugsera store administration dashboard." noindex url={location.pathname} />
         <AdminRoute>
           <DashboardLayout />
         </AdminRoute>
@@ -359,7 +360,6 @@ function App() {
               {/* Collections */}
               <Route path="/collections" element={
                 <StorefrontLayout minimal showFooter>
-                  <SEOHead title="Shop All Collections" description="Browse premium oversized T-shirts, printed shirts and hoodies from Slug's Era. Streetwear for Delhi NCR and delivery across India." keywords={['streetwear Delhi NCR', 'oversized t-shirts India', 'printed shirts India', 'hoodies India']} url="/collections" />
                   <Collections />
                 </StorefrontLayout>
               } />
@@ -380,7 +380,7 @@ function App() {
               <Route path="/cart" element={
                 <StorefrontLayout minimal showFooter={false}>
                   <ProtectedRoute>
-                    <SEOHead title="Shopping Bag" noindex url="/cart" />
+                    <SEOHead title="Shopping Bag" description="Review the Slugsera streetwear products, sizes and quantities in your shopping bag before checkout." noindex url="/cart" />
                     <Cart />
                   </ProtectedRoute>
                 </StorefrontLayout>
@@ -390,7 +390,7 @@ function App() {
               <Route path="/checkout/address" element={
                 <StorefrontLayout minimal showFooter={false}>
                   <ProtectedRoute>
-                    <SEOHead title="Shipping Address" noindex url="/checkout/address" />
+                    <SEOHead title="Shipping Address" description="Enter and confirm the delivery address for your Slugsera order." noindex url="/checkout/address" />
                     <Address />
                   </ProtectedRoute>
                 </StorefrontLayout>
@@ -398,7 +398,7 @@ function App() {
               <Route path="/checkout/payment" element={
                 <StorefrontLayout minimal showFooter={false}>
                   <ProtectedRoute>
-                    <SEOHead title="Payment" noindex url="/checkout/payment" />
+                    <SEOHead title="Secure Payment" description="Complete secure payment for your Slugsera streetwear order." noindex url="/checkout/payment" />
                     <Payment />
                   </ProtectedRoute>
                 </StorefrontLayout>
@@ -406,7 +406,7 @@ function App() {
               <Route path="/order-success" element={
                 <StorefrontLayout minimal showFooter={false}>
                   <ProtectedRoute>
-                    <SEOHead title="Order Confirmed" noindex url="/order-success" />
+                    <SEOHead title="Order Confirmed" description="Confirmation and next steps for your completed Slugsera order." noindex url="/order-success" />
                     <Success />
                   </ProtectedRoute>
                 </StorefrontLayout>
@@ -416,7 +416,7 @@ function App() {
               <Route path="/profile" element={
                 <StorefrontLayout minimal showFooter={false}>
                   <ProtectedRoute>
-                    <SEOHead title="My Account" noindex url="/profile" />
+                    <SEOHead title="My Slugsera Account" description="Manage your Slugsera profile, saved details and order history." noindex url="/profile" />
                     <Profile />
                   </ProtectedRoute>
                 </StorefrontLayout>
@@ -425,13 +425,13 @@ function App() {
               {/* Info Pages */}
               <Route path="/about" element={
                 <StorefrontLayout minimal showFooter>
-                  <SEOHead title="Our Story" description="Meet Slug's Era, an Indian slow-fashion streetwear movement built around premium quality, thoughtful design and intentional living." keywords={['Slugsera story', 'Indian slow fashion brand', 'streetwear brand Delhi NCR']} url="/about" />
+                  <SEOHead title="About Slugsera | Independent Indian Streetwear Brand" description="Meet Slugsera, the independent Delhi-born slow-fashion streetwear label founded by college entrepreneurs Gaurav Bhatt and Bandhan Kumar." keywords={['Slugsera story', 'Indian slow fashion brand', 'streetwear brand Delhi NCR']} url="/about" />
                   <AboutPage />
                 </StorefrontLayout>
               } />
               <Route path="/faq" element={
                 <StorefrontLayout minimal showFooter>
-                  <SEOHead title="Frequently Asked Questions" description="Find answers about Slug's Era sizing, shipping, returns and orders for our oversized streetwear clothing." keywords={['Slugsera size guide', 'streetwear shipping India', 't-shirt exchange policy']} url="/faq" structuredData={{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [
+                  <SEOHead title="Slugsera FAQ | Sizing, Delivery, Returns & Product Care" description="Get answers about Slugsera sizing, 240 GSM fabric, shipping across India, exchanges, payments, pre-orders and caring for printed streetwear." keywords={['Slugsera size guide', 'streetwear shipping India', 't-shirt exchange policy']} url="/faq" structuredData={{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: [
                     { '@type': 'Question', name: 'How long does delivery take?', acceptedAnswer: { '@type': 'Answer', text: 'Orders are normally delivered within 3–7 business days after dispatch.' } },
                     { '@type': 'Question', name: 'Can I return or exchange an item?', acceptedAnswer: { '@type': 'Answer', text: 'Eligible unworn items can be returned or exchanged according to our published return policy.' } },
                     { '@type': 'Question', name: 'How do I choose my size?', acceptedAnswer: { '@type': 'Answer', text: 'Use the size guide on the product page and contact us if you need help choosing.' } },
@@ -441,37 +441,37 @@ function App() {
               } />
               <Route path="/contact" element={
                 <StorefrontLayout minimal showFooter>
-                  <SEOHead title="Contact Us" description="Contact Slug's Era for help with orders, sizing or our premium streetwear collection. We support customers in Delhi NCR and across India." keywords={['contact Slugsera', 'streetwear customer support Delhi NCR', 'Slugsera WhatsApp']} url="/contact" />
+                  <SEOHead title="Contact Slugsera | Order, Sizing & Streetwear Support" description="Contact Slugsera for order help, sizing advice, product questions or collaborations. Reach our Indian streetwear support team by form, email or WhatsApp." keywords={['contact Slugsera', 'streetwear customer support Delhi NCR', 'Slugsera WhatsApp']} url="/contact" />
                   <Contact />
                 </StorefrontLayout>
               } />
               <Route path="/lookbook" element={
                 <StorefrontLayout minimal showFooter>
-                  <SEOHead title="Streetwear Lookbook" description="Explore Slug's Era streetwear looks and outfit ideas featuring oversized tees, printed shirts and heavyweight hoodies." keywords={['streetwear lookbook India', 'oversized t-shirt outfits', 'Delhi NCR streetwear style']} url="/lookbook" />
+                  <SEOHead title="Indian Streetwear Lookbook | Oversized Outfit Ideas" description="Explore the Slugsera streetwear lookbook for oversized T-shirt, printed shirt and hoodie outfit ideas created for expressive everyday style in India." keywords={['streetwear lookbook India', 'oversized t-shirt outfits', 'Delhi NCR streetwear style']} url="/lookbook" />
                   <Lookbook />
                 </StorefrontLayout>
               } />
               <Route path="/shipping-policy" element={
                 <StorefrontLayout minimal showFooter>
-                  <SEOHead title="Shipping Policy" description="Read Slug's Era shipping information, delivery timelines and order tracking details for customers across India." keywords={['Slugsera shipping policy', 'streetwear delivery India', 'Delhi NCR clothing delivery']} url="/shipping-policy" />
+                  <SEOHead title="Slugsera Shipping Policy | Delivery Across India" description="See Slugsera dispatch times, free-shipping terms, delivery estimates, tracking details and support for streetwear orders shipped across India." keywords={['Slugsera shipping policy', 'streetwear delivery India', 'Delhi NCR clothing delivery']} url="/shipping-policy" />
                   <ShippingPolicy />
                 </StorefrontLayout>
               } />
               <Route path="/return-policy" element={
                 <StorefrontLayout minimal showFooter>
-                  <SEOHead title="Return & Exchange Policy" description="Read the Slug's Era return and exchange policy for eligible streetwear orders, sizing issues and product concerns." keywords={['Slugsera return policy', 't-shirt exchange India', 'streetwear returns']} url="/return-policy" />
+                  <SEOHead title="Slugsera Returns & Exchanges | Clothing Size Exchanges" description="Read eligibility, timelines and steps for Slugsera clothing exchanges, damaged-item support and returns for streetwear orders in India." keywords={['Slugsera return policy', 't-shirt exchange India', 'streetwear returns']} url="/return-policy" />
                   <ReturnPolicy />
                 </StorefrontLayout>
               } />
               <Route path="/privacy-policy" element={
                 <StorefrontLayout minimal showFooter>
-                  <SEOHead title="Privacy Policy" description="Learn how Slug's Era collects, uses and protects your personal information." url="/privacy-policy" />
+                  <SEOHead title="Slugsera Privacy Policy | Personal Data & Cookie Choices" description="Learn what information Slugsera collects, how it is used and protected, which providers process it and how to manage analytics cookie choices." url="/privacy-policy" />
                   <PrivacyPolicy />
                 </StorefrontLayout>
               } />
               <Route path="/terms" element={
                 <StorefrontLayout minimal showFooter>
-                  <SEOHead title="Terms and Conditions" description="Read the terms that govern use of the Slug's Era website and purchases." url="/terms" />
+                  <SEOHead title="Slugsera Terms & Conditions | Website and Order Terms" description="Read the terms for using slugsera.com, placing orders, payments, product availability, shipping, exchanges and intellectual property." url="/terms" />
                   <Terms />
                 </StorefrontLayout>
               } />

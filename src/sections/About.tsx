@@ -1,13 +1,11 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { TypeAnimation } from 'react-type-animation';
-import { useStore } from '@/store';
 import { CDN } from '@/lib/cdn';
 import { useSiteSection } from '@/context/SiteContentContext';
 import InstagramFeed from '@/components/InstagramFeed';
 
 export default function About() {
-  const { isAboutMobileVisible } = useStore();
   const { section, getMeta } = useSiteSection('about');
 
   const year = (getMeta('year') as string) || '2026';
@@ -40,14 +38,18 @@ export default function About() {
         >
         <img
           src={mainImage}
-          alt="Our Story"
+          alt="Slugsera founders developing Indian streetwear artwork and garments"
+          loading="lazy"
+          decoding="async"
           className="w-full aspect-square object-cover bg-[#F9F7F5] p-[6%]"
         />
         {/* Accent image */}
         <div className="absolute -bottom-9 -right-9 w-[42%] aspect-square bg-white border-[7px] border-white flex items-center justify-center overflow-hidden shadow-[0_12px_36px_rgba(0,0,0,0.1)] hidden lg:flex">
           <img
             src={accentImage}
-            alt="Detail"
+            alt="Close-up of Slugsera garment artwork and production detail"
+            loading="lazy"
+            decoding="async"
               className="w-[80%] object-contain"
             />
           </div>

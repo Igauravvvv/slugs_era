@@ -1,62 +1,46 @@
-import { useParams, Navigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { blogPosts } from '@/data/blogData';
 import SEOHead from '@/components/SEOHead';
 import { ArrowLeft } from 'lucide-react';
+import NotFound from '@/pages/NotFound';
 
 export default function BlogPost() {
   const { slug } = useParams();
   const post = blogPosts.find(p => p.slug === slug);
 
   if (!post) {
-    return <Navigate to="/blog" replace />;
+    return <NotFound />;
   }
 
   // Find related posts (same category, excluding current)
   const relatedPosts = blogPosts
     .filter(p => p.id !== post.id)
     .slice(0, 3);
+  const postUrl = `https://www.slugsera.com/blog/${post.slug}`;
+  const articleSchema = {
+    '@context': 'https://schema.org', '@type': 'BlogPosting', mainEntityOfPage: { '@type': 'WebPage', '@id': postUrl },
+    headline: post.title, image: post.image.startsWith('http') ? post.image : `https://www.slugsera.com${post.image}`,
+    author: { '@type': 'Organization', name: post.author, url: 'https://www.slugsera.com' },
+    publisher: { '@id': 'https://www.slugsera.com/#organization' }, datePublished: post.date, dateModified: post.date, description: post.excerpt,
+  };
+  const breadcrumbSchema = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.slugsera.com/' },
+    { '@type': 'ListItem', position: 2, name: 'Journal', item: 'https://www.slugsera.com/blog' },
+    { '@type': 'ListItem', position: 3, name: post.title, item: postUrl },
+  ] };
 
   return (
     <div className="bg-white min-h-screen pb-20">
       <SEOHead 
-        title={post.title} 
-        description={post.excerpt} 
+        title={post.seoTitle || post.title}
+        description={post.seoDescription || post.excerpt}
         keywords={[post.title, post.category, 'Indian streetwear', 'slow fashion India', 'Slugsera']}
         url={`/blog/${post.slug}`} 
         image={post.image}
         type="article"
+        structuredData={[articleSchema, breadcrumbSchema]}
       />
-      
-      {/* JSON-LD Article Schema for rich snippets */}
-      <script type="application/ld+json">
-        {JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "BlogPosting",
-          "mainEntityOfPage": {
-            "@type": "WebPage",
-            "@id": `https://www.slugsera.com/blog/${post.slug}`
-          },
-          "headline": post.title,
-          "image": post.image.startsWith('http') ? post.image : `https://www.slugsera.com${post.image}`,
-          "author": {
-            "@type": "Organization",
-            "name": post.author,
-            "url": "https://www.slugsera.com"
-          },  
-          "publisher": {
-            "@type": "Organization",
-            "name": "Slug's Era",
-            "logo": {
-              "@type": "ImageObject",
-              "url": "https://www.slugsera.com/images/logo.webp"
-            }
-          },
-          "datePublished": post.date,
-          "dateModified": post.date,
-          "description": post.excerpt
-        })}
-      </script>
 
       {/* Header Image */}
       <div className="w-full h-[50vh] lg:h-[70vh] relative overflow-hidden">
@@ -64,6 +48,8 @@ export default function BlogPost() {
           src={post.image} 
           alt={post.title} 
           className="w-full h-full object-cover"
+          decoding="async"
+          fetchPriority="high"
         />
         <div className="absolute inset-0 bg-black/20"></div>
       </div>
@@ -105,9 +91,9 @@ export default function BlogPost() {
             {/* Social Share mock */}
             <div className="flex gap-4">
               <span className="text-[11px] uppercase tracking-wider text-[#888880]">Share:</span>
-              <a href="#" className="text-[#1A1A1A] hover:text-[#C0132A]">Tw</a>
-              <a href="#" className="text-[#1A1A1A] hover:text-[#C0132A]">Fb</a>
-              <a href="#" className="text-[#1A1A1A] hover:text-[#C0132A]">In</a>
+              <a aria-label="Share on X" target="_blank" rel="noopener noreferrer" href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(postUrl)}`} className="text-[#1A1A1A] hover:text-[#C0132A]">X</a>
+              <a aria-label="Share on Facebook" target="_blank" rel="noopener noreferrer" href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}`} className="text-[#1A1A1A] hover:text-[#C0132A]">Fb</a>
+              <a aria-label="Share on LinkedIn" target="_blank" rel="noopener noreferrer" href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`} className="text-[#1A1A1A] hover:text-[#C0132A]">In</a>
             </div>
           </div>
         </div>
@@ -117,7 +103,7 @@ export default function BlogPost() {
       {relatedPosts.length > 0 && (
         <section className="max-w-7xl mx-auto px-5 lg:px-20 mt-24">
           <div className="border-t border-[#E8E4E0] pt-16">
-            <h3 className="font-display text-[28px] text-[#1A1A1A] mb-10">Read More from Slugsera</h3>
+            <h2 className="font-display text-[28px] text-[#1A1A1A] mb-10">Read More from Slugsera</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {relatedPosts.map((post, i) => (
                 <motion.div
@@ -132,12 +118,14 @@ export default function BlogPost() {
                       <img 
                         src={post.image} 
                         alt={post.title} 
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                     </div>
-                    <h4 className="font-display text-[18px] leading-tight text-[#1A1A1A] mb-2 group-hover:text-[#C0132A] transition-colors">
+                    <h3 className="font-display text-[18px] leading-tight text-[#1A1A1A] mb-2 group-hover:text-[#C0132A] transition-colors">
                       {post.title}
-                    </h4>
+                    </h3>
                     <p className="text-[13px] text-[#888880] line-clamp-2">
                       {post.excerpt}
                     </p>

@@ -10,12 +10,17 @@ const HERO_IMAGES = [
   '/images/slow_down_model.webp',
   '/images/seedhe%20pahad%20se%20model.webp'
 ] as const;
+const HERO_ALT: Record<(typeof HERO_IMAGES)[number], string> = {
+  '/images/Female_model_vinyl.webp': 'Model wearing the Slugsera Let The Moment Play oversized graphic T-shirt',
+  '/images/turtlemodelimage.webp': 'Model styling the Slugsera Savage Tortoise oversized T-shirt',
+  '/images/slow_down_model.webp': 'Model wearing the green Slugsera Slow Down heavyweight oversized T-shirt',
+  '/images/seedhe%20pahad%20se%20model.webp': 'Model wearing the Slugsera Seedhe Pahad Se graphic streetwear T-shirt',
+};
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const modelRef = useRef<HTMLImageElement>(null);
   const elementsRef = useRef<(HTMLDivElement | null)[]>([]);
-  const [currentImage, setCurrentImage] = useState<string>(HERO_IMAGES[0]);
+  const [currentImage, setCurrentImage] = useState<(typeof HERO_IMAGES)[number]>(HERO_IMAGES[0]);
 
   const { section } = useSiteSection('hero');
   const ctaText = section?.cta_text || 'Shop now';
@@ -36,12 +41,12 @@ export default function Hero() {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentImage((prev) => {
-        const currentIndex = HERO_IMAGES.indexOf(prev as any);
+        const currentIndex = HERO_IMAGES.indexOf(prev);
         return HERO_IMAGES[(currentIndex + 1) % HERO_IMAGES.length];
       });
     }, 3500);
     return () => clearInterval(timer);
-  }, [currentImage]);
+  }, []);
 
   // Parallax on mouse move
   useEffect(() => {
@@ -122,12 +127,12 @@ export default function Hero() {
   const isTitleRightAligned = currentImage === HERO_IMAGES[0] || currentImage === HERO_IMAGES[2];
 
   const handleNext = () => {
-    const currentIndex = HERO_IMAGES.indexOf(currentImage as any);
+    const currentIndex = HERO_IMAGES.indexOf(currentImage);
     setCurrentImage(HERO_IMAGES[(currentIndex + 1) % HERO_IMAGES.length]);
   };
 
   const handlePrev = () => {
-    const currentIndex = HERO_IMAGES.indexOf(currentImage as any);
+    const currentIndex = HERO_IMAGES.indexOf(currentImage);
     setCurrentImage(HERO_IMAGES[(currentIndex - 1 + HERO_IMAGES.length) % HERO_IMAGES.length]);
   };
 
@@ -139,26 +144,20 @@ export default function Hero() {
     >
       {/* Background Model Image - Takes Full Screen */}
       <div className="absolute inset-0 w-full h-full z-0">
-        {HERO_IMAGES.map((img) => {
-          let positionClass = "object-center";
-          if (img === '/images/turtlemodelimage.webp' || img === '/images/seedhe%20pahad%20se%20model.webp') {
-            positionClass = "object-[80%_center] sm:object-center";
-          }
-          return (
-            <motion.img
-              key={img}
-              src={img}
-              alt="Fashion Model"
-              className={`absolute inset-0 w-full h-full object-cover ${positionClass}`}
-              initial={false}
-              animate={{ 
-                opacity: currentImage === img ? 1 : 0,
-                scale: currentImage === img ? 1 : 1.05
-              }}
-              transition={{ duration: 0.8, ease: "easeInOut" }}
-            />
-          );
-        })}
+        <AnimatePresence mode="sync">
+          <motion.img
+            key={currentImage}
+            src={currentImage}
+            alt={HERO_ALT[currentImage]}
+            className={`absolute inset-0 w-full h-full object-cover ${currentImage === '/images/turtlemodelimage.webp' || currentImage === '/images/seedhe%20pahad%20se%20model.webp' ? 'object-[80%_center] sm:object-center' : 'object-center'}`}
+            initial={{ opacity: 0, scale: 1.025 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.65, ease: 'easeInOut' }}
+            decoding="async"
+            fetchPriority="high"
+          />
+        </AnimatePresence>
         {/* Subtle overlay to make text readable if needed */}
         <div className="absolute inset-0 bg-black/10 mix-blend-overlay"></div>
       </div>
@@ -167,7 +166,7 @@ export default function Hero() {
       <motion.div
         className="absolute inset-0 z-10 touch-pan-y"
         onPanEnd={(e, info) => {
-          const currentIndex = HERO_IMAGES.indexOf(currentImage as any);
+          const currentIndex = HERO_IMAGES.indexOf(currentImage);
           if (info.offset.x < -50) {
             // swipe left -> next
             setCurrentImage(HERO_IMAGES[(currentIndex + 1) % HERO_IMAGES.length]);
@@ -246,10 +245,12 @@ export default function Hero() {
 
         {/* The logo is the page's primary visual heading. */}
         <h1>
+          <span className="sr-only">Slugsera premium oversized streetwear made in India</span>
           <motion.img
             layout
             src="/images/texttttlogo.webp"
-            alt="Slugsera — premium slow fashion streetwear"
+            alt=""
+            aria-hidden="true"
             className="w-[160px] sm:w-[200px] md:w-[320px] lg:w-[420px] h-auto object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.3)]"
           />
         </h1>

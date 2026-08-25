@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence, useMotionTemplate, useMotionValue, useSpring } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
+import type { Variants } from 'framer-motion';
 import { useStore } from '@/store';
 import type { Product } from '@/types';
 import { generateSlug } from '@/types';
@@ -12,7 +13,7 @@ interface ProductCardProps {
   product: Product;
   index?: number;
   onQuickView?: (product: Product) => void;
-  customVariants?: any;
+  customVariants?: Variants;
 }
 
 export default function ProductCard({ product, index = 0, onQuickView, customVariants }: ProductCardProps) {
@@ -27,7 +28,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
   const images = product.images && product.images.length > 0
     ? product.images
     : [product.image];
-  const productUrl = `/product/${product.slug || generateSlug(product.name)}`;
+  const productUrl = `/product/${generateSlug(product.name)}`;
 
   const showPreviousImage = () => {
     setImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
@@ -141,8 +142,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
     mouseY.set(0);
   };
 
-  const rotateX = useMotionTemplate`${useMotionValue(mouseY.get() * -6)}deg`;
-  const rotateY = useMotionTemplate`${useMotionValue(mouseX.get() * 6)}deg`;
+  const zeroRotation = useMotionValue(0);
 
   const defaultVariants = {
     hidden: { opacity: 0, y: 50 },
@@ -171,7 +171,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
       <motion.div 
         className="w-full h-full"
         style={{
-          rotateX: useMotionTemplate`${useMotionValue(0)}`, // We need to update this dynamically but hooks in style is tricky. Let's use motion values properly below.
+          rotateX: zeroRotation,
         }}
         animate={{
           rotateX: mouseY.get() * -8,
@@ -187,6 +187,15 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
           onTouchStart={handleImageTouchStart}
           onTouchEnd={handleImageTouchEnd}
         >
+        <Link
+          to={productUrl}
+          aria-label={`View ${product.name}`}
+          onClick={(event) => {
+            event.stopPropagation();
+            void trackCustomerEvent('product_clicked', { productId: product.id, properties: { product_name: product.name, category: product.category, source: 'product_card_image' } });
+          }}
+          className="absolute inset-0 z-20"
+        />
         {(product.badge || isComingSoon) && (
           <span className={`badge ${product.badge === 'New' ? 'badge-dark' : ''} z-[25]`}>
             {isComingSoon ? 'Soon' : product.badge}
@@ -198,6 +207,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
             src={images[imageIndex]}
             alt={product.name}
             loading="lazy"
+            decoding="async"
             className={`w-full h-full object-cover transition-all duration-700 ${
               isComingSoon ? 'filter grayscale-[40%] blur-[8px] scale-105' : ''
             }`}

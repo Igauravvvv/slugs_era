@@ -101,6 +101,8 @@ export default function Lookbook() {
                       <img
                         src={product.image}
                         alt={product.name}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover p-[8%] transition-transform duration-700 ease-out group-hover:scale-105"
                       />
                       {product.badge && (

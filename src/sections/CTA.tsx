@@ -1,12 +1,11 @@
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useStore } from '@/store';
 import { useSiteSection } from '@/context/SiteContentContext';
 
 export default function CTA() {
-  const { setCollectionFilter, products } = useStore();
-  const navigate = useNavigate();
+  const { products } = useStore();
   const { section, getMeta } = useSiteSection('cta');
 
   const eyebrow = section?.subtitle || 'Upgrade Your Wardrobe';
@@ -34,18 +33,6 @@ export default function CTA() {
   // Prices and availability come from the live product catalogue, not old marketing copy.
   const ctaPrimaryText = buildCollectionCta(ctaPrimaryLink, 'T-Shirts', 'Shop T-Shirts — ₹1,199');
   const ctaSecondaryText = buildCollectionCta(ctaSecondaryLink, 'Shirts', 'Shop Shirts — Coming Soon');
-
-  const handleCtaPrimary = () => {
-    setCollectionFilter(ctaPrimaryLink, null);
-    navigate(`/collections/${ctaPrimaryLink}`);
-    window.scrollTo(0, 0);
-  };
-
-  const handleCtaSecondary = () => {
-    setCollectionFilter(ctaSecondaryLink, null);
-    navigate(`/collections/${ctaSecondaryLink}`);
-    window.scrollTo(0, 0);
-  };
 
   return (
     <section className="relative py-16 lg:py-[100px] px-5 lg:px-20 bg-[#C0132A] text-center overflow-hidden">
@@ -93,21 +80,19 @@ export default function CTA() {
         </p>
 
         <div className="flex gap-5 items-center justify-center flex-wrap">
-          <button
-            type="button"
-            onClick={handleCtaPrimary}
+          <Link
+            to={`/collections/${ctaPrimaryLink}`}
             className="inline-flex items-center gap-3 bg-[#1A1A1A] text-white text-[10px] lg:text-[11px] font-medium tracking-[0.17em] uppercase px-6 lg:px-8 py-3.5 lg:py-4 transition-all duration-300 hover:bg-black hover:-translate-y-0.5"
           >
             {ctaPrimaryText}
             <ArrowRight size={13} strokeWidth={2} />
-          </button>
-          <button
-            type="button"
-            onClick={handleCtaSecondary}
+          </Link>
+          <Link
+            to={`/collections/${ctaSecondaryLink}`}
             className="inline-flex items-center gap-3 bg-white/15 text-white text-[10px] lg:text-[11px] font-medium tracking-[0.17em] uppercase px-6 lg:px-8 py-3.5 lg:py-4 transition-all duration-300 hover:bg-white/25 hover:-translate-y-0.5"
           >
             {ctaSecondaryText}
-          </button>
+          </Link>
         </div>
       </motion.div>
     </section>
