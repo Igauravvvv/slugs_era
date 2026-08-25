@@ -1,5 +1,5 @@
 {
-  "buildCommand": "vite build",
+  "buildCommand": "npm run build",
   "installCommand": "npm install --legacy-peer-deps",
   "outputDirectory": "dist",
   "framework": "vite",
@@ -21,7 +21,7 @@
     { "source": "/api/cron", "destination": "/api/cron" },
     { "source": "/api/payment/create-order", "destination": "/api/payment/create-order" },
     { "source": "/api/payment/verify", "destination": "/api/payment/verify" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/(.*)", "destination": "/index" }
   ],
   "crons": [
     {
