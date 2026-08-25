@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Check, ShoppingBag, Heart, Share2, Truck, RotateCcw, Shield, Clock, Bell, AlertTriangle, Info, ChevronDown, ChevronUp, Copy, X, Play } from 'lucide-react';
@@ -37,7 +37,6 @@ export default function ProductDetail() {
   const [notifySubmitted, setNotifySubmitted] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [openPolicy, setOpenPolicy] = useState<'shipping' | 'returns' | 'payment' | null>(null);
-  const swipeStart = useRef<{ x: number; y: number } | null>(null);
   const productMedia = useMemo(() => selectedProduct
     ? (selectedProduct.images?.length ? selectedProduct.images : [selectedProduct.image].filter(Boolean))
     : [], [selectedProduct]);
@@ -203,22 +202,6 @@ export default function ProductDetail() {
 
   const nextImage = () => setCurrentImageIndex((prev) => prev === productMedia.length - 1 ? 0 : prev + 1);
   const prevImage = () => setCurrentImageIndex((prev) => prev === 0 ? productMedia.length - 1 : prev - 1);
-  const handleSwipeStart = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (productMedia.length < 2 || (event.target as HTMLElement).closest('button, video[controls]')) return;
-    swipeStart.current = { x: event.clientX, y: event.clientY };
-    event.currentTarget.setPointerCapture?.(event.pointerId);
-  };
-  const handleSwipeEnd = (event: React.PointerEvent<HTMLDivElement>) => {
-    const start = swipeStart.current;
-    swipeStart.current = null;
-    if (!start || productMedia.length < 2) return;
-    event.currentTarget.releasePointerCapture?.(event.pointerId);
-    const distanceX = event.clientX - start.x;
-    const distanceY = event.clientY - start.y;
-    if (Math.abs(distanceX) < 48 || Math.abs(distanceX) <= Math.abs(distanceY)) return;
-    if (distanceX > 0) prevImage();
-    else nextImage();
-  };
   return (
     <div className="min-h-screen bg-white">
       <SEOHead
@@ -280,14 +263,24 @@ export default function ProductDetail() {
               aria-roledescription="carousel"
               aria-label={`${selectedProduct.name} product media`}
               tabIndex={0}
-              onPointerDown={handleSwipeStart}
-              onPointerUp={handleSwipeEnd}
-              onPointerCancel={() => { swipeStart.current = null; }}
               onKeyDown={(event) => {
                 if (event.key === 'ArrowLeft') { event.preventDefault(); prevImage(); }
                 if (event.key === 'ArrowRight') { event.preventDefault(); nextImage(); }
               }}
             >
+              <motion.div
+                className="absolute inset-0 cursor-grab active:cursor-grabbing"
+                drag={productMedia.length > 1 && !currentMediaIsVideo ? 'x' : false}
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.18}
+                dragMomentum={false}
+                dragSnapToOrigin
+                onDragEnd={(_, info) => {
+                  if (Math.abs(info.offset.x) < 48 && Math.abs(info.velocity.x) < 350) return;
+                  if (info.offset.x > 0 || info.velocity.x > 350) prevImage();
+                  else nextImage();
+                }}
+              >
               <AnimatePresence mode="popLayout" initial={false}>
                 {currentMediaIsVideo ? (
                   <motion.video
@@ -311,6 +304,7 @@ export default function ProductDetail() {
                     exit={{ opacity: 0 }} transition={{ duration: 0.1 }} className="w-full h-full object-cover" decoding="async" fetchPriority="high" draggable={false} width="960" height="960" />
                 )}
               </AnimatePresence>
+              </motion.div>
 
               {productMedia.length > 1 && (
                 <>
