@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import { useStore } from '@/store';
 import type { Product } from '@/types';
@@ -164,10 +164,8 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
             });
           }}
         >
-        <AnimatePresence initial={false} mode="popLayout">
           {isVideoMedia(images[imageIndex]) ? (
-            <motion.video
-              key={imageIndex}
+            <video
               src={images[imageIndex]}
               aria-label={`${product.name} product video`}
               muted
@@ -177,14 +175,9 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
               preload="metadata"
               className={`pointer-events-none w-full h-full object-cover transition-all duration-700 ${isComingSoon ? 'filter grayscale-[40%] blur-[8px] scale-105' : ''}`}
               draggable={false}
-              initial={{ opacity: 0.8 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0.8 }}
-              transition={{ duration: 0.2 }}
             />
           ) : (
-            <motion.img
-              key={imageIndex}
+            <img
               src={optimizedProductImageUrl(images[imageIndex], 640)}
               srcSet={optimizedProductImageSrcSet(images[imageIndex])}
               sizes="(min-width: 1024px) 20vw, 50vw"
@@ -193,16 +186,10 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
               decoding="async"
               width="640"
               height="640"
-              className={`pointer-events-none w-full h-full object-cover transition-all duration-700 ${isComingSoon ? 'filter grayscale-[40%] blur-[8px] scale-105' : ''}`}
+              className={`pointer-events-none w-full h-full object-cover transition-transform duration-300 group-hover/slider:scale-[1.02] ${isComingSoon ? 'filter grayscale-[40%] blur-[8px] scale-105' : ''}`}
               draggable={false}
-              initial={{ opacity: 0.8 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0.8 }}
-              transition={{ duration: 0.1 }}
-              whileHover={{ scale: 1.05, transition: { duration: 0.8, ease: 'easeOut' } }}
             />
           )}
-        </AnimatePresence>
         </Link>
 
         {/* Mirror Glass Overlay for Coming Soon */}
