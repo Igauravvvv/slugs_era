@@ -22,7 +22,6 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
   const navigate = useNavigate();
   const [imageIndex, setImageIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
-  const didSwipeImage = useRef(false);
   const lastArrowPointerAt = useRef(0);
   const isComingSoon = product.status === 'coming_soon';
 
@@ -51,14 +50,12 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
   const handlePrevImage = (e: React.SyntheticEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    didSwipeImage.current = false;
     showPreviousImage();
   };
 
   const handleNextImage = (e: React.SyntheticEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    didSwipeImage.current = false;
     showNextImage();
   };
 
@@ -87,7 +84,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
     const distanceX = endX - startX;
     if (Math.abs(distanceX) < 44) return;
 
-    didSwipeImage.current = true;
+    event.preventDefault();
     if (distanceX > 0) showPreviousImage();
     else showNextImage();
   };
@@ -151,13 +148,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
           to={productUrl}
           aria-label={`View ${product.name}`}
           className="block w-full h-full"
-          onClick={(event) => {
-            if (didSwipeImage.current) {
-              event.preventDefault();
-              event.stopPropagation();
-              didSwipeImage.current = false;
-              return;
-            }
+          onClick={() => {
             void trackCustomerEvent('product_clicked', {
               productId: product.id,
               properties: { product_name: product.name, category: product.category, source: 'product_card_image' },
