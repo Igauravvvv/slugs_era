@@ -7,27 +7,28 @@ import { useStore } from '@/store';
 const HERO_IMAGES = [
   '/images/black_tshirt_studio_hero.webp',
   '/images/blue_turtle_hero_desktop.webp',
-  '/images/slow_down_model.webp',
+  '/images/green_tshirt_studio_hero.webp',
   '/images/seedhe%20pahad%20se%20model.webp'
 ] as const;
 const FIRST_HERO_MOBILE_SRCSET = '/images/cdn/hero-black-tshirt-laptop-compact-640.webp 640w, /images/cdn/hero-black-tshirt-laptop-compact-1280.webp 1280w, /images/cdn/hero-black-tshirt-laptop-compact-1920.webp 1920w';
 const BLUE_TURTLE_MOBILE_SRCSET = '/images/cdn/hero-blue-turtle-mobile-640.webp 640w, /images/cdn/hero-blue-turtle-mobile-960.webp 960w, /images/cdn/hero-blue-turtle-mobile-1440.webp 1440w';
+const GREEN_STUDIO_SRCSET = '/images/cdn/hero-green-studio-640.webp 640w, /images/cdn/hero-green-studio-1280.webp 1280w, /images/cdn/hero-green-studio-1672.webp 1672w';
 const HERO_ALT: Record<(typeof HERO_IMAGES)[number], string> = {
   '/images/black_tshirt_studio_hero.webp': 'Model wearing the Slugsera Let The Moment Play oversized graphic T-shirt between studio lights',
   '/images/blue_turtle_hero_desktop.webp': 'Model wearing the blue Slugsera Slow Steady Savage turtle T-shirt at sea',
-  '/images/slow_down_model.webp': 'Model wearing the green Slugsera Slow Down heavyweight oversized T-shirt',
+  '/images/green_tshirt_studio_hero.webp': 'Model wearing a green Slugsera T-shirt in a botanical photo studio',
   '/images/seedhe%20pahad%20se%20model.webp': 'Model wearing the Slugsera Seedhe Pahad Se graphic streetwear T-shirt',
 };
 const HERO_RESPONSIVE: Record<(typeof HERO_IMAGES)[number], string> = {
   '/images/black_tshirt_studio_hero.webp': 'hero-black-tshirt-studio',
   '/images/blue_turtle_hero_desktop.webp': 'hero-blue-turtle-desktop',
-  '/images/slow_down_model.webp': 'hero-slow-down',
+  '/images/green_tshirt_studio_hero.webp': 'hero-green-studio',
   '/images/seedhe%20pahad%20se%20model.webp': 'hero-pahad',
 };
 const HERO_DIMENSIONS: Record<(typeof HERO_IMAGES)[number], { width: number; height: number }> = {
   '/images/black_tshirt_studio_hero.webp': { width: 2400, height: 1351 },
   '/images/blue_turtle_hero_desktop.webp': { width: 2400, height: 1351 },
-  '/images/slow_down_model.webp': { width: 2000, height: 1116 },
+  '/images/green_tshirt_studio_hero.webp': { width: 1672, height: 941 },
   '/images/seedhe%20pahad%20se%20model.webp': { width: 2000, height: 848 },
 };
 
@@ -178,6 +179,9 @@ export default function Hero() {
             )}
             {!hasCustomHero && currentImage === HERO_IMAGES[1] && (
               <source media="(max-width: 767px)" srcSet={BLUE_TURTLE_MOBILE_SRCSET} sizes="100vw" />
+            )}
+            {!hasCustomHero && currentImage === HERO_IMAGES[2] && (
+              <source srcSet={GREEN_STUDIO_SRCSET} sizes="100vw" />
             )}
             {desktopHeroImage && <source media="(min-width: 768px)" srcSet={desktopHeroImage} />}
             <img
