@@ -6,25 +6,26 @@ import { useStore } from '@/store';
 
 const HERO_IMAGES = [
   '/images/black_tshirt_laptop_hero_compact.webp',
-  '/images/turtlemodelimage.webp',
+  '/images/blue_turtle_hero_desktop.webp',
   '/images/slow_down_model.webp',
   '/images/seedhe%20pahad%20se%20model.webp'
 ] as const;
+const BLUE_TURTLE_MOBILE_SRCSET = '/images/cdn/hero-blue-turtle-mobile-640.webp 640w, /images/cdn/hero-blue-turtle-mobile-960.webp 960w, /images/cdn/hero-blue-turtle-mobile-1440.webp 1440w';
 const HERO_ALT: Record<(typeof HERO_IMAGES)[number], string> = {
   '/images/black_tshirt_laptop_hero_compact.webp': 'Model wearing the Slugsera Let The Moment Play oversized graphic T-shirt',
-  '/images/turtlemodelimage.webp': 'Model styling the Slugsera Savage Tortoise oversized T-shirt',
+  '/images/blue_turtle_hero_desktop.webp': 'Model wearing the blue Slugsera Slow Steady Savage turtle T-shirt at sea',
   '/images/slow_down_model.webp': 'Model wearing the green Slugsera Slow Down heavyweight oversized T-shirt',
   '/images/seedhe%20pahad%20se%20model.webp': 'Model wearing the Slugsera Seedhe Pahad Se graphic streetwear T-shirt',
 };
 const HERO_RESPONSIVE: Record<(typeof HERO_IMAGES)[number], string> = {
   '/images/black_tshirt_laptop_hero_compact.webp': 'hero-black-tshirt-laptop-compact',
-  '/images/turtlemodelimage.webp': 'hero-tortoise',
+  '/images/blue_turtle_hero_desktop.webp': 'hero-blue-turtle-desktop',
   '/images/slow_down_model.webp': 'hero-slow-down',
   '/images/seedhe%20pahad%20se%20model.webp': 'hero-pahad',
 };
 const HERO_DIMENSIONS: Record<(typeof HERO_IMAGES)[number], { width: number; height: number }> = {
   '/images/black_tshirt_laptop_hero_compact.webp': { width: 2400, height: 1600 },
-  '/images/turtlemodelimage.webp': { width: 2000, height: 1116 },
+  '/images/blue_turtle_hero_desktop.webp': { width: 2400, height: 1351 },
   '/images/slow_down_model.webp': { width: 2000, height: 1116 },
   '/images/seedhe%20pahad%20se%20model.webp': { width: 2000, height: 848 },
 };
@@ -170,6 +171,9 @@ export default function Hero() {
             transition={{ duration: 0.65, ease: 'easeInOut' }}
           >
             {mobileHeroImage && <source media="(max-width: 767px)" srcSet={mobileHeroImage} />}
+            {!hasCustomHero && currentImage === HERO_IMAGES[1] && (
+              <source media="(max-width: 767px)" srcSet={BLUE_TURTLE_MOBILE_SRCSET} sizes="100vw" />
+            )}
             {desktopHeroImage && <source media="(min-width: 768px)" srcSet={desktopHeroImage} />}
             <img
               src={desktopHeroImage || mobileHeroImage || currentImage}
@@ -181,7 +185,7 @@ export default function Hero() {
               className={`absolute inset-0 w-full h-full object-cover ${
                 !hasCustomHero && currentImage === HERO_IMAGES[0]
                   ? 'object-center md:object-[center_75%]'
-                  : !hasCustomHero && (currentImage === '/images/turtlemodelimage.webp' || currentImage === '/images/seedhe%20pahad%20se%20model.webp')
+                  : !hasCustomHero && currentImage === '/images/seedhe%20pahad%20se%20model.webp'
                     ? 'object-[80%_center] sm:object-center'
                     : 'object-center'
               }`}
