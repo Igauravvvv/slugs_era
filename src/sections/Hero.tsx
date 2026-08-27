@@ -228,6 +228,27 @@ export default function Hero() {
         </div>
       ))}
 
+      {/* Vinyl Element */}
+      <AnimatePresence>
+        {!hasCustomHero && currentImage === HERO_IMAGES[0] && (
+          <motion.div
+            className="absolute -right-16 lg:-right-24 -bottom-4 lg:-bottom-8 z-10 hidden md:block pointer-events-none"
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 100, transition: { duration: 0.5 } }}
+            transition={{ duration: 1.2, type: "spring", stiffness: 40 }}
+          >
+            <motion.img
+              src="/images/Vinyl_Only-removebg-preview.webp"
+              alt="Vinyl"
+              className="w-[250px] h-[250px] lg:w-[350px] lg:h-[350px] drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] opacity-95"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Top Title Block */}
       <motion.div 
         layout
