@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, type FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { motion } from 'framer-motion';
@@ -58,6 +58,22 @@ const tabs = [
   { id: 'description', label: 'Description', icon: FileText },
 ];
 
+const fieldLocations: Partial<Record<keyof FormValues, { tab: string; tabLabel: string; label: string }>> = {
+  name: { tab: 'basic', tabLabel: 'Basic Info', label: 'Product Name' },
+  slug: { tab: 'basic', tabLabel: 'Basic Info', label: 'Slug' },
+  category: { tab: 'basic', tabLabel: 'Basic Info', label: 'Category' },
+  subcategory: { tab: 'basic', tabLabel: 'Basic Info', label: 'Subcategory' },
+  season: { tab: 'basic', tabLabel: 'Basic Info', label: 'Season' },
+  images: { tab: 'media', tabLabel: 'Media', label: 'Product Images' },
+  price: { tab: 'inventory', tabLabel: 'Pricing & Inventory', label: 'Price' },
+  compare_price: { tab: 'inventory', tabLabel: 'Pricing & Inventory', label: 'Compare at Price' },
+  stock_quantity: { tab: 'inventory', tabLabel: 'Pricing & Inventory', label: 'Total Stock' },
+  sizes: { tab: 'inventory', tabLabel: 'Pricing & Inventory', label: 'Sizes' },
+  size_stock: { tab: 'inventory', tabLabel: 'Pricing & Inventory', label: 'Quantity by Size' },
+  colors: { tab: 'inventory', tabLabel: 'Pricing & Inventory', label: 'Colors' },
+  description: { tab: 'description', tabLabel: 'Description', label: 'Description' },
+};
+
 interface ProductFormProps {
   productId?: string;
   onBack: () => void;
@@ -73,6 +89,7 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
   const [tagInput, setTagInput] = useState('');
   const [colorName, setColorName] = useState('');
   const [colorHex, setColorHex] = useState('#000000');
+  const [validationIssues, setValidationIssues] = useState<Array<{ field: string; tab: string; tabLabel: string; label: string; message: string }>>([]);
   
   const { addToast } = useDashboardToast();
 
@@ -177,6 +194,7 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
   }, [values, isDirty, productId, saving, autoSaving, getValues, reset]);
 
   const onSubmit = async (data: FormValues) => {
+    setValidationIssues([]);
     setSaving(true);
     try {
       if (productId) {
@@ -196,19 +214,37 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
     }
   };
 
-  const onInvalid = () => {
-    const currentErrors = errors;
-    if (currentErrors.name || currentErrors.slug || currentErrors.category) setActiveTab('basic');
-    else if (currentErrors.price || currentErrors.stock_quantity) setActiveTab('inventory');
-    else if (currentErrors.images) setActiveTab('media');
-    else if (currentErrors.description) setActiveTab('description');
+  const onInvalid = (validationErrors: FieldErrors<FormValues>) => {
+    const issues = Object.keys(validationErrors).flatMap((field) => {
+      const location = fieldLocations[field as keyof FormValues];
+      if (!location) return [];
+      const error = validationErrors[field as keyof FormValues];
+      return [{
+        field,
+        ...location,
+        message: typeof error?.message === 'string' ? error.message : `${location.label} contains invalid data`,
+      }];
+    });
+
+    setValidationIssues(issues);
+    const firstIssue = issues[0];
+    if (firstIssue) {
+      setActiveTab(firstIssue.tab);
+      window.setTimeout(() => {
+        document.querySelector<HTMLElement>(`[name="${firstIssue.field}"]`)?.focus();
+      }, 0);
+    }
 
     addToast({
       type: 'error',
       title: 'Product was not saved',
-      message: 'Please correct the highlighted required fields and save again.',
+      message: firstIssue
+        ? `${firstIssue.tabLabel}: ${issues.map((issue) => issue.label).join(', ')}`
+        : 'Please review the product details and save again.',
     });
   };
+
+  const tabHasError = (tabId: string) => validationIssues.some((issue) => issue.tab === tabId);
 
   const addTag = () => {
     if (tagInput.trim() && !values.tags?.includes(tagInput.trim())) {
@@ -307,13 +343,27 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
             <tab.icon size={14} />
             {tab.label}
             {/* Show error dot if tab has validation errors */}
-            {((tab.id === 'basic' && (errors.name || errors.slug)) || 
-              (tab.id === 'inventory' && (errors.price || errors.stock_quantity))) && (
+            {tabHasError(tab.id) && (
               <span className="w-1.5 h-1.5 rounded-full bg-[#F44336] ml-1" />
             )}
           </button>
         ))}
       </div>
+
+      {validationIssues.length > 0 && (
+        <div className="cms-validation-summary" role="alert" aria-live="assertive">
+          <strong>Needs attention before this product can be saved:</strong>
+          <ul>
+            {validationIssues.map((issue) => (
+              <li key={issue.field}>
+                <button type="button" onClick={() => setActiveTab(issue.tab)}>
+                  {issue.tabLabel} → {issue.label}: {issue.message}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Tab Content */}
       <div className="mt-6">
@@ -332,12 +382,12 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
                 </div>
                 <div>
                   <label className="cms-label">Product Name</label>
-                  <input {...register('name')} className="cms-input" placeholder="Heavyweight Oversized Tee" />
+                  <input {...register('name')} className={`cms-input ${errors.name ? 'cms-field-invalid' : ''}`} aria-invalid={!!errors.name} placeholder="Heavyweight Oversized Tee" />
                   {errors.name && <span className="cms-error-msg">{errors.name.message}</span>}
                 </div>
                 <div>
                   <label className="cms-label">Slug</label>
-                  <input {...register('slug')} className="cms-input" placeholder="heavyweight-oversized-tee" />
+                  <input {...register('slug')} className={`cms-input ${errors.slug ? 'cms-field-invalid' : ''}`} aria-invalid={!!errors.slug} placeholder="heavyweight-oversized-tee" />
                   {errors.slug && <span className="cms-error-msg">{errors.slug.message}</span>}
                 </div>
               </div>
@@ -363,12 +413,13 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
               <div className="cms-card p-6 space-y-4">
                 <div>
                   <label className="cms-label">Category</label>
-                  <select {...register('category')} className="cms-select">
+                  <select {...register('category')} className={`cms-select ${errors.category ? 'cms-field-invalid' : ''}`} aria-invalid={!!errors.category}>
                     <option value="">Select Category</option>
                     {PRODUCT_CATEGORIES.map(([id, category]) => (
                       <option key={id} value={id}>{category.label}</option>
                     ))}
                   </select>
+                  {errors.category && <span className="cms-error-msg">Please select a valid category</span>}
                 </div>
                 <div>
                   <label className="cms-label">Subcategory</label>
@@ -452,7 +503,7 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="cms-label">Price (₹)</label>
-                  <input type="number" {...register('price', { valueAsNumber: true })} className="cms-input" />
+                  <input type="number" {...register('price', { valueAsNumber: true })} className={`cms-input ${errors.price ? 'cms-field-invalid' : ''}`} aria-invalid={!!errors.price} />
                   {errors.price && <span className="cms-error-msg">{errors.price.message}</span>}
                 </div>
                 <div>
@@ -462,7 +513,7 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
               </div>
               <div className="pt-2">
                 <label className="cms-label">Total Stock</label>
-                <input type="number" {...register('stock_quantity', { valueAsNumber: true })} readOnly className="cms-input w-full sm:w-1/2 opacity-70 cursor-not-allowed" />
+                <input type="number" {...register('stock_quantity', { valueAsNumber: true })} readOnly className={`cms-input w-full sm:w-1/2 opacity-70 cursor-not-allowed ${errors.stock_quantity ? 'cms-field-invalid' : ''}`} aria-invalid={!!errors.stock_quantity} />
                 <p className="text-[11px] text-[#888] mt-1">Calculated from the quantities entered for each size.</p>
                 {errors.stock_quantity && <span className="cms-error-msg">{errors.stock_quantity.message}</span>}
               </div>

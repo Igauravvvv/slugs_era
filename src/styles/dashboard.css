@@ -746,6 +746,37 @@
   gap: 4px;
 }
 
+.cms-field-invalid {
+  border-color: var(--cms-error) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cms-error) 14%, transparent);
+}
+
+.cms-validation-summary {
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--cms-error) 50%, transparent);
+  border-radius: var(--cms-radius-input);
+  background: color-mix(in srgb, var(--cms-error) 10%, var(--cms-surface));
+  color: var(--cms-text);
+  font-size: 12px;
+}
+
+.cms-validation-summary strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.cms-validation-summary ul {
+  display: grid;
+  gap: 3px;
+}
+
+.cms-validation-summary button {
+  color: var(--cms-error);
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 /* ─── Responsive ─────────────────────────────────────────────── */
 @media (max-width: 1023px) {
   .cms-sidebar {
