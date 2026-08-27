@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { motion, useScroll, useTransform, useReducedMotion, AnimatePresence } from 'framer-motion';
 import { useSiteSection } from '@/context/SiteContentContext';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '@/store';
@@ -35,6 +35,7 @@ export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const elementsRef = useRef<(HTMLDivElement | null)[]>([]);
   const [currentImage, setCurrentImage] = useState<(typeof HERO_IMAGES)[number]>(HERO_IMAGES[0]);
+  const prefersReducedMotion = useReducedMotion();
 
   const { section } = useSiteSection('hero');
   const ctaText = section?.cta_text || 'Shop now';
@@ -201,6 +202,53 @@ export default function Hero() {
         {/* Subtle overlay to make text readable if needed */}
         <div className="absolute inset-0 bg-black/10 mix-blend-overlay"></div>
       </div>
+
+      {/* Slow studio-light pulse for the first look. The physical lamps are baked into the desktop art
+          and rendered as edge overlays on mobile, while the shared glow keeps both breakpoints alive. */}
+      {!hasCustomHero && currentImage === HERO_IMAGES[0] && (
+        <>
+          <motion.div
+            className="absolute inset-0 z-[2] pointer-events-none overflow-hidden"
+            animate={prefersReducedMotion ? { opacity: 0.82 } : { opacity: [0.5, 0.95, 0.68, 1, 0.5] }}
+            transition={prefersReducedMotion ? undefined : { duration: 7.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
+            aria-hidden="true"
+          >
+            <div
+              className="absolute inset-y-0 left-0 w-[28%] mix-blend-screen"
+              style={{ background: 'radial-gradient(ellipse at left center, rgba(255,235,225,0.26), rgba(255,80,80,0.08) 40%, transparent 72%)' }}
+            />
+            <div
+              className="absolute inset-y-0 right-0 w-[28%] mix-blend-screen"
+              style={{ background: 'radial-gradient(ellipse at right center, rgba(255,235,225,0.26), rgba(255,80,80,0.08) 40%, transparent 72%)' }}
+            />
+            <div
+              className="absolute inset-0 mix-blend-screen"
+              style={{ background: 'radial-gradient(ellipse at 50% 52%, rgba(255,240,225,0.18), transparent 48%)' }}
+            />
+          </motion.div>
+
+          <div className="absolute inset-0 z-[3] pointer-events-none overflow-hidden md:hidden" aria-hidden="true">
+            <motion.img
+              src="/images/studio_spotlight_overlay.webp"
+              alt=""
+              width="420"
+              height="522"
+              className="absolute -left-14 top-[21%] w-28 h-auto -rotate-6 drop-shadow-[0_0_18px_rgba(255,245,235,0.35)]"
+              animate={prefersReducedMotion ? { opacity: 0.9, filter: 'brightness(1.15)' } : { opacity: [0.58, 1, 0.7, 1, 0.58], filter: ['brightness(0.82)', 'brightness(1.35)', 'brightness(0.95)', 'brightness(1.42)', 'brightness(0.82)'] }}
+              transition={prefersReducedMotion ? undefined : { duration: 7.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
+            />
+            <motion.img
+              src="/images/studio_spotlight_overlay.webp"
+              alt=""
+              width="420"
+              height="522"
+              className="absolute -right-14 top-[21%] w-28 h-auto rotate-6 scale-x-[-1] drop-shadow-[0_0_18px_rgba(255,245,235,0.35)]"
+              animate={prefersReducedMotion ? { opacity: 0.9, filter: 'brightness(1.15)' } : { opacity: [0.58, 1, 0.7, 1, 0.58], filter: ['brightness(0.82)', 'brightness(1.35)', 'brightness(0.95)', 'brightness(1.42)', 'brightness(0.82)'] }}
+              transition={prefersReducedMotion ? undefined : { duration: 7.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1], delay: 0.35 }}
+            />
+          </div>
+        </>
+      )}
 
       {/* Swipe Interceptor Layer */}
       <motion.div
