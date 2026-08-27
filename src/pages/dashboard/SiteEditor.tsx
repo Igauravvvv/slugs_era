@@ -2,11 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Palette, Save, RotateCcw, ChevronDown, ChevronRight,
-  Type, Image, Tag, Link, AlignLeft, Eye, Sparkles,
-  Megaphone, Mail, Heart, Shirt, ShoppingBag,
+  Eye, Sparkles, Megaphone, Mail, Heart, Shirt, ShoppingBag,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { SiteSection } from '@/context/SiteContentContext';
+import ImageUploader from '@/components/dashboard/ImageUploader';
+import type { ProductImage } from '@/types/dashboard';
 
 type SectionConfig = {
   key: string;
@@ -20,14 +21,14 @@ type SectionConfig = {
 type FieldConfig = {
   key: keyof SiteSection;
   label: string;
-  type: 'text' | 'textarea' | 'url';
+  type: 'text' | 'textarea' | 'url' | 'image';
   placeholder: string;
 };
 
 type MetaFieldConfig = {
   key: string;
   label: string;
-  type: 'text' | 'textarea' | 'list' | 'json-list';
+  type: 'text' | 'textarea' | 'list' | 'json-list' | 'image';
   placeholder: string;
   itemLabel?: string;
 };
@@ -37,15 +38,16 @@ const SECTION_CONFIGS: SectionConfig[] = [
     key: 'hero',
     label: 'Hero Section',
     icon: Sparkles,
-    description: 'The main landing section — heading, subtitle, tags, and CTAs',
+    description: 'The main landing section — separate desktop and mobile covers, text, and CTAs',
     fields: [
       { key: 'title', label: 'Heading', type: 'text', placeholder: 'Wear the Philosophy of Slow Culture' },
       { key: 'subtitle', label: 'Subtitle', type: 'textarea', placeholder: 'Premium pieces for those who value intention over impulse.' },
-      { key: 'image_url', label: 'Hero Image URL', type: 'url', placeholder: 'https://... (leave blank for default CDN image)' },
+      { key: 'image_url', label: 'Desktop Hero Cover (wide)', type: 'image', placeholder: 'Recommended: 2000 × 1125 or wider' },
       { key: 'cta_text', label: 'Primary CTA Text', type: 'text', placeholder: 'Shop Now' },
       { key: 'cta_link', label: 'Primary CTA Link', type: 'text', placeholder: '#products' },
     ],
     metaFields: [
+      { key: 'mobile_image_url', label: 'Mobile Hero Cover (portrait)', type: 'image', placeholder: 'Recommended: 1290 × 2796 for iPhone screens' },
       { key: 'eyebrow_sequences', label: 'Eyebrow Animation Sequences', type: 'json-list', placeholder: 'One phrase per line', itemLabel: 'Sequence' },
       { key: 'tags', label: 'Tags', type: 'list', placeholder: 'One tag per line', itemLabel: 'Tag' },
       { key: 'cta_secondary_text', label: 'Secondary CTA Text', type: 'text', placeholder: 'Our Story' },
@@ -209,6 +211,22 @@ function SectionEditor({
     setDirty(true);
   };
 
+  const renderImageField = (key: string, label: string, placeholder: string) => {
+    const url = typeof form[key] === 'string' ? form[key] as string : '';
+    const images: ProductImage[] = url ? [{ url, alt: label, isPrimary: true, mediaType: 'image' }] : [];
+    return (
+      <div>
+        <ImageUploader
+          images={images}
+          onChange={(next) => handleChange(key, next[0]?.url || '')}
+          bucket="section-images"
+          maxFiles={1}
+        />
+        <p className="text-[10px] text-[#666] mt-2">{placeholder}. Uploading a replacement updates only this device layout.</p>
+      </div>
+    );
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -300,7 +318,9 @@ function SectionEditor({
             <label className="block text-[11px] font-semibold text-[#888] uppercase tracking-wider mb-1.5">
               {field.label}
             </label>
-            {field.type === 'textarea' ? (
+            {field.type === 'image' ? (
+              renderImageField(field.key, field.label, field.placeholder)
+            ) : field.type === 'textarea' ? (
               <textarea
                 value={(form[field.key] as string) || ''}
                 onChange={e => handleChange(field.key, e.target.value)}
@@ -332,7 +352,9 @@ function SectionEditor({
             <label className="block text-[11px] font-semibold text-[#888] uppercase tracking-wider mb-1.5">
               {field.label}
             </label>
-            {(field.type === 'list' || field.type === 'json-list') ? (
+            {field.type === 'image' ? (
+              renderImageField(field.key, field.label, field.placeholder)
+            ) : (field.type === 'list' || field.type === 'json-list') ? (
               <textarea
                 value={(form[field.key] as string) || ''}
                 onChange={e => handleChange(field.key, e.target.value)}

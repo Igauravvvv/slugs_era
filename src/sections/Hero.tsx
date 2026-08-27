@@ -37,6 +37,9 @@ export default function Hero() {
   const { section } = useSiteSection('hero');
   const ctaText = section?.cta_text || 'Shop now';
   const ctaLink = section?.cta_link || '#products';
+  const desktopHeroImage = section?.image_url || '';
+  const mobileHeroImage = typeof section?.meta?.mobile_image_url === 'string' ? section.meta.mobile_image_url : '';
+  const hasCustomHero = Boolean(desktopHeroImage || mobileHeroImage);
 
   const navigate = useNavigate();
   const setCollectionFilter = useStore(state => state.setCollectionFilter);
@@ -51,6 +54,7 @@ export default function Hero() {
 
   // Autoplay Slider
   useEffect(() => {
+    if (hasCustomHero) return;
     const timer = setInterval(() => {
       setCurrentImage((prev) => {
         const currentIndex = HERO_IMAGES.indexOf(prev);
@@ -58,7 +62,7 @@ export default function Hero() {
       });
     }, 8000);
     return () => clearInterval(timer);
-  }, []);
+  }, [hasCustomHero]);
 
   // Parallax on mouse move
   useEffect(() => {
@@ -136,7 +140,7 @@ export default function Hero() {
     </svg>
   );
 
-  const isTitleRightAligned = currentImage === HERO_IMAGES[0] || currentImage === HERO_IMAGES[2];
+  const isTitleRightAligned = hasCustomHero || currentImage === HERO_IMAGES[0] || currentImage === HERO_IMAGES[2];
 
   const handleNext = () => {
     const currentIndex = HERO_IMAGES.indexOf(currentImage);
@@ -157,22 +161,28 @@ export default function Hero() {
       {/* Background Model Image - Takes Full Screen */}
       <div className="absolute inset-0 w-full h-full z-0">
         <AnimatePresence mode="sync">
-          <motion.img
-            key={currentImage}
-            src={currentImage}
-            srcSet={`/images/cdn/${HERO_RESPONSIVE[currentImage]}-640.webp 640w, /images/cdn/${HERO_RESPONSIVE[currentImage]}-1280.webp 1280w, /images/cdn/${HERO_RESPONSIVE[currentImage]}-1920.webp 1920w`}
-            sizes="100vw"
-            alt={HERO_ALT[currentImage]}
-            width={HERO_DIMENSIONS[currentImage].width}
-            height={HERO_DIMENSIONS[currentImage].height}
-            className={`absolute inset-0 w-full h-full object-cover ${currentImage === '/images/turtlemodelimage.webp' || currentImage === '/images/seedhe%20pahad%20se%20model.webp' ? 'object-[80%_center] sm:object-center' : 'object-center'}`}
+          <motion.picture
+            key={hasCustomHero ? `${desktopHeroImage}:${mobileHeroImage}` : currentImage}
+            className="absolute inset-0 block w-full h-full"
             initial={{ opacity: 0, scale: 1.025 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.65, ease: 'easeInOut' }}
-            decoding="async"
-            fetchPriority="high"
-          />
+          >
+            {mobileHeroImage && <source media="(max-width: 767px)" srcSet={mobileHeroImage} />}
+            {desktopHeroImage && <source media="(min-width: 768px)" srcSet={desktopHeroImage} />}
+            <img
+              src={desktopHeroImage || mobileHeroImage || currentImage}
+              srcSet={hasCustomHero ? undefined : `/images/cdn/${HERO_RESPONSIVE[currentImage]}-640.webp 640w, /images/cdn/${HERO_RESPONSIVE[currentImage]}-1280.webp 1280w, /images/cdn/${HERO_RESPONSIVE[currentImage]}-1920.webp 1920w`}
+              sizes="100vw"
+              alt={hasCustomHero ? 'Slugsera seasonal hero cover' : HERO_ALT[currentImage]}
+              width={hasCustomHero ? 2000 : HERO_DIMENSIONS[currentImage].width}
+              height={hasCustomHero ? 1125 : HERO_DIMENSIONS[currentImage].height}
+              className={`absolute inset-0 w-full h-full object-cover ${!hasCustomHero && (currentImage === '/images/turtlemodelimage.webp' || currentImage === '/images/seedhe%20pahad%20se%20model.webp') ? 'object-[80%_center] sm:object-center' : 'object-center'}`}
+              decoding="async"
+              fetchPriority="high"
+            />
+          </motion.picture>
         </AnimatePresence>
         {/* Subtle overlay to make text readable if needed */}
         <div className="absolute inset-0 bg-black/10 mix-blend-overlay"></div>
@@ -181,7 +191,8 @@ export default function Hero() {
       {/* Swipe Interceptor Layer */}
       <motion.div
         className="absolute inset-0 z-10 touch-pan-y"
-        onPanEnd={(e, info) => {
+        onPanEnd={(_, info) => {
+          if (hasCustomHero) return;
           const currentIndex = HERO_IMAGES.indexOf(currentImage);
           if (info.offset.x < -50) {
             // swipe left -> next
@@ -219,7 +230,7 @@ export default function Hero() {
 
       {/* Vinyl Element */}
       <AnimatePresence>
-        {currentImage === '/images/Female_model_vinyl.webp' && (
+        {!hasCustomHero && currentImage === '/images/Female_model_vinyl.webp' && (
           <motion.div 
             className="absolute -right-16 lg:-right-24 -bottom-4 lg:-bottom-8 z-10 hidden md:block pointer-events-none"
             initial={{ opacity: 0, y: 100 }}
@@ -316,7 +327,7 @@ export default function Hero() {
       </motion.div>
 
       {/* Navigation Arrows (Glassmorphism) — hidden on very small phones to prevent overlap */}
-      <button 
+      {!hasCustomHero && <button
         onClick={handlePrev}
         className="absolute left-2 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 z-30 w-9 h-9 sm:w-10 sm:h-10 md:w-16 md:h-16 hidden sm:flex items-center justify-center rounded-full bg-white/10 backdrop-blur-lg border border-white/20 text-white shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:bg-white/20 hover:scale-105 transition-all duration-300"
         aria-label="Previous Look"
@@ -324,9 +335,9 @@ export default function Hero() {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 md:w-8 md:h-8">
           <polyline points="15 18 9 12 15 6"></polyline>
         </svg>
-      </button>
+      </button>}
 
-      <button 
+      {!hasCustomHero && <button
         onClick={handleNext}
         className="absolute right-2 sm:right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 w-9 h-9 sm:w-10 sm:h-10 md:w-16 md:h-16 hidden sm:flex items-center justify-center rounded-full bg-white/10 backdrop-blur-lg border border-white/20 text-white shadow-[0_8px_32px_rgba(0,0,0,0.1)] hover:bg-white/20 hover:scale-105 transition-all duration-300"
         aria-label="Next Look"
@@ -334,10 +345,10 @@ export default function Hero() {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-5 sm:h-5 md:w-8 md:h-8">
           <polyline points="9 18 15 12 9 6"></polyline>
         </svg>
-      </button>
+      </button>}
 
       {/* Image Toggle Switch (Dots) */}
-      <div className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2.5 sm:gap-3 md:gap-4">
+      {!hasCustomHero && <div className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2.5 sm:gap-3 md:gap-4">
         {HERO_IMAGES.map((img, idx) => (
           <button
             key={img}
@@ -350,7 +361,7 @@ export default function Hero() {
             aria-label={`View look ${idx + 1}`}
           />
         ))}
-      </div>
+      </div>}
     </section>
   );
 }
