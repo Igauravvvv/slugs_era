@@ -175,10 +175,10 @@ export default function Header({ minimal = false }: HeaderProps) {
   const renderHeaderContent = (theme: 'red' | 'white' | 'transparent') => {
     // If 'transparent', force invisible text to keep exact layout spacing but avoid rendering double text
     const textColor = theme === 'transparent' ? 'text-transparent' : (theme === 'white' ? 'text-white' : 'text-[#C0132A]');
-    // Use valid raw CSS filter strings
-    const logoFilter = theme === 'white'
-      ? 'brightness(0) invert(1)'
-      : 'brightness(0) saturate(100%) invert(18%) sepia(74%) saturate(4422%) hue-rotate(343deg) brightness(85%) contrast(100%)';
+    // Render the raster logo as an alpha mask. Unlike CSS filter chains, this
+    // keeps the brand red consistent between wide-gamut iPhone displays and
+    // standard desktop panels.
+    const logoColor = theme === 'white' ? '#FFFFFF' : '#C0132A';
 
     const isTransparent = theme === 'transparent';
 
@@ -252,11 +252,21 @@ export default function Header({ minimal = false }: HeaderProps) {
         {/* Center: Desktop & Mobile Logo */}
         <div className={`absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 flex items-center justify-center ${isTransparent ? 'opacity-0 pointer-events-none' : ''}`}>
           <button type="button" aria-label="Go to Slug's Era home" onClick={() => scrollToSection('hero')} className="flex items-center">
-            <motion.img
-              src={CDN.LOGO}
-              alt="Slug's Era Logo"
-              className="h-[52px] lg:h-[72px] w-auto object-contain bg-transparent drop-shadow-md transition-all duration-500 delay-100"
-              style={{ filter: logoFilter }}
+            <motion.span
+              role="img"
+              aria-label="Slug's Era Logo"
+              className="block h-[52px] lg:h-[72px] w-[89px] lg:w-[123px] transition-transform duration-500 delay-100"
+              style={{
+                backgroundColor: logoColor,
+                WebkitMaskImage: `url(${CDN.LOGO})`,
+                WebkitMaskPosition: 'center',
+                WebkitMaskRepeat: 'no-repeat',
+                WebkitMaskSize: 'contain',
+                maskImage: `url(${CDN.LOGO})`,
+                maskPosition: 'center',
+                maskRepeat: 'no-repeat',
+                maskSize: 'contain',
+              }}
               whileHover={{ scale: 1.05, y: 10 }}
             />
           </button>
@@ -356,11 +366,20 @@ export default function Header({ minimal = false }: HeaderProps) {
             {/* Center: Logo */}
             <div className="absolute left-1/2 -translate-x-1/2 lg:static lg:translate-x-0 flex items-center justify-center">
               <button type="button" aria-label="Go to Slug's Era home" onClick={() => scrollToSection('hero')} className="flex items-center">
-                <motion.img
-                  src={CDN.LOGO}
-                  alt="Slug's Era Logo"
-                  className="h-[52px] lg:h-[72px] w-auto object-contain bg-transparent drop-shadow-md transition-all duration-500"
-                  style={{ filter: 'brightness(0) saturate(100%) invert(18%) sepia(74%) saturate(4422%) hue-rotate(343deg) brightness(85%) contrast(100%)' }}
+                <motion.span
+                  role="img"
+                  aria-label="Slug's Era Logo"
+                  className="block h-[52px] lg:h-[72px] w-[89px] lg:w-[123px] bg-[#C0132A] transition-transform duration-500"
+                  style={{
+                    WebkitMaskImage: `url(${CDN.LOGO})`,
+                    WebkitMaskPosition: 'center',
+                    WebkitMaskRepeat: 'no-repeat',
+                    WebkitMaskSize: 'contain',
+                    maskImage: `url(${CDN.LOGO})`,
+                    maskPosition: 'center',
+                    maskRepeat: 'no-repeat',
+                    maskSize: 'contain',
+                  }}
                   whileHover={{ scale: 1.05, y: 10 }}
                 />
               </button>
