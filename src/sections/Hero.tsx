@@ -5,25 +5,25 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '@/store';
 
 const HERO_IMAGES = [
-  '/images/Female_model_vinyl.webp',
+  '/images/black_tshirt_laptop_hero.webp',
   '/images/turtlemodelimage.webp',
   '/images/slow_down_model.webp',
   '/images/seedhe%20pahad%20se%20model.webp'
 ] as const;
 const HERO_ALT: Record<(typeof HERO_IMAGES)[number], string> = {
-  '/images/Female_model_vinyl.webp': 'Model wearing the Slugsera Let The Moment Play oversized graphic T-shirt',
+  '/images/black_tshirt_laptop_hero.webp': 'Model wearing the Slugsera Let The Moment Play oversized graphic T-shirt',
   '/images/turtlemodelimage.webp': 'Model styling the Slugsera Savage Tortoise oversized T-shirt',
   '/images/slow_down_model.webp': 'Model wearing the green Slugsera Slow Down heavyweight oversized T-shirt',
   '/images/seedhe%20pahad%20se%20model.webp': 'Model wearing the Slugsera Seedhe Pahad Se graphic streetwear T-shirt',
 };
 const HERO_RESPONSIVE: Record<(typeof HERO_IMAGES)[number], string> = {
-  '/images/Female_model_vinyl.webp': 'hero-vinyl',
+  '/images/black_tshirt_laptop_hero.webp': 'hero-black-tshirt-laptop',
   '/images/turtlemodelimage.webp': 'hero-tortoise',
   '/images/slow_down_model.webp': 'hero-slow-down',
   '/images/seedhe%20pahad%20se%20model.webp': 'hero-pahad',
 };
 const HERO_DIMENSIONS: Record<(typeof HERO_IMAGES)[number], { width: number; height: number }> = {
-  '/images/Female_model_vinyl.webp': { width: 2000, height: 1186 },
+  '/images/black_tshirt_laptop_hero.webp': { width: 2400, height: 1351 },
   '/images/turtlemodelimage.webp': { width: 2000, height: 1116 },
   '/images/slow_down_model.webp': { width: 2000, height: 1116 },
   '/images/seedhe%20pahad%20se%20model.webp': { width: 2000, height: 848 },
@@ -227,27 +227,6 @@ export default function Hero() {
           )}
         </div>
       ))}
-
-      {/* Vinyl Element */}
-      <AnimatePresence>
-        {!hasCustomHero && currentImage === '/images/Female_model_vinyl.webp' && (
-          <motion.div 
-            className="absolute -right-16 lg:-right-24 -bottom-4 lg:-bottom-8 z-10 hidden md:block pointer-events-none"
-            initial={{ opacity: 0, y: 100 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 100, transition: { duration: 0.5 } }}
-            transition={{ duration: 1.2, type: "spring", stiffness: 40 }}
-          >
-            <motion.img 
-              src="/images/Vinyl_Only-removebg-preview.webp"
-              alt="Vinyl"
-              className="w-[250px] h-[250px] lg:w-[350px] lg:h-[350px] drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] opacity-95"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Top Title Block */}
       <motion.div 
