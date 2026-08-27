@@ -40,6 +40,19 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.cms-dashboard--light {
+  --cms-bg: #F5F5F2;
+  --cms-surface: #FFFFFF;
+  --cms-surface-2: #F1F1ED;
+  --cms-text: #1A1A1A;
+  --cms-text-secondary: #5F5F5F;
+  --cms-text-muted: #858585;
+  --cms-border: #DDDDD8;
+  --cms-border-hover: #C7C7C1;
+  --cms-shadow: 0 4px 24px rgba(20, 20, 20, 0.09);
+  --cms-shadow-lg: 0 8px 40px rgba(20, 20, 20, 0.14);
+}
+
 .cms-dashboard * {
   box-sizing: border-box;
 }
@@ -69,7 +82,7 @@
 
 /* ─── Sidebar ────────────────────────────────────────────────── */
 .cms-sidebar {
-  background: linear-gradient(180deg, #0F0F0F 0%, #0A0A0A 100%);
+  background: linear-gradient(180deg, var(--cms-surface) 0%, var(--cms-bg) 100%);
   border-right: 1px solid var(--cms-border);
   transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -198,7 +211,7 @@
   justify-content: space-between;
   padding: 0 16px;
   border-bottom: 1px solid var(--cms-border);
-  background: rgba(10, 10, 10, 0.85);
+  background: color-mix(in srgb, var(--cms-bg) 85%, transparent);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   flex-shrink: 0;
@@ -291,7 +304,7 @@
   max-height: 400px;
   overflow-y: auto;
   border-radius: var(--cms-radius-card);
-  background: rgba(17, 17, 17, 0.95);
+  background: color-mix(in srgb, var(--cms-surface) 95%, transparent);
   border: 1px solid var(--cms-border);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -303,6 +316,16 @@
 .cms-main {
   background: var(--cms-bg);
 }
+
+.cms-dashboard--dark [class~="bg-white"] { background-color: var(--cms-surface) !important; }
+.cms-dashboard--dark [class*="bg-[#F6F6F4]"] { background-color: var(--cms-surface-2) !important; }
+.cms-dashboard--dark [class*="text-[#1A1A1A]"] { color: var(--cms-text) !important; }
+.cms-dashboard--dark [class*="text-[#6B6B6B]"] { color: var(--cms-text-secondary) !important; }
+.cms-dashboard--dark [class*="text-[#9E9E9E]"] { color: var(--cms-text-muted) !important; }
+.cms-dashboard--dark [class*="border-[#E5E5E5]"] { border-color: var(--cms-border) !important; }
+.cms-dashboard--dark input:not([type="checkbox"]):not([type="radio"]),
+.cms-dashboard--dark select,
+.cms-dashboard--dark textarea { background-color: var(--cms-surface-2); color: var(--cms-text); border-color: var(--cms-border); }
 
 /* ─── Cards ──────────────────────────────────────────────────── */
 .cms-card {

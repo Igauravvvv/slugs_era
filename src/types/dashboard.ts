@@ -52,6 +52,24 @@ export interface DbProduct {
 }
 
 export type ProductFormData = Omit<DbProduct, 'id' | 'created_at' | 'updated_at'>;
+export type Product = DbProduct;
+
+export interface Drop {
+  id: string;
+  name: string;
+  season: string;
+  drop_date: string | null;
+  cover_image_url: string | null;
+  description: string | null;
+  is_active: boolean;
+  status: 'active' | 'coming_soon' | 'archived';
+  product_ids: string[];
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export type DropFormData = Omit<Drop, 'id' | 'created_at' | 'updated_at'>;
 
 /** Site sections for CMS control */
 export interface SiteSection {

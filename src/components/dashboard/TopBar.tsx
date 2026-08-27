@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, Bell, Search, Moon, Sun, User, Check } from 'lucide-react';
 import type { DashboardView } from './Sidebar';
+import { useMarkNotificationsRead, useNotifications } from '@/hooks/useNotifications';
 
 const viewTitles: Record<string, string> = {
   overview: 'Overview',
@@ -57,6 +58,9 @@ export default function TopBar({
   const [notifOpen, setNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  const notifications = useNotifications();
+  const markRead = useMarkNotificationsRead();
+  const unread = (notifications.data || []).filter((item) => !item.is_read);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -120,7 +124,7 @@ export default function TopBar({
                   setSearchQuery(e.target.value);
                   onSearch?.(e.target.value);
                 }}
-                placeholder="Search products, drops..."
+                placeholder="Search products..."
                 className="cms-search-input"
                 onBlur={() => {
                   if (!searchQuery) setSearchOpen(false);
@@ -154,7 +158,7 @@ export default function TopBar({
             title="Notifications"
           >
             <Bell size={18} />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#C0132A] animate-pulse" />
+            {unread.length > 0 && <span className="absolute top-1 right-1 min-w-4 h-4 px-1 rounded-full bg-[var(--cms-accent)] text-white text-[9px] font-bold flex items-center justify-center">{unread.length > 9 ? '9+' : unread.length}</span>}
           </button>
 
           <AnimatePresence>
@@ -165,16 +169,13 @@ export default function TopBar({
                 exit={{ opacity: 0, y: 8, scale: 0.95 }}
                 className="cms-notif-dropdown"
               >
-                <div className="flex items-center justify-between p-4 border-b border-[#2A2A2A]">
-                  <span className="text-sm font-semibold text-[#F5F5F5]">Notifications</span>
-                  <button className="text-[10px] font-medium text-[#C0132A] hover:text-[#9C0E21] flex items-center gap-1">
+                <div className="flex items-center justify-between p-4 border-b border-[var(--cms-border)]">
+                  <span className="text-sm font-semibold text-[var(--cms-text)]">Notifications</span>
+                  <button disabled={unread.length === 0 || markRead.isPending} onClick={() => markRead.mutate(undefined)} className="text-[10px] font-medium text-[var(--cms-accent)] disabled:opacity-40 flex items-center gap-1">
                     <Check size={10} /> Mark all read
                   </button>
                 </div>
-                <div className="py-6 text-center">
-                  <Bell size={24} className="mx-auto text-[#333] mb-2" />
-                  <p className="text-xs text-[#666]">No new notifications</p>
-                </div>
+                {notifications.isLoading ? <div className="py-6 text-center text-xs text-[var(--cms-text-muted)]">Loading notifications…</div> : unread.length === 0 ? <div className="py-6 text-center"><Bell size={24} className="mx-auto text-[var(--cms-text-muted)] mb-2" /><p className="text-xs text-[var(--cms-text-secondary)]">You are all caught up</p></div> : <div className="divide-y divide-[var(--cms-border)]">{unread.slice(0, 8).map((item) => <button key={item.id} onClick={() => markRead.mutate([item.id])} className="w-full text-left p-4 hover:bg-[var(--cms-surface-2)] transition-colors"><p className="text-xs font-semibold text-[var(--cms-text)]">{item.title}</p>{item.message && <p className="text-[11px] text-[var(--cms-text-secondary)] mt-1 line-clamp-2">{item.message}</p>}<p className="text-[10px] text-[var(--cms-text-muted)] mt-1.5">{new Date(item.created_at).toLocaleString('en-IN')}</p></button>)}</div>}
               </motion.div>
             )}
           </AnimatePresence>
@@ -187,10 +188,10 @@ export default function TopBar({
             <User size={14} />
           </div>
           <div className="hidden sm:block">
-            <p className="text-xs font-semibold text-[#F5F5F5] truncate max-w-[120px]">
+            <p className="text-xs font-semibold text-[var(--cms-text)] truncate max-w-[120px]">
               {userEmail?.split('@')[0] || 'Admin'}
             </p>
-            <p className="text-[10px] text-[#666]">Super Admin</p>
+            <p className="text-[10px] text-[var(--cms-text-muted)]">Super Admin</p>
           </div>
         </div>
       </div>

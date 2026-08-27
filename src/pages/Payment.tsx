@@ -8,11 +8,11 @@ import { trackPurchase } from '@/lib/analytics';
 import { calculateShipping } from '@/utils/shipping';
 import ProductPrice from '@/components/ProductPrice';
 import { getCartCompareAtTotal } from '@/lib/pricing';
+import { api } from '@/lib/api';
 
 type PaymentMethod = 'card' | 'upi' | 'cod';
 
 const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || '';
-const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3000');
 
 export default function Payment() {
   const navigate = useNavigate();
@@ -55,15 +55,8 @@ export default function Payment() {
       if (!loaded) { alert('Razorpay failed to load. Check your connection.'); setIsProcessing(false); return; }
 
       // 1. Create order on backend
-      const orderRes = await fetch(`${API_URL}/api/payment/create-order`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: total, currency: 'INR' }),
-      });
-      const orderData = await orderRes.json();
-      if (!orderData.success) { 
-        throw new Error(orderData.error || orderData.message || 'Failed to create order'); 
-      }
+      const checkoutItems = cart.map(i => ({ productId: i.product.id, size: i.size, color: i.color, quantity: i.quantity }));
+      const orderData = await api.post<any>('/api/payment/create-order', { items: checkoutItems });
 
       // 2. Open Razorpay modal
       const options = {
@@ -81,10 +74,7 @@ export default function Payment() {
         theme: { color: '#C0132A' },
         handler: async (response: any) => {
           // 3. Verify payment on backend
-          const verifyRes = await fetch(`${API_URL}/api/payment/verify`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
+          const verifyData = await api.post<any>('/api/payment/verify', {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
@@ -99,12 +89,8 @@ export default function Payment() {
                 pincode: selectedAddress.pincode,
                 country: 'India',
               } : null,
-              items: cart.map(i => ({ productId: i.product.id, name: i.product.name, size: i.size, color: i.color, quantity: i.quantity, price: i.product.price })),
-              totalAmount: total,
-              shippingFee: shipping,
-            }),
+              items: checkoutItems,
           });
-          const verifyData = await verifyRes.json();
 
           if (verifyData.success) {
             const orderData = verifyData.data?.order;
@@ -118,7 +104,7 @@ export default function Payment() {
             clearCart();
             navigate('/order-success', { state: { orderNumber, orderId, total } });
           } else {
-            alert('Payment verification failed. Contact support.');
+            alert(verifyData.error || 'Payment verification failed. Contact support.');
           }
           setIsProcessing(false);
         },

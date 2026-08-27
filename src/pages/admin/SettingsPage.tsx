@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAdminSettings, useUpdateAdminSettings, type AdminSiteSettings } from '@/hooks/useAdminData';
-import { Store, User, Bell, AlertTriangle, Save } from 'lucide-react';
+import { Store, User, Bell, RotateCcw, Save } from 'lucide-react';
 
 function Skeleton({ className = '' }: { className?: string }) {
   return <div className={`animate-pulse bg-gray-200 rounded ${className}`} />;
@@ -39,6 +39,7 @@ export default function SettingsPage() {
         founder_name: settings.founder_name || '',
         founder_email: settings.founder_email || '',
       });
+      setNotifications({ newOrder: settings.notify_new_order, lowStock: settings.notify_low_stock, returns: settings.notify_returns });
     }
   }, [settings]);
 
@@ -50,7 +51,7 @@ export default function SettingsPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await updateSettings.mutateAsync(form);
+      await updateSettings.mutateAsync({ ...form, notify_new_order: notifications.newOrder, notify_low_stock: notifications.lowStock, notify_returns: notifications.returns });
       showToast('Settings saved successfully');
     } catch (err: any) {
       showToast('Error: ' + err.message);
@@ -136,18 +137,18 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {/* Danger Zone */}
+          {/* Safe preference reset */}
           <div className="bg-white rounded-xl border border-[#C0392B]/20 p-5" style={{ borderLeft: '3px solid #C0392B' }}>
             <div className="flex items-center gap-2 mb-3">
-              <AlertTriangle size={16} className="text-[#C0392B]" />
-              <h3 className="text-sm font-semibold text-[#C0392B]">Danger Zone</h3>
+              <RotateCcw size={16} className="text-[#C0392B]" />
+              <h3 className="text-sm font-semibold text-[#C0392B]">Reset Preferences</h3>
             </div>
-            <p className="text-sm text-[#6B6B6B] mb-4">Permanently delete all dashboard data. This action cannot be undone.</p>
+            <p className="text-sm text-[#6B6B6B] mb-4">Restore store and notification preferences. Products, orders, and customers are never deleted.</p>
             <button
               onClick={() => setConfirmReset(true)}
               className="px-4 py-2 text-sm font-medium text-[#C0392B] border border-[#C0392B] rounded-lg hover:bg-[#FEECEC]"
             >
-              Reset Dashboard Data
+              Reset Preferences
             </button>
           </div>
         </>
@@ -157,12 +158,12 @@ export default function SettingsPage() {
       {confirmReset && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50" onClick={() => setConfirmReset(false)}>
           <div className="bg-white rounded-xl p-6 max-w-sm w-full" onClick={e => e.stopPropagation()}>
-            <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2">Reset all data?</h3>
-            <p className="text-sm text-[#6B6B6B] mb-5">This will permanently delete all products, orders, and customer data. You cannot undo this.</p>
+            <h3 className="text-lg font-semibold text-[#1A1A1A] mb-2">Reset preferences?</h3>
+            <p className="text-sm text-[#6B6B6B] mb-5">This restores dashboard defaults. Your catalog and orders stay untouched.</p>
             <div className="flex gap-3">
               <button onClick={() => setConfirmReset(false)} className="flex-1 px-4 py-2 text-sm font-medium text-[#6B6B6B] border border-[#E5E5E5] rounded-lg">Cancel</button>
-              <button onClick={() => { setConfirmReset(false); showToast('Data reset disabled in demo'); }} className="flex-1 px-4 py-2 text-sm font-medium text-white bg-[#C0392B] rounded-lg hover:bg-[#A93226]">
-                Reset Everything
+              <button onClick={async () => { await updateSettings.mutateAsync({ store_name: 'Slugsera', currency: 'INR', currency_symbol: '₹', timezone: 'Asia/Kolkata', founder_name: '', founder_email: '', notify_new_order: true, notify_low_stock: true, notify_returns: false }); setConfirmReset(false); showToast('Preferences restored'); }} className="flex-1 px-4 py-2 text-sm font-medium text-white bg-[#C0392B] rounded-lg hover:bg-[#A93226]">
+                Reset
               </button>
             </div>
           </div>

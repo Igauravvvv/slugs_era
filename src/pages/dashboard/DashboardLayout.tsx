@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from 'react';
+import { useEffect, useState, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useLocation, useParams, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -78,10 +78,18 @@ export default function DashboardLayout() {
   const location = useLocation();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = window.localStorage.getItem('slugsera-dashboard-theme');
+    if (saved) return saved === 'dark';
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? true;
+  });
   const [searchQuery, setSearchQuery] = useState('');
 
   const activeView = getActiveView(location.pathname);
+
+  useEffect(() => {
+    window.localStorage.setItem('slugsera-dashboard-theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
 
   // If auth is loading, show a minimal spinner
   if (loading) {
@@ -120,7 +128,7 @@ export default function DashboardLayout() {
   };
 
   return (
-    <div className="cms-dashboard flex h-screen overflow-hidden">
+    <div className={`cms-dashboard ${darkMode ? 'cms-dashboard--dark' : 'cms-dashboard--light'} flex h-screen overflow-hidden`}>
       {/* Sidebar */}
       <Sidebar
         activeView={activeView}
@@ -142,7 +150,10 @@ export default function DashboardLayout() {
           userEmail={user.email || ''}
           darkMode={darkMode}
           onToggleDarkMode={() => setDarkMode(!darkMode)}
-          onSearch={setSearchQuery}
+          onSearch={(query) => {
+            setSearchQuery(query);
+            if (query.trim() && !location.pathname.startsWith('/dashboard/products')) navigate('/dashboard/products');
+          }}
         />
 
         {/* Page content — Nested Routes */}

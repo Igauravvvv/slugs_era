@@ -33,7 +33,7 @@ export interface CustomerEvent {
   created_at: string;
 }
 export interface StorefrontProfile { id: string; email: string; name: string | null; created_at: string; }
-export interface AdminSiteSettings { id: string; store_name: string; currency: string; currency_symbol: string; timezone: string; founder_name: string | null; founder_email: string | null; logo_url: string | null; updated_at: string; }
+export interface AdminSiteSettings { id: string; store_name: string; currency: string; currency_symbol: string; timezone: string; founder_name: string | null; founder_email: string | null; logo_url: string | null; notify_new_order: boolean; notify_low_stock: boolean; notify_returns: boolean; updated_at: string; }
 
 const keys = {
   products: ['admin-products'] as const, product: (id: string) => ['admin-products', id] as const,
@@ -45,6 +45,11 @@ const keys = {
 
 // Storefront query key — invalidate this so main site refreshes too
 const STOREFRONT_PRODUCTS_KEY = ['products'];
+
+function normalizeOrderStatus(status: unknown): string {
+  const value = String(status || 'Pending').toLowerCase();
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
 
 // ─── Map DB row → AdminProduct ──────────────────────────────
 function mapProduct(p: any): AdminProduct {
@@ -171,21 +176,24 @@ export function useAdminOrders() {
   return useQuery({
     queryKey: keys.orders,
     queryFn: async (): Promise<AdminOrder[]> => {
-      try {
-        const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
-        if (error) throw error;
-        return (data || []).map((o: any) => ({
+      const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      return (data || []).map((o: any) => ({
           id: o.id, order_number: o.order_number || `#SLG-${o.id.slice(0, 4)}`,
-          customer_name: o.customer_name || 'Customer', customer_email: o.customer_email,
-          customer_phone: o.customer_phone, shipping_address: o.shipping_address,
-          items: o.items || [], subtotal: Number(o.subtotal || o.total || 0),
-          shipping_fee: Number(o.shipping_fee || 0), total: Number(o.total || 0),
-          payment_method: o.payment_method, payment_status: o.payment_status || 'Pending',
-          status: o.status || 'Pending', notes: o.notes,
+          customer_name: o.customer_name || o.shipping_address?.fullName || 'Customer',
+          customer_email: o.customer_email || o.shipping_address?.email || null,
+          customer_phone: o.customer_phone || o.shipping_address?.phone || null,
+          shipping_address: o.shipping_address,
+          items: (Array.isArray(o.items) ? o.items : []).map((item: any) => ({ ...item, name: item.name || item.product_name || 'Unknown product', qty: Number(item.quantity ?? item.qty ?? 1), price: Number(item.price ?? item.unit_price ?? 0) })),
+          subtotal: Number(o.subtotal || o.total || 0),
+          shipping_fee: Number(o.shipping_fee ?? o.shipping_cost ?? 0), total: Number(o.total || 0),
+          payment_method: o.payment_method || (o.payment_id ? 'Razorpay' : null),
+          payment_status: normalizeOrderStatus(o.payment_status || (o.payment_id ? 'Paid' : 'Pending')),
+          status: normalizeOrderStatus(o.status), notes: o.notes ?? o.admin_note ?? null,
           created_at: o.created_at, updated_at: o.updated_at || o.created_at,
         }));
-      } catch { return []; }
     },
+    refetchInterval: 15_000,
   });
 }
 
@@ -193,7 +201,11 @@ export function useUpdateAdminOrder() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<AdminOrder> & { id: string }) => {
-      const { data, error } = await supabase.from('orders').update(updates).eq('id', id).select().single();
+      const payload: Record<string, unknown> = { ...updates };
+      if (updates.notes !== undefined) { payload.admin_note = updates.notes; delete payload.notes; }
+      delete payload.customer_name; delete payload.customer_email; delete payload.customer_phone;
+      delete payload.shipping_fee; delete payload.payment_method; delete payload.payment_status;
+      const { data, error } = await supabase.from('orders').update(payload).eq('id', id).select().single();
       if (error) throw error;
       return data as unknown as AdminOrder;
     },
@@ -201,18 +213,20 @@ export function useUpdateAdminOrder() {
   });
 }
 
-// ─── CUSTOMERS (fallback) ───────────────────────────────────
-const FALLBACK_CUSTOMERS: AdminCustomer[] = [
-  { id: '1', name: 'Rahul Sharma', email: 'rahul@gmail.com', phone: '9876543210', city: 'Noida', state: 'UP', total_orders: 3, total_spent: 4497, last_order_at: new Date(Date.now() - 2*86400000).toISOString(), created_at: new Date(Date.now() - 30*86400000).toISOString() },
-  { id: '2', name: 'Priya Patel', email: 'priya.p@gmail.com', phone: '9123456789', city: 'Mumbai', state: 'MH', total_orders: 2, total_spent: 5497, last_order_at: new Date(Date.now() - 86400000).toISOString(), created_at: new Date(Date.now() - 20*86400000).toISOString() },
-  { id: '3', name: 'Arjun Mehta', email: 'arjun.m@outlook.com', phone: '9988776655', city: 'Bangalore', state: 'KA', total_orders: 1, total_spent: 2998, last_order_at: new Date(Date.now() - 6*3600000).toISOString(), created_at: new Date(Date.now() - 10*86400000).toISOString() },
-  { id: '4', name: 'Sneha Gupta', email: 'sneha.g@gmail.com', phone: '8877665544', city: 'Kolkata', state: 'WB', total_orders: 1, total_spent: 1499, last_order_at: new Date().toISOString(), created_at: new Date(Date.now() - 5*86400000).toISOString() },
-  { id: '5', name: 'Vikram Singh', email: 'vikram@gmail.com', phone: '7766554433', city: 'Jaipur', state: 'RJ', total_orders: 1, total_spent: 1299, last_order_at: new Date(Date.now() - 3*3600000).toISOString(), created_at: new Date(Date.now() - 7*86400000).toISOString() },
-  { id: '6', name: 'Ananya Reddy', email: 'ananya.r@gmail.com', phone: '9654321876', city: 'Hyderabad', state: 'TS', total_orders: 4, total_spent: 7996, last_order_at: new Date(Date.now() - 5*86400000).toISOString(), created_at: new Date(Date.now() - 45*86400000).toISOString() },
-  { id: '7', name: 'Karan Chopra', email: 'karan.c@gmail.com', phone: '8899001122', city: 'Delhi', state: 'DL', total_orders: 2, total_spent: 2998, last_order_at: new Date(Date.now() - 7*86400000).toISOString(), created_at: new Date(Date.now() - 15*86400000).toISOString() },
-];
+// ─── CUSTOMERS (derived from real orders) ───────────────────
 export function useAdminCustomers() {
-  return useQuery({ queryKey: keys.customers, queryFn: async () => FALLBACK_CUSTOMERS });
+  return useQuery({ queryKey: keys.customers, queryFn: async (): Promise<AdminCustomer[]> => {
+    const { data, error } = await supabase.from('orders').select('id, shipping_address, total, created_at').order('created_at', { ascending: false });
+    if (error) throw error;
+    const customers = new Map<string, AdminCustomer>();
+    (data || []).forEach((order: any) => {
+      const key = String(order.shipping_address?.email || order.shipping_address?.phone || order.shipping_address?.fullName || order.id).toLowerCase();
+      const existing = customers.get(key);
+      if (existing) { existing.total_orders += 1; existing.total_spent += Number(order.total || 0); if (new Date(order.created_at) > new Date(existing.last_order_at || 0)) existing.last_order_at = order.created_at; return; }
+      customers.set(key, { id: key, name: order.shipping_address?.fullName || 'Customer', email: order.shipping_address?.email || null, phone: order.shipping_address?.phone || null, city: order.shipping_address?.city || null, state: order.shipping_address?.state || null, total_orders: 1, total_spent: Number(order.total || 0), last_order_at: order.created_at, created_at: order.created_at });
+    });
+    return [...customers.values()];
+  }, refetchInterval: 15_000 });
 }
 
 // ─── ANALYTICS (real storefront events) ─────────────────────
@@ -286,13 +300,15 @@ export function useStorefrontProfiles() {
   });
 }
 
-// ─── SITE SETTINGS (in-memory) ──────────────────────────────
-let localSettings: AdminSiteSettings = { id: '1', store_name: 'Slugsera', currency: 'INR', currency_symbol: '₹', timezone: 'Asia/Kolkata', founder_name: 'Gaurav', founder_email: 'slugsera@gmail.com', logo_url: null, updated_at: new Date().toISOString() };
-export function useAdminSettings() { return useQuery({ queryKey: keys.settings, queryFn: async () => localSettings }); }
+// ─── SITE SETTINGS (persistent dashboard preferences) ──────
+const SETTINGS_STORAGE_KEY = 'slugsera-admin-settings';
+const defaultSettings: AdminSiteSettings = { id: '1', store_name: 'Slugsera', currency: 'INR', currency_symbol: '₹', timezone: 'Asia/Kolkata', founder_name: 'Gaurav', founder_email: 'slugsera@gmail.com', logo_url: null, notify_new_order: true, notify_low_stock: true, notify_returns: false, updated_at: new Date().toISOString() };
+function readLocalSettings(): AdminSiteSettings { try { const saved = window.localStorage.getItem(SETTINGS_STORAGE_KEY); return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings; } catch { return defaultSettings; } }
+export function useAdminSettings() { return useQuery({ queryKey: keys.settings, queryFn: async () => readLocalSettings() }); }
 export function useUpdateAdminSettings() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (updates: Partial<AdminSiteSettings>) => { localSettings = { ...localSettings, ...updates, updated_at: new Date().toISOString() }; return localSettings; },
+    mutationFn: async (updates: Partial<AdminSiteSettings>) => { const next = { ...readLocalSettings(), ...updates, updated_at: new Date().toISOString() }; window.localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(next)); return next; },
     onSuccess: () => qc.invalidateQueries({ queryKey: keys.settings }),
   });
 }
