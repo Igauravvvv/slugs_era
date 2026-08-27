@@ -1,17 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Package, Plus, Search, Filter, MoreHorizontal, 
-  Edit3, Trash2, ExternalLink, Image as ImageIcon,
-  CheckCircle2, XCircle
+  Package, Plus, Filter,
+  Edit3, Trash2, Image as ImageIcon,
+  XCircle, ArrowLeft, ArrowRight, GripVertical
 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { fetchProducts, toggleProductPublished, updateProductStock, deleteProduct } from '@/lib/queries';
+import { fetchProducts, toggleProductPublished, updateProductSortOrder, deleteProduct } from '@/lib/queries';
 import { PRODUCTS_QUERY_KEY } from '@/hooks/useProducts';
 import { useDashboardToast } from '@/store/dashboardToast';
 import { ProductTableSkeleton } from '@/components/dashboard/SkeletonLoader';
 import type { Product } from '@/types/dashboard';
-import type { DashboardView } from '@/components/dashboard/Sidebar';
 
 interface ProductListProps {
   onAddNew: () => void;
@@ -30,11 +29,7 @@ export default function ProductList({ onAddNew, onEdit, searchQuery }: ProductLi
   const loadProducts = async () => {
     try {
       setLoading(true);
-      const data = await fetchProducts({
-        search: searchQuery,
-        category: filterCategory !== 'all' ? filterCategory : undefined,
-        published: filterStatus !== 'all' ? filterStatus === 'published' : undefined
-      });
+      const data = await fetchProducts();
       setProducts(data);
     } catch (err: any) {
       addToast({ type: 'error', title: 'Failed to load products', message: err.message });
@@ -44,8 +39,47 @@ export default function ProductList({ onAddNew, onEdit, searchQuery }: ProductLi
   };
 
   useEffect(() => {
-    loadProducts();
-  }, [searchQuery, filterCategory, filterStatus]);
+    void loadProducts();
+  }, []);
+
+  const visibleProducts = useMemo(() => {
+    const query = searchQuery?.trim().toLowerCase();
+    return products.filter((product) => {
+      if (query && !product.name.toLowerCase().includes(query) && !product.slug.toLowerCase().includes(query)) return false;
+      if (filterCategory !== 'all' && product.category !== filterCategory) return false;
+      if (filterStatus === 'published' && !product.is_published) return false;
+      if (filterStatus === 'draft' && product.is_published) return false;
+      return true;
+    });
+  }, [filterCategory, filterStatus, products, searchQuery]);
+
+  const homepageTshirts = useMemo(
+    () => products.filter((product) => product.category === 'tshirts' && product.is_published && product.status !== 'sold_out'),
+    [products],
+  );
+
+  const moveHomepageProduct = async (index: number, direction: -1 | 1) => {
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= homepageTshirts.length) return;
+
+    const reordered = [...homepageTshirts];
+    [reordered[index], reordered[targetIndex]] = [reordered[targetIndex], reordered[index]];
+    const updates = reordered.map((product, position) => ({ id: product.id, sort_order: position + 1 }));
+    const previous = products;
+    const ranks = new Map(updates.map((update) => [update.id, update.sort_order]));
+    setProducts((current) => [...current]
+      .map((product) => ranks.has(product.id) ? { ...product, sort_order: ranks.get(product.id)! } : product)
+      .sort((a, b) => a.sort_order - b.sort_order));
+
+    try {
+      await updateProductSortOrder(updates);
+      await queryClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
+      addToast({ type: 'success', title: 'Homepage order updated', message: 'The storefront shelf now uses this order.' });
+    } catch (err: unknown) {
+      setProducts(previous);
+      addToast({ type: 'error', title: 'Order was not saved', message: err instanceof Error ? err.message : 'Please try again.' });
+    }
+  };
 
   const handleTogglePublish = async (product: Product) => {
     try {
@@ -83,7 +117,7 @@ export default function ProductList({ onAddNew, onEdit, searchQuery }: ProductLi
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-bold text-[#F5F5F5] font-heading">Products</h2>
-          <p className="text-sm text-[#888] mt-1">{products.length} products found</p>
+          <p className="text-sm text-[#888] mt-1">{visibleProducts.length} products found</p>
         </div>
         <div className="flex items-center gap-3">
           <button onClick={onAddNew} className="cms-btn cms-btn--primary whitespace-nowrap">
@@ -103,10 +137,9 @@ export default function ProductList({ onAddNew, onEdit, searchQuery }: ProductLi
             className="cms-select w-full sm:w-40 h-9"
           >
             <option value="all">All Categories</option>
-            <option value="tops">Tops</option>
-            <option value="bottoms">Bottoms</option>
-            <option value="outerwear">Outerwear</option>
-            <option value="accessories">Accessories</option>
+            <option value="tshirts">T-Shirts</option>
+            <option value="shirts">Shirts</option>
+            <option value="hoodies">Hoodies</option>
           </select>
           <select 
             value={filterStatus} 
@@ -120,10 +153,44 @@ export default function ProductList({ onAddNew, onEdit, searchQuery }: ProductLi
         </div>
       </div>
 
+      <div className="cms-card p-5">
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div>
+            <h3 className="text-sm font-semibold text-[#F5F5F5]">Homepage T-shirt order</h3>
+            <p className="text-xs text-[#888] mt-1">The first five live T-shirts appear left to right on the homepage.</p>
+          </div>
+          <span className="cms-chip whitespace-nowrap">{Math.min(homepageTshirts.length, 5)}/5 shown</span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-3">
+          {homepageTshirts.map((product, index) => {
+            const primaryImage = product.images?.find((image) => image.isPrimary) || product.images?.[0];
+            return (
+              <div key={product.id} className={`rounded-xl border p-3 ${index < 5 ? 'border-[#C0132A]/50 bg-[#C0132A]/5' : 'border-[#2A2A2A] bg-[#111]'}`}>
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="relative w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-[#1A1A1A] border border-[#2A2A2A]">
+                    {primaryImage ? <img src={primaryImage.url} alt="" className="w-full h-full object-cover" /> : <ImageIcon size={16} className="absolute inset-0 m-auto text-[#555]" />}
+                    <span className="absolute left-1 top-1 min-w-5 h-5 px-1 rounded bg-[#C0132A] text-white text-[10px] font-bold flex items-center justify-center">{index + 1}</span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs font-medium text-[#F5F5F5]">{product.name}</p>
+                    <p className="text-[10px] text-[#888] mt-1">{index < 5 ? `Homepage position ${index + 1}` : 'Not shown in first five'}</p>
+                  </div>
+                  <GripVertical size={15} className="text-[#555] shrink-0" />
+                </div>
+                <div className="grid grid-cols-2 gap-2 mt-3">
+                  <button type="button" disabled={index === 0} onClick={() => void moveHomepageProduct(index, -1)} className="cms-btn cms-btn--secondary justify-center px-2 disabled:opacity-30" aria-label={`Move ${product.name} earlier`}><ArrowLeft size={14} /> Earlier</button>
+                  <button type="button" disabled={index === homepageTshirts.length - 1} onClick={() => void moveHomepageProduct(index, 1)} className="cms-btn cms-btn--secondary justify-center px-2 disabled:opacity-30" aria-label={`Move ${product.name} later`}>Later <ArrowRight size={14} /></button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Product List */}
       {loading ? (
         <ProductTableSkeleton rows={8} />
-      ) : products.length === 0 ? (
+      ) : visibleProducts.length === 0 ? (
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -158,7 +225,7 @@ export default function ProductList({ onAddNew, onEdit, searchQuery }: ProductLi
               </thead>
               <tbody>
                 <AnimatePresence>
-                  {products.map((product) => {
+                  {visibleProducts.map((product) => {
                     const primaryImage = product.images?.find(img => img.isPrimary) || product.images?.[0];
                     return (
                       <motion.tr 

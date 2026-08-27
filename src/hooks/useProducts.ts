@@ -167,6 +167,7 @@ export function useProducts() {
       const { data, error } = await supabase
         .from('products')
         .select('*')
+        .eq('is_published', true)
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false });
 

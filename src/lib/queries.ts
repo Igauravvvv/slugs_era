@@ -23,6 +23,7 @@ export async function fetchProducts(filters?: {
   let query = supabase
     .from('products')
     .select('*')
+    .order('sort_order', { ascending: true })
     .order('created_at', { ascending: false });
 
   if (filters?.category) {
@@ -96,17 +97,11 @@ export async function deleteProduct(id: string): Promise<void> {
 }
 
 export async function updateProductSortOrder(updates: { id: string; sort_order: number }[]): Promise<void> {
-  // Update each product's sort_order — silently skip if column doesn't exist
-  try {
-    const promises = updates.map(({ id, sort_order }) =>
-      supabase.from('products').update({ sort_order }).eq('id', id)
-    );
-    const results = await Promise.all(promises);
-    const err = results.find((r) => r.error);
-    if (err?.error) console.warn('sort_order update skipped:', err.error.message);
-  } catch (e) {
-    console.warn('sort_order column may not exist yet:', e);
-  }
+  const results = await Promise.all(updates.map(({ id, sort_order }) =>
+    supabase.from('products').update({ sort_order }).eq('id', id),
+  ));
+  const failed = results.find((result) => result.error)?.error;
+  if (failed) throw new Error(`Failed to save homepage order: ${failed.message}`);
 }
 
 export async function toggleProductPublished(id: string, is_published: boolean): Promise<void> {

@@ -8,7 +8,7 @@ import { fetchProductById, createProduct, updateProduct } from '@/lib/queries';
 import { useDashboardToast } from '@/store/dashboardToast';
 import ImageUploader from '@/components/dashboard/ImageUploader';
 import RichTextEditor from '@/components/dashboard/RichTextEditor';
-import type { Product, ProductFormData } from '@/types/dashboard';
+import type { ProductFormData } from '@/types/dashboard';
 import { PRODUCT_CATEGORIES, PRODUCT_SIZES, type ProductCategory } from '@/lib/productTaxonomy';
 
 const productSchema = z.object({
@@ -395,8 +395,8 @@ export default function ProductForm({ productId, onBack, onSaved }: ProductFormP
               <div className="cms-card p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <label className="cms-label mb-0">Show on homepage?</label>
-                    <p className="text-[11px] text-[#888] mt-1">Featured products are listed in the homepage product shelf.</p>
+                    <label className="cms-label mb-0">Featured product?</label>
+                    <p className="text-[11px] text-[#888] mt-1">Homepage position is managed from Products → Homepage T-shirt order.</p>
                   </div>
                   <Controller
                     name="is_featured"

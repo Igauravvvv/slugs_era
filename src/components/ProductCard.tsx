@@ -72,7 +72,6 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
   };
 
   const handleImageTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
-    if (isComingSoon || images.length < 2) return;
     touchStartX.current = event.touches[0]?.clientX ?? null;
   };
 
@@ -80,9 +79,22 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
     const startX = touchStartX.current;
     const endX = event.changedTouches[0]?.clientX;
     touchStartX.current = null;
-    if (startX === null || endX === undefined || isComingSoon || images.length < 2) return;
+    if (startX === null || endX === undefined) return;
     const distanceX = endX - startX;
-    if (Math.abs(distanceX) < 44) return;
+
+    // Mobile browsers can suppress the Link click after a touch gesture on the
+    // image slider. Handle a genuine tap directly so the product always opens.
+    if (Math.abs(distanceX) < 12) {
+      event.preventDefault();
+      navigate(productUrl);
+      void trackCustomerEvent('product_clicked', {
+        productId: product.id,
+        properties: { product_name: product.name, category: product.category, source: 'product_card_image_mobile' },
+      });
+      return;
+    }
+
+    if (isComingSoon || images.length < 2 || Math.abs(distanceX) < 44) return;
 
     event.preventDefault();
     if (distanceX > 0) showPreviousImage();

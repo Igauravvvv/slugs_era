@@ -13,11 +13,10 @@ export default function Products() {
   const title = section?.title || 'The Essential Five';
   const subtitle = section?.subtitle || 'T-Shirt Collection';
 
-  const featuredProducts = products.filter((p) => p.isFeatured && p.status !== 'sold_out');
-  const tshirts = products.filter((p) => p.category === 'tshirts');
-  // A dashboard editor controls the home shelf. Preserve the original T-shirt
-  // shelf as a sensible fallback until at least one product is featured.
-  const homeProducts = featuredProducts.length > 0 ? featuredProducts : tshirts;
+  // Products arrive in the dashboard-controlled sort_order. The homepage shelf
+  // is always the first five live T-shirts instead of collapsing to a single
+  // card when only one item happens to be marked as featured.
+  const homeProducts = products.filter((p) => p.category === 'tshirts' && p.status !== 'sold_out');
 
   const getCardVariants = (index: number) => {
     return {
