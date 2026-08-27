@@ -5,25 +5,25 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '@/store';
 
 const HERO_IMAGES = [
-  '/images/black_tshirt_laptop_hero.webp',
+  '/images/black_tshirt_laptop_hero_compact.webp',
   '/images/turtlemodelimage.webp',
   '/images/slow_down_model.webp',
   '/images/seedhe%20pahad%20se%20model.webp'
 ] as const;
 const HERO_ALT: Record<(typeof HERO_IMAGES)[number], string> = {
-  '/images/black_tshirt_laptop_hero.webp': 'Model wearing the Slugsera Let The Moment Play oversized graphic T-shirt',
+  '/images/black_tshirt_laptop_hero_compact.webp': 'Model wearing the Slugsera Let The Moment Play oversized graphic T-shirt',
   '/images/turtlemodelimage.webp': 'Model styling the Slugsera Savage Tortoise oversized T-shirt',
   '/images/slow_down_model.webp': 'Model wearing the green Slugsera Slow Down heavyweight oversized T-shirt',
   '/images/seedhe%20pahad%20se%20model.webp': 'Model wearing the Slugsera Seedhe Pahad Se graphic streetwear T-shirt',
 };
 const HERO_RESPONSIVE: Record<(typeof HERO_IMAGES)[number], string> = {
-  '/images/black_tshirt_laptop_hero.webp': 'hero-black-tshirt-laptop',
+  '/images/black_tshirt_laptop_hero_compact.webp': 'hero-black-tshirt-laptop-compact',
   '/images/turtlemodelimage.webp': 'hero-tortoise',
   '/images/slow_down_model.webp': 'hero-slow-down',
   '/images/seedhe%20pahad%20se%20model.webp': 'hero-pahad',
 };
 const HERO_DIMENSIONS: Record<(typeof HERO_IMAGES)[number], { width: number; height: number }> = {
-  '/images/black_tshirt_laptop_hero.webp': { width: 2400, height: 1351 },
+  '/images/black_tshirt_laptop_hero_compact.webp': { width: 1536, height: 1024 },
   '/images/turtlemodelimage.webp': { width: 2000, height: 1116 },
   '/images/slow_down_model.webp': { width: 2000, height: 1116 },
   '/images/seedhe%20pahad%20se%20model.webp': { width: 2000, height: 848 },
