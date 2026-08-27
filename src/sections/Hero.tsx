@@ -10,7 +10,6 @@ const HERO_IMAGES = [
   '/images/slow_down_model.webp',
   '/images/seedhe%20pahad%20se%20model.webp'
 ] as const;
-const FIRST_HERO_MOBILE_SRCSET = '/images/cdn/hero-black-tshirt-mobile-640.webp 640w, /images/cdn/hero-black-tshirt-mobile-960.webp 960w, /images/cdn/hero-black-tshirt-mobile-1440.webp 1440w';
 const HERO_ALT: Record<(typeof HERO_IMAGES)[number], string> = {
   '/images/black_tshirt_laptop_hero_compact.webp': 'Model wearing the Slugsera Let The Moment Play oversized graphic T-shirt',
   '/images/turtlemodelimage.webp': 'Model styling the Slugsera Savage Tortoise oversized T-shirt',
@@ -171,9 +170,6 @@ export default function Hero() {
             transition={{ duration: 0.65, ease: 'easeInOut' }}
           >
             {mobileHeroImage && <source media="(max-width: 767px)" srcSet={mobileHeroImage} />}
-            {!hasCustomHero && currentImage === HERO_IMAGES[0] && (
-              <source media="(max-width: 767px)" srcSet={FIRST_HERO_MOBILE_SRCSET} sizes="100vw" />
-            )}
             {desktopHeroImage && <source media="(min-width: 768px)" srcSet={desktopHeroImage} />}
             <img
               src={desktopHeroImage || mobileHeroImage || currentImage}
