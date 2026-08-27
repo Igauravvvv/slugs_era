@@ -10,6 +10,7 @@ const HERO_IMAGES = [
   '/images/slow_down_model.webp',
   '/images/seedhe%20pahad%20se%20model.webp'
 ] as const;
+const FIRST_HERO_MOBILE_SRCSET = '/images/cdn/hero-black-tshirt-mobile-640.webp 640w, /images/cdn/hero-black-tshirt-mobile-960.webp 960w, /images/cdn/hero-black-tshirt-mobile-1440.webp 1440w';
 const HERO_ALT: Record<(typeof HERO_IMAGES)[number], string> = {
   '/images/black_tshirt_laptop_hero_compact.webp': 'Model wearing the Slugsera Let The Moment Play oversized graphic T-shirt',
   '/images/turtlemodelimage.webp': 'Model styling the Slugsera Savage Tortoise oversized T-shirt',
@@ -23,7 +24,7 @@ const HERO_RESPONSIVE: Record<(typeof HERO_IMAGES)[number], string> = {
   '/images/seedhe%20pahad%20se%20model.webp': 'hero-pahad',
 };
 const HERO_DIMENSIONS: Record<(typeof HERO_IMAGES)[number], { width: number; height: number }> = {
-  '/images/black_tshirt_laptop_hero_compact.webp': { width: 1536, height: 1024 },
+  '/images/black_tshirt_laptop_hero_compact.webp': { width: 2400, height: 1600 },
   '/images/turtlemodelimage.webp': { width: 2000, height: 1116 },
   '/images/slow_down_model.webp': { width: 2000, height: 1116 },
   '/images/seedhe%20pahad%20se%20model.webp': { width: 2000, height: 848 },
@@ -170,6 +171,9 @@ export default function Hero() {
             transition={{ duration: 0.65, ease: 'easeInOut' }}
           >
             {mobileHeroImage && <source media="(max-width: 767px)" srcSet={mobileHeroImage} />}
+            {!hasCustomHero && currentImage === HERO_IMAGES[0] && (
+              <source media="(max-width: 767px)" srcSet={FIRST_HERO_MOBILE_SRCSET} sizes="100vw" />
+            )}
             {desktopHeroImage && <source media="(min-width: 768px)" srcSet={desktopHeroImage} />}
             <img
               src={desktopHeroImage || mobileHeroImage || currentImage}
@@ -178,7 +182,13 @@ export default function Hero() {
               alt={hasCustomHero ? 'Slugsera seasonal hero cover' : HERO_ALT[currentImage]}
               width={hasCustomHero ? 2000 : HERO_DIMENSIONS[currentImage].width}
               height={hasCustomHero ? 1125 : HERO_DIMENSIONS[currentImage].height}
-              className={`absolute inset-0 w-full h-full object-cover ${!hasCustomHero && (currentImage === '/images/turtlemodelimage.webp' || currentImage === '/images/seedhe%20pahad%20se%20model.webp') ? 'object-[80%_center] sm:object-center' : 'object-center'}`}
+              className={`absolute inset-0 w-full h-full object-cover ${
+                !hasCustomHero && currentImage === HERO_IMAGES[0]
+                  ? 'object-center md:object-[center_75%]'
+                  : !hasCustomHero && (currentImage === '/images/turtlemodelimage.webp' || currentImage === '/images/seedhe%20pahad%20se%20model.webp')
+                    ? 'object-[80%_center] sm:object-center'
+                    : 'object-center'
+              }`}
               decoding="async"
               fetchPriority="high"
             />
