@@ -231,6 +231,25 @@ export default function Hero() {
             />
           </motion.div>
 
+          {/* The desktop artwork already contains the fixtures, so these halos sit directly over
+              their white faces and make the lamps themselves visibly pulse. */}
+          <div className="absolute inset-0 z-[3] pointer-events-none overflow-hidden hidden md:block" aria-hidden="true">
+            <motion.div
+              data-hero-lamp="left"
+              className="absolute -left-8 top-[18%] h-28 w-36 -rotate-[24deg] rounded-full blur-[3px] mix-blend-screen"
+              style={{ background: 'radial-gradient(ellipse, rgba(255,255,255,0.98) 0%, rgba(255,242,232,0.76) 22%, rgba(255,128,112,0.34) 46%, transparent 72%)' }}
+              animate={prefersReducedMotion ? { opacity: 0.78 } : { opacity: [0.08, 1, 0.12, 0.88, 0.08], scale: [0.94, 1.08, 0.96, 1.05, 0.94] }}
+              transition={prefersReducedMotion ? undefined : { duration: 6.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.24, 0.5, 0.74, 1] }}
+            />
+            <motion.div
+              data-hero-lamp="right"
+              className="absolute -right-8 top-[19%] h-28 w-36 rotate-[24deg] rounded-full blur-[3px] mix-blend-screen"
+              style={{ background: 'radial-gradient(ellipse, rgba(255,255,255,0.98) 0%, rgba(255,242,232,0.76) 22%, rgba(255,128,112,0.34) 46%, transparent 72%)' }}
+              animate={prefersReducedMotion ? { opacity: 0.78 } : { opacity: [0.08, 0.88, 0.12, 1, 0.08], scale: [0.94, 1.05, 0.96, 1.08, 0.94] }}
+              transition={prefersReducedMotion ? undefined : { duration: 6.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.24, 0.5, 0.74, 1], delay: 0.3 }}
+            />
+          </div>
+
           <div className="absolute inset-0 z-[3] pointer-events-none overflow-hidden md:hidden" aria-hidden="true">
             <motion.img
               src="/images/studio_spotlight_overlay.webp"
