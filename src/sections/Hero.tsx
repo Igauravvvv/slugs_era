@@ -229,6 +229,36 @@ export default function Hero() {
               className="absolute inset-0 mix-blend-screen"
               style={{ background: 'radial-gradient(ellipse at 50% 52%, rgba(255,240,225,0.18), transparent 48%)' }}
             />
+
+            {/* Directional beams originate at the photographed lamp faces and converge on the model.
+                This layer sits above the baked hero image, so the flash illuminates the clothing too. */}
+            <motion.div
+              data-hero-beam="left"
+              className="absolute inset-0 hidden md:block mix-blend-screen blur-[10px]"
+              style={{
+                clipPath: 'polygon(2.5% 21%, 8% 23%, 61% 70%, 47% 82%)',
+                background: 'linear-gradient(132deg, rgba(255,248,238,0.52) 0%, rgba(255,211,198,0.24) 38%, rgba(255,120,112,0.08) 66%, transparent 84%)',
+              }}
+              animate={prefersReducedMotion ? { opacity: 0.42 } : { opacity: [0.18, 0.58, 0.25, 0.5, 0.18] }}
+              transition={prefersReducedMotion ? undefined : { duration: 6.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.24, 0.5, 0.74, 1] }}
+            />
+            <motion.div
+              data-hero-beam="right"
+              className="absolute inset-0 hidden md:block mix-blend-screen blur-[10px]"
+              style={{
+                clipPath: 'polygon(97.5% 21%, 92% 23%, 39% 70%, 53% 82%)',
+                background: 'linear-gradient(228deg, rgba(255,248,238,0.52) 0%, rgba(255,211,198,0.24) 38%, rgba(255,120,112,0.08) 66%, transparent 84%)',
+              }}
+              animate={prefersReducedMotion ? { opacity: 0.42 } : { opacity: [0.18, 0.5, 0.25, 0.58, 0.18] }}
+              transition={prefersReducedMotion ? undefined : { duration: 6.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.24, 0.5, 0.74, 1], delay: 0.3 }}
+            />
+            <motion.div
+              data-hero-model-flash="true"
+              className="absolute inset-0 hidden md:block mix-blend-screen blur-xl"
+              style={{ background: 'radial-gradient(ellipse at 51% 60%, rgba(255,236,224,0.22) 0%, rgba(255,139,126,0.08) 28%, transparent 50%)' }}
+              animate={prefersReducedMotion ? { opacity: 0.5 } : { opacity: [0.25, 0.7, 0.35, 0.65, 0.25] }}
+              transition={prefersReducedMotion ? undefined : { duration: 6.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.24, 0.5, 0.74, 1] }}
+            />
           </motion.div>
 
           {/* The desktop artwork already contains the fixtures, so these halos sit directly over
