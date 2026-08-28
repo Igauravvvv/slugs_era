@@ -270,6 +270,39 @@ export default function Hero() {
           </motion.div>
 
           <div className="absolute inset-0 z-[3] pointer-events-none overflow-hidden md:hidden" aria-hidden="true">
+            <motion.svg
+              data-hero-mobile-beams="true"
+              className="absolute inset-0 h-full w-full mix-blend-screen"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+              animate={prefersReducedMotion ? { opacity: 0.46 } : { opacity: [0.26, 0.62, 0.34, 0.55, 0.26] }}
+              transition={prefersReducedMotion ? undefined : { duration: 7.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
+            >
+              <defs>
+                <linearGradient id="hero-mobile-left-beam" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.72" />
+                  <stop offset="44%" stopColor="#ffd8ca" stopOpacity="0.36" />
+                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.12" />
+                </linearGradient>
+                <linearGradient id="hero-mobile-right-beam" x1="1" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.72" />
+                  <stop offset="44%" stopColor="#ffd8ca" stopOpacity="0.36" />
+                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.12" />
+                </linearGradient>
+                <filter id="hero-mobile-beam-feather" x="-12" y="-12" width="124" height="124" filterUnits="userSpaceOnUse">
+                  <feGaussianBlur stdDeviation="2.2" />
+                </filter>
+              </defs>
+              <path d="M 3 28 L 56 57 L 40 79 Z" fill="url(#hero-mobile-left-beam)" filter="url(#hero-mobile-beam-feather)" />
+              <path d="M 97 28 L 44 57 L 60 79 Z" fill="url(#hero-mobile-right-beam)" filter="url(#hero-mobile-beam-feather)" />
+            </motion.svg>
+            <motion.div
+              data-hero-mobile-model-flash="true"
+              className="absolute inset-0 mix-blend-screen blur-xl"
+              style={{ background: 'radial-gradient(ellipse at 50% 59%, rgba(255,236,224,0.2) 0%, rgba(255,139,126,0.07) 30%, transparent 56%)' }}
+              animate={prefersReducedMotion ? { opacity: 0.34 } : { opacity: [0.16, 0.44, 0.24, 0.4, 0.16] }}
+              transition={prefersReducedMotion ? undefined : { duration: 7.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
+            />
             <motion.img
               src="/images/studio_spotlight_overlay.webp"
               alt=""
