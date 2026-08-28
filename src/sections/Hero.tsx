@@ -218,14 +218,6 @@ export default function Hero() {
             aria-hidden="true"
           >
             <div
-              className="absolute inset-y-0 left-0 w-[28%] mix-blend-screen"
-              style={{ background: 'radial-gradient(ellipse at left center, rgba(255,235,225,0.26), rgba(255,80,80,0.08) 40%, transparent 72%)' }}
-            />
-            <div
-              className="absolute inset-y-0 right-0 w-[28%] mix-blend-screen"
-              style={{ background: 'radial-gradient(ellipse at right center, rgba(255,235,225,0.26), rgba(255,80,80,0.08) 40%, transparent 72%)' }}
-            />
-            <div
               className="absolute inset-0 mix-blend-screen"
               style={{ background: 'radial-gradient(ellipse at 50% 52%, rgba(255,240,225,0.18), transparent 48%)' }}
             />
