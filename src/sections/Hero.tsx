@@ -213,8 +213,8 @@ export default function Hero() {
         <>
           <motion.div
             className="absolute inset-0 z-[2] pointer-events-none overflow-hidden"
-            animate={prefersReducedMotion ? { opacity: 0.82 } : { opacity: [0.5, 0.95, 0.68, 1, 0.5] }}
-            transition={prefersReducedMotion ? undefined : { duration: 7.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
+            animate={prefersReducedMotion ? { opacity: 0.84 } : { opacity: [0.62, 0.92, 0.72, 0.95, 0.62] }}
+            transition={prefersReducedMotion ? undefined : { duration: 8.8, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
             aria-hidden="true"
           >
             <div
@@ -237,23 +237,23 @@ export default function Hero() {
               className="absolute inset-0 hidden h-full w-full md:block mix-blend-screen"
               viewBox="0 0 100 100"
               preserveAspectRatio="none"
-              animate={prefersReducedMotion ? { opacity: 0.48 } : { opacity: [0.28, 0.65, 0.36, 0.58, 0.28] }}
-              transition={prefersReducedMotion ? undefined : { duration: 6.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.24, 0.5, 0.74, 1] }}
+              animate={prefersReducedMotion ? { opacity: 0.52 } : { opacity: [0.32, 0.7, 0.42, 0.64, 0.32] }}
+              transition={prefersReducedMotion ? undefined : { duration: 8.8, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
               aria-hidden="true"
             >
               <defs>
                 <linearGradient id="hero-left-beam" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.75" />
-                  <stop offset="42%" stopColor="#ffd8ca" stopOpacity="0.38" />
-                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.14" />
+                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.82" />
+                  <stop offset="42%" stopColor="#ffd8ca" stopOpacity="0.42" />
+                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.16" />
                 </linearGradient>
                 <linearGradient id="hero-right-beam" x1="1" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.75" />
-                  <stop offset="42%" stopColor="#ffd8ca" stopOpacity="0.38" />
-                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.14" />
+                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.82" />
+                  <stop offset="42%" stopColor="#ffd8ca" stopOpacity="0.42" />
+                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.16" />
                 </linearGradient>
                 <filter id="hero-beam-feather" x="-10" y="-10" width="120" height="120" filterUnits="userSpaceOnUse">
-                  <feGaussianBlur stdDeviation="1.8" />
+                  <feGaussianBlur stdDeviation="2.6" />
                 </filter>
               </defs>
               {/* These cones follow the photographed lamp angles and the user's marked guide lines. */}
@@ -262,10 +262,10 @@ export default function Hero() {
             </motion.svg>
             <motion.div
               data-hero-model-flash="true"
-              className="absolute inset-0 hidden md:block mix-blend-screen blur-xl"
-              style={{ background: 'radial-gradient(ellipse at 51% 60%, rgba(255,236,224,0.22) 0%, rgba(255,139,126,0.08) 28%, transparent 50%)' }}
-              animate={prefersReducedMotion ? { opacity: 0.36 } : { opacity: [0.18, 0.48, 0.26, 0.44, 0.18] }}
-              transition={prefersReducedMotion ? undefined : { duration: 6.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.24, 0.5, 0.74, 1] }}
+              className="absolute inset-0 hidden md:block mix-blend-screen blur-2xl"
+              style={{ background: 'radial-gradient(ellipse at 51% 59%, rgba(255,236,224,0.28) 0%, rgba(255,139,126,0.1) 32%, transparent 58%)' }}
+              animate={prefersReducedMotion ? { opacity: 0.42 } : { opacity: [0.22, 0.55, 0.32, 0.5, 0.22] }}
+              transition={prefersReducedMotion ? undefined : { duration: 8.8, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
             />
           </motion.div>
 
@@ -275,22 +275,22 @@ export default function Hero() {
               className="absolute inset-0 h-full w-full mix-blend-screen"
               viewBox="0 0 100 100"
               preserveAspectRatio="none"
-              animate={prefersReducedMotion ? { opacity: 0.46 } : { opacity: [0.26, 0.62, 0.34, 0.55, 0.26] }}
-              transition={prefersReducedMotion ? undefined : { duration: 7.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
+              animate={prefersReducedMotion ? { opacity: 0.5 } : { opacity: [0.3, 0.7, 0.42, 0.62, 0.3] }}
+              transition={prefersReducedMotion ? undefined : { duration: 9.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
             >
               <defs>
                 <linearGradient id="hero-mobile-left-beam" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.72" />
-                  <stop offset="44%" stopColor="#ffd8ca" stopOpacity="0.36" />
-                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.12" />
+                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.78" />
+                  <stop offset="44%" stopColor="#ffd8ca" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.14" />
                 </linearGradient>
                 <linearGradient id="hero-mobile-right-beam" x1="1" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.72" />
-                  <stop offset="44%" stopColor="#ffd8ca" stopOpacity="0.36" />
-                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.12" />
+                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.78" />
+                  <stop offset="44%" stopColor="#ffd8ca" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.14" />
                 </linearGradient>
                 <filter id="hero-mobile-beam-feather" x="-12" y="-12" width="124" height="124" filterUnits="userSpaceOnUse">
-                  <feGaussianBlur stdDeviation="2.2" />
+                  <feGaussianBlur stdDeviation="3.4" />
                 </filter>
               </defs>
               <path d="M 3 28 L 56 57 L 40 79 Z" fill="url(#hero-mobile-left-beam)" filter="url(#hero-mobile-beam-feather)" />
@@ -298,10 +298,10 @@ export default function Hero() {
             </motion.svg>
             <motion.div
               data-hero-mobile-model-flash="true"
-              className="absolute inset-0 mix-blend-screen blur-xl"
-              style={{ background: 'radial-gradient(ellipse at 50% 59%, rgba(255,236,224,0.2) 0%, rgba(255,139,126,0.07) 30%, transparent 56%)' }}
-              animate={prefersReducedMotion ? { opacity: 0.34 } : { opacity: [0.16, 0.44, 0.24, 0.4, 0.16] }}
-              transition={prefersReducedMotion ? undefined : { duration: 7.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
+              className="absolute inset-0 mix-blend-screen blur-2xl"
+              style={{ background: 'radial-gradient(ellipse at 50% 59%, rgba(255,236,224,0.25) 0%, rgba(255,139,126,0.09) 32%, transparent 60%)' }}
+              animate={prefersReducedMotion ? { opacity: 0.4 } : { opacity: [0.2, 0.52, 0.3, 0.46, 0.2] }}
+              transition={prefersReducedMotion ? undefined : { duration: 9.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
             />
             <motion.img
               src="/images/studio_spotlight_overlay.webp"
@@ -309,8 +309,8 @@ export default function Hero() {
               width="420"
               height="522"
               className="absolute -left-14 top-[21%] w-28 h-auto -rotate-6 drop-shadow-[0_0_18px_rgba(255,245,235,0.35)]"
-              animate={prefersReducedMotion ? { opacity: 0.9, filter: 'brightness(1.15)' } : { opacity: [0.58, 1, 0.7, 1, 0.58], filter: ['brightness(0.82)', 'brightness(1.35)', 'brightness(0.95)', 'brightness(1.42)', 'brightness(0.82)'] }}
-              transition={prefersReducedMotion ? undefined : { duration: 7.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
+              animate={prefersReducedMotion ? { opacity: 0.9, filter: 'brightness(1.12)' } : { opacity: [0.7, 0.98, 0.78, 1, 0.7], filter: ['brightness(0.95)', 'brightness(1.22)', 'brightness(1.02)', 'brightness(1.28)', 'brightness(0.95)'] }}
+              transition={prefersReducedMotion ? undefined : { duration: 9.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
             />
             <motion.img
               src="/images/studio_spotlight_overlay.webp"
@@ -318,8 +318,8 @@ export default function Hero() {
               width="420"
               height="522"
               className="absolute -right-14 top-[21%] w-28 h-auto rotate-6 scale-x-[-1] drop-shadow-[0_0_18px_rgba(255,245,235,0.35)]"
-              animate={prefersReducedMotion ? { opacity: 0.9, filter: 'brightness(1.15)' } : { opacity: [0.58, 1, 0.7, 1, 0.58], filter: ['brightness(0.82)', 'brightness(1.35)', 'brightness(0.95)', 'brightness(1.42)', 'brightness(0.82)'] }}
-              transition={prefersReducedMotion ? undefined : { duration: 7.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1], delay: 0.35 }}
+              animate={prefersReducedMotion ? { opacity: 0.9, filter: 'brightness(1.12)' } : { opacity: [0.7, 0.98, 0.78, 1, 0.7], filter: ['brightness(0.95)', 'brightness(1.22)', 'brightness(1.02)', 'brightness(1.28)', 'brightness(0.95)'] }}
+              transition={prefersReducedMotion ? undefined : { duration: 9.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1], delay: 0.45 }}
             />
           </div>
         </>
