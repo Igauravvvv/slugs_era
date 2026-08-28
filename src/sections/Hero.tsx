@@ -232,53 +232,42 @@ export default function Hero() {
 
             {/* Directional beams originate at the photographed lamp faces and converge on the model.
                 This layer sits above the baked hero image, so the flash illuminates the clothing too. */}
-            <motion.div
-              data-hero-beam="left"
-              className="absolute inset-0 hidden md:block mix-blend-screen blur-[10px]"
-              style={{
-                clipPath: 'polygon(2.5% 21%, 8% 23%, 61% 70%, 47% 82%)',
-                background: 'linear-gradient(132deg, rgba(255,248,238,0.52) 0%, rgba(255,211,198,0.24) 38%, rgba(255,120,112,0.08) 66%, transparent 84%)',
-              }}
-              animate={prefersReducedMotion ? { opacity: 0.42 } : { opacity: [0.18, 0.58, 0.25, 0.5, 0.18] }}
+            <motion.svg
+              data-hero-beams="true"
+              className="absolute inset-0 hidden h-full w-full md:block mix-blend-screen"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+              animate={prefersReducedMotion ? { opacity: 0.48 } : { opacity: [0.28, 0.65, 0.36, 0.58, 0.28] }}
               transition={prefersReducedMotion ? undefined : { duration: 6.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.24, 0.5, 0.74, 1] }}
-            />
-            <motion.div
-              data-hero-beam="right"
-              className="absolute inset-0 hidden md:block mix-blend-screen blur-[10px]"
-              style={{
-                clipPath: 'polygon(97.5% 21%, 92% 23%, 39% 70%, 53% 82%)',
-                background: 'linear-gradient(228deg, rgba(255,248,238,0.52) 0%, rgba(255,211,198,0.24) 38%, rgba(255,120,112,0.08) 66%, transparent 84%)',
-              }}
-              animate={prefersReducedMotion ? { opacity: 0.42 } : { opacity: [0.18, 0.5, 0.25, 0.58, 0.18] }}
-              transition={prefersReducedMotion ? undefined : { duration: 6.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.24, 0.5, 0.74, 1], delay: 0.3 }}
-            />
+              aria-hidden="true"
+            >
+              <defs>
+                <linearGradient id="hero-left-beam" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.75" />
+                  <stop offset="42%" stopColor="#ffd8ca" stopOpacity="0.38" />
+                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.14" />
+                </linearGradient>
+                <linearGradient id="hero-right-beam" x1="1" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.75" />
+                  <stop offset="42%" stopColor="#ffd8ca" stopOpacity="0.38" />
+                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.14" />
+                </linearGradient>
+                <filter id="hero-beam-feather" x="-10" y="-10" width="120" height="120" filterUnits="userSpaceOnUse">
+                  <feGaussianBlur stdDeviation="1.8" />
+                </filter>
+              </defs>
+              {/* These cones follow the photographed lamp angles and the user's marked guide lines. */}
+              <path d="M 4 22 L 44 55 L 35 74 Z" fill="url(#hero-left-beam)" filter="url(#hero-beam-feather)" />
+              <path d="M 96 22 L 49 57 L 60 79 Z" fill="url(#hero-right-beam)" filter="url(#hero-beam-feather)" />
+            </motion.svg>
             <motion.div
               data-hero-model-flash="true"
               className="absolute inset-0 hidden md:block mix-blend-screen blur-xl"
               style={{ background: 'radial-gradient(ellipse at 51% 60%, rgba(255,236,224,0.22) 0%, rgba(255,139,126,0.08) 28%, transparent 50%)' }}
-              animate={prefersReducedMotion ? { opacity: 0.5 } : { opacity: [0.25, 0.7, 0.35, 0.65, 0.25] }}
+              animate={prefersReducedMotion ? { opacity: 0.36 } : { opacity: [0.18, 0.48, 0.26, 0.44, 0.18] }}
               transition={prefersReducedMotion ? undefined : { duration: 6.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.24, 0.5, 0.74, 1] }}
             />
           </motion.div>
-
-          {/* The desktop artwork already contains the fixtures, so these halos sit directly over
-              their white faces and make the lamps themselves visibly pulse. */}
-          <div className="absolute inset-0 z-[3] pointer-events-none overflow-hidden hidden md:block" aria-hidden="true">
-            <motion.div
-              data-hero-lamp="left"
-              className="absolute -left-8 top-[18%] h-28 w-36 -rotate-[24deg] rounded-full blur-[3px] mix-blend-screen"
-              style={{ background: 'radial-gradient(ellipse, rgba(255,255,255,0.98) 0%, rgba(255,242,232,0.76) 22%, rgba(255,128,112,0.34) 46%, transparent 72%)' }}
-              animate={prefersReducedMotion ? { opacity: 0.78 } : { opacity: [0.08, 1, 0.12, 0.88, 0.08], scale: [0.94, 1.08, 0.96, 1.05, 0.94] }}
-              transition={prefersReducedMotion ? undefined : { duration: 6.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.24, 0.5, 0.74, 1] }}
-            />
-            <motion.div
-              data-hero-lamp="right"
-              className="absolute -right-8 top-[19%] h-28 w-36 rotate-[24deg] rounded-full blur-[3px] mix-blend-screen"
-              style={{ background: 'radial-gradient(ellipse, rgba(255,255,255,0.98) 0%, rgba(255,242,232,0.76) 22%, rgba(255,128,112,0.34) 46%, transparent 72%)' }}
-              animate={prefersReducedMotion ? { opacity: 0.78 } : { opacity: [0.08, 0.88, 0.12, 1, 0.08], scale: [0.94, 1.05, 0.96, 1.08, 0.94] }}
-              transition={prefersReducedMotion ? undefined : { duration: 6.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.24, 0.5, 0.74, 1], delay: 0.3 }}
-            />
-          </div>
 
           <div className="absolute inset-0 z-[3] pointer-events-none overflow-hidden md:hidden" aria-hidden="true">
             <motion.img
