@@ -26,6 +26,50 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Align the animated lash masks with the spotlight faces baked into the first hero image.
+   The formulas mirror the hero's centered object-cover crop at either side of 16:9. */
+@media (min-width: 768px) and (max-aspect-ratio: 16 / 9) {
+  .hero-lamp-lash-frame {
+    position: absolute;
+    top: 20.9vh;
+    width: 9.3vh;
+    height: 7.8vh;
+    overflow: hidden;
+    border-radius: 50%;
+  }
+
+  .hero-lamp-lash-frame--left {
+    left: calc(50vw - 83vh);
+    transform: rotate(-43deg);
+  }
+
+  .hero-lamp-lash-frame--right {
+    right: calc(50vw - 83vh);
+    transform: rotate(43deg) scaleX(-1);
+  }
+}
+
+@media (min-width: 768px) and (min-aspect-ratio: 16 / 9) {
+  .hero-lamp-lash-frame {
+    position: absolute;
+    top: calc(75vh - 30.5vw);
+    width: 5.4vw;
+    height: 4.5vw;
+    overflow: hidden;
+    border-radius: 50%;
+  }
+
+  .hero-lamp-lash-frame--left {
+    left: 3.2vw;
+    transform: rotate(-43deg);
+  }
+
+  .hero-lamp-lash-frame--right {
+    right: 3.2vw;
+    transform: rotate(43deg) scaleX(-1);
+  }
+}
+
 @layer base {
   :root {
     --red: #C0132A;
