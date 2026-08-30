@@ -32,20 +32,18 @@ const HERO_DIMENSIONS: Record<(typeof HERO_IMAGES)[number], { width: number; hei
   '/images/seedhe%20pahad%20se%20model.webp': { width: 2000, height: 848 },
 };
 
-const LAMP_LASH_SRC = '/images/spotlight_lash_overlay.webp';
-
-function LampLash({ controls }: { controls: ReturnType<typeof useAnimationControls> }) {
+function LampFaceShade({
+  controls,
+  reducedMotion,
+}: {
+  controls: ReturnType<typeof useAnimationControls>;
+  reducedMotion: boolean;
+}) {
   return (
-    <motion.img
-      src={LAMP_LASH_SRC}
-      alt=""
-      width="492"
-      height="192"
-      className="absolute inset-0 h-full w-full origin-top object-cover mix-blend-multiply"
-      initial={{ opacity: 0, y: '-85%', scaleY: 0.35 }}
-      animate={controls}
-      style={{ filter: 'grayscale(1) contrast(3) brightness(1.35)' }}
-      draggable={false}
+    <motion.div
+      className="absolute -inset-[8%] rounded-[50%] bg-[#020202]"
+      initial={{ opacity: reducedMotion ? 0 : 1 }}
+      animate={reducedMotion ? { opacity: 0 } : controls}
     />
   );
 }
@@ -55,7 +53,8 @@ export default function Hero() {
   const elementsRef = useRef<(HTMLDivElement | null)[]>([]);
   const [currentImage, setCurrentImage] = useState<(typeof HERO_IMAGES)[number]>(HERO_IMAGES[0]);
   const prefersReducedMotion = useReducedMotion();
-  const lampBlinkControls = useAnimationControls();
+  const lampFaceControls = useAnimationControls();
+  const lampFlashControls = useAnimationControls();
   const shutterContextRef = useRef<AudioContext | null>(null);
   const soundArmedRef = useRef(false);
 
@@ -113,19 +112,25 @@ export default function Hero() {
     makeClick(0.055, 0.045, 980);
   }, []);
 
-  const triggerLampBlink = useCallback(() => {
+  const triggerLampFlash = useCallback(() => {
     if (prefersReducedMotion) return;
 
-    lampBlinkControls.stop();
-    lampBlinkControls.set({ opacity: 0, y: '-85%', scaleY: 0.35 });
-    void lampBlinkControls.start({
-      opacity: [0, 0.94, 1, 0.94, 0],
-      y: ['-85%', '-18%', '4%', '-18%', '-85%'],
-      scaleY: [0.35, 0.86, 1, 0.86, 0.35],
-      transition: { duration: 0.72, ease: 'easeInOut', times: [0, 0.24, 0.44, 0.66, 1] },
+    lampFaceControls.stop();
+    lampFlashControls.stop();
+    lampFaceControls.set({ opacity: 1 });
+    lampFlashControls.set({ opacity: 0 });
+
+    // Open from black to a clean white lamp, then let the light decay back to black.
+    void lampFaceControls.start({
+      opacity: [1, 0, 0, 0.28, 1],
+      transition: { duration: 1.35, ease: 'easeInOut', times: [0, 0.09, 0.28, 0.58, 1] },
     });
-    playShutterSound(0.29);
-  }, [lampBlinkControls, playShutterSound, prefersReducedMotion]);
+    void lampFlashControls.start({
+      opacity: [0, 0.82, 0.48, 0.16, 0],
+      transition: { duration: 1.28, ease: 'easeOut', times: [0, 0.1, 0.3, 0.66, 1] },
+    });
+    playShutterSound(0.12);
+  }, [lampFaceControls, lampFlashControls, playShutterSound, prefersReducedMotion]);
 
   // Audio is armed by a real visitor gesture so the shutter respects browser autoplay rules.
   useEffect(() => {
@@ -142,7 +147,7 @@ export default function Hero() {
       void audioContext.resume();
 
       if (!prefersReducedMotion && !hasCustomHero && currentImage === HERO_IMAGES[0]) {
-        triggerLampBlink();
+        triggerLampFlash();
       }
 
       window.removeEventListener('pointerdown', armAudio);
@@ -159,7 +164,7 @@ export default function Hero() {
       window.removeEventListener('keydown', armAudio);
       window.removeEventListener('touchstart', armAudio);
     };
-  }, [currentImage, hasCustomHero, prefersReducedMotion, triggerLampBlink]);
+  }, [currentImage, hasCustomHero, prefersReducedMotion, triggerLampFlash]);
 
   useEffect(() => () => {
     const audioContext = shutterContextRef.current;
@@ -168,17 +173,17 @@ export default function Hero() {
     }
   }, []);
 
-  // The first studio look gets two occasional blinks before the carousel advances.
+  // The first studio look gets two restrained flash cycles before the carousel advances.
   useEffect(() => {
     if (prefersReducedMotion || hasCustomHero || currentImage !== HERO_IMAGES[0]) return;
 
-    const firstBlink = window.setTimeout(triggerLampBlink, 1550);
-    const secondBlink = window.setTimeout(triggerLampBlink, 5200);
+    const firstFlash = window.setTimeout(triggerLampFlash, 1350);
+    const secondFlash = window.setTimeout(triggerLampFlash, 5100);
     return () => {
-      window.clearTimeout(firstBlink);
-      window.clearTimeout(secondBlink);
+      window.clearTimeout(firstFlash);
+      window.clearTimeout(secondFlash);
     };
-  }, [currentImage, hasCustomHero, prefersReducedMotion, triggerLampBlink]);
+  }, [currentImage, hasCustomHero, prefersReducedMotion, triggerLampFlash]);
 
   // Autoplay Slider
   useEffect(() => {
@@ -338,8 +343,7 @@ export default function Hero() {
         <>
           <motion.div
             className="absolute inset-0 z-[2] pointer-events-none overflow-hidden"
-            animate={prefersReducedMotion ? { opacity: 0.58 } : { opacity: [0.42, 0.68, 0.5, 0.64, 0.42] }}
-            transition={prefersReducedMotion ? undefined : { duration: 8.8, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
+            animate={{ opacity: prefersReducedMotion ? 0.42 : 0.62 }}
             aria-hidden="true"
           >
             <div
@@ -354,8 +358,8 @@ export default function Hero() {
               className="absolute inset-0 hidden h-full w-full md:block mix-blend-screen"
               viewBox="0 0 100 100"
               preserveAspectRatio="none"
-              animate={prefersReducedMotion ? { opacity: 0.34 } : { opacity: [0.2, 0.46, 0.27, 0.42, 0.2] }}
-              transition={prefersReducedMotion ? undefined : { duration: 8.8, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
+              initial={{ opacity: prefersReducedMotion ? 0.2 : 0 }}
+              animate={prefersReducedMotion ? { opacity: 0.2 } : lampFlashControls}
               aria-hidden="true"
             >
               <defs>
@@ -381,18 +385,18 @@ export default function Hero() {
               data-hero-model-flash="true"
               className="absolute inset-0 hidden md:block mix-blend-screen blur-2xl"
               style={{ background: 'radial-gradient(ellipse at 50% 46%, rgba(255,246,235,0.22) 0%, rgba(255,164,146,0.07) 25%, transparent 44%)' }}
-              animate={prefersReducedMotion ? { opacity: 0.28 } : { opacity: [0.14, 0.34, 0.2, 0.3, 0.14] }}
-              transition={prefersReducedMotion ? undefined : { duration: 8.8, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
+              initial={{ opacity: prefersReducedMotion ? 0.12 : 0 }}
+              animate={prefersReducedMotion ? { opacity: 0.12 } : lampFlashControls}
             />
           </motion.div>
 
-          {/* The photographed desktop spotlights become a pair of blinking camera-eyes. */}
+          {/* Black face masks reveal the photographed white lamps only during each flash. */}
           <div className="absolute inset-0 z-[4] hidden overflow-hidden pointer-events-none md:block" aria-hidden="true">
-            <div className="hero-lamp-lash-frame hero-lamp-lash-frame--left">
-              <LampLash controls={lampBlinkControls} />
+            <div className="hero-lamp-face-frame hero-lamp-face-frame--left">
+              <LampFaceShade controls={lampFaceControls} reducedMotion={Boolean(prefersReducedMotion)} />
             </div>
-            <div className="hero-lamp-lash-frame hero-lamp-lash-frame--right">
-              <LampLash controls={lampBlinkControls} />
+            <div className="hero-lamp-face-frame hero-lamp-face-frame--right">
+              <LampFaceShade controls={lampFaceControls} reducedMotion={Boolean(prefersReducedMotion)} />
             </div>
           </div>
 
@@ -402,8 +406,8 @@ export default function Hero() {
               className="absolute inset-0 h-full w-full mix-blend-screen"
               viewBox="0 0 100 100"
               preserveAspectRatio="none"
-              animate={prefersReducedMotion ? { opacity: 0.32 } : { opacity: [0.18, 0.42, 0.25, 0.38, 0.18] }}
-              transition={prefersReducedMotion ? undefined : { duration: 9.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
+              initial={{ opacity: prefersReducedMotion ? 0.18 : 0 }}
+              animate={prefersReducedMotion ? { opacity: 0.18 } : lampFlashControls}
             >
               <defs>
                 <linearGradient id="hero-mobile-left-beam" x1="0" y1="0" x2="1" y2="1">
@@ -427,27 +431,25 @@ export default function Hero() {
               data-hero-mobile-model-flash="true"
               className="absolute inset-0 mix-blend-screen blur-2xl"
               style={{ background: 'radial-gradient(ellipse at 50% 45%, rgba(255,246,235,0.18) 0%, rgba(255,164,146,0.06) 24%, transparent 45%)' }}
-              animate={prefersReducedMotion ? { opacity: 0.25 } : { opacity: [0.13, 0.31, 0.18, 0.28, 0.13] }}
-              transition={prefersReducedMotion ? undefined : { duration: 9.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
+              initial={{ opacity: prefersReducedMotion ? 0.1 : 0 }}
+              animate={prefersReducedMotion ? { opacity: 0.1 } : lampFlashControls}
             />
             <motion.div
               className="absolute -left-8 top-[24%] w-20 h-auto -rotate-6 drop-shadow-[0_0_12px_rgba(255,245,235,0.28)]"
-              animate={prefersReducedMotion ? { opacity: 0.78, filter: 'brightness(1.06)' } : { opacity: [0.66, 0.86, 0.72, 0.88, 0.66], filter: ['brightness(0.98)', 'brightness(1.12)', 'brightness(1.02)', 'brightness(1.14)', 'brightness(0.98)'] }}
-              transition={prefersReducedMotion ? undefined : { duration: 9.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
+              animate={{ opacity: 0.82, filter: 'brightness(1.04)' }}
             >
               <img src="/images/studio_spotlight_overlay.webp" alt="" width="420" height="522" className="block h-auto w-full" />
               <div className="absolute left-[38%] top-[36%] h-[46%] w-[62%] -rotate-[42deg] overflow-hidden rounded-[50%]">
-                <LampLash controls={lampBlinkControls} />
+                <LampFaceShade controls={lampFaceControls} reducedMotion={Boolean(prefersReducedMotion)} />
               </div>
             </motion.div>
             <motion.div
               className="absolute -right-8 top-[24%] w-20 h-auto rotate-6 scale-x-[-1] drop-shadow-[0_0_12px_rgba(255,245,235,0.28)]"
-              animate={prefersReducedMotion ? { opacity: 0.78, filter: 'brightness(1.06)' } : { opacity: [0.66, 0.86, 0.72, 0.88, 0.66], filter: ['brightness(0.98)', 'brightness(1.12)', 'brightness(1.02)', 'brightness(1.14)', 'brightness(0.98)'] }}
-              transition={prefersReducedMotion ? undefined : { duration: 9.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1], delay: 0.45 }}
+              animate={{ opacity: 0.82, filter: 'brightness(1.04)' }}
             >
               <img src="/images/studio_spotlight_overlay.webp" alt="" width="420" height="522" className="block h-auto w-full" />
               <div className="absolute left-[38%] top-[36%] h-[46%] w-[62%] -rotate-[42deg] overflow-hidden rounded-[50%]">
-                <LampLash controls={lampBlinkControls} />
+                <LampFaceShade controls={lampFaceControls} reducedMotion={Boolean(prefersReducedMotion)} />
               </div>
             </motion.div>
           </div>
