@@ -351,8 +351,8 @@ export default function Hero() {
               style={{ background: 'radial-gradient(ellipse at 50% 46%, rgba(255,244,232,0.11), transparent 40%)' }}
             />
 
-            {/* Directional beams originate at the photographed lamp faces and converge on the model.
-                They now feather out around the shoulders instead of covering the garment. */}
+            {/* Directional beams are brightest at the photographed lamp faces, then disappear
+                before their guide shapes reach the garment. */}
             <motion.svg
               data-hero-beams="true"
               className="absolute inset-0 hidden h-full w-full md:block mix-blend-screen"
@@ -363,15 +363,21 @@ export default function Hero() {
               aria-hidden="true"
             >
               <defs>
-                <linearGradient id="hero-left-beam" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.58" />
-                  <stop offset="48%" stopColor="#ffd8ca" stopOpacity="0.24" />
-                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.05" />
+                <linearGradient id="hero-left-beam" gradientUnits="userSpaceOnUse" x1="4" y1="22" x2="37" y2="56">
+                  <stop offset="0%" stopColor="#fffefb" stopOpacity="1" />
+                  <stop offset="14%" stopColor="#fff4ec" stopOpacity="0.78" />
+                  <stop offset="40%" stopColor="#ffd8ca" stopOpacity="0.18" />
+                  <stop offset="64%" stopColor="#ffb2a1" stopOpacity="0.025" />
+                  <stop offset="78%" stopColor="#ff998c" stopOpacity="0" />
+                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0" />
                 </linearGradient>
-                <linearGradient id="hero-right-beam" x1="1" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.58" />
-                  <stop offset="48%" stopColor="#ffd8ca" stopOpacity="0.24" />
-                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.05" />
+                <linearGradient id="hero-right-beam" gradientUnits="userSpaceOnUse" x1="96" y1="22" x2="62" y2="56">
+                  <stop offset="0%" stopColor="#fffefb" stopOpacity="1" />
+                  <stop offset="14%" stopColor="#fff4ec" stopOpacity="0.78" />
+                  <stop offset="40%" stopColor="#ffd8ca" stopOpacity="0.18" />
+                  <stop offset="64%" stopColor="#ffb2a1" stopOpacity="0.025" />
+                  <stop offset="78%" stopColor="#ff998c" stopOpacity="0" />
+                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0" />
                 </linearGradient>
                 <filter id="hero-beam-feather" x="-10" y="-10" width="120" height="120" filterUnits="userSpaceOnUse">
                   <feGaussianBlur stdDeviation="3.2" />
@@ -384,9 +390,9 @@ export default function Hero() {
             <motion.div
               data-hero-model-flash="true"
               className="absolute inset-0 hidden md:block mix-blend-screen blur-2xl"
-              style={{ background: 'radial-gradient(ellipse at 50% 46%, rgba(255,246,235,0.22) 0%, rgba(255,164,146,0.07) 25%, transparent 44%)' }}
-              initial={{ opacity: prefersReducedMotion ? 0.12 : 0 }}
-              animate={prefersReducedMotion ? { opacity: 0.12 } : lampFlashControls}
+              style={{ background: 'radial-gradient(ellipse at 50% 46%, rgba(255,246,235,0.09) 0%, rgba(255,164,146,0.02) 16%, transparent 31%)' }}
+              initial={{ opacity: prefersReducedMotion ? 0.06 : 0 }}
+              animate={prefersReducedMotion ? { opacity: 0.06 } : lampFlashControls}
             />
           </motion.div>
 
@@ -410,15 +416,21 @@ export default function Hero() {
               animate={prefersReducedMotion ? { opacity: 0.18 } : lampFlashControls}
             >
               <defs>
-                <linearGradient id="hero-mobile-left-beam" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.54" />
-                  <stop offset="48%" stopColor="#ffd8ca" stopOpacity="0.22" />
-                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.04" />
+                <linearGradient id="hero-mobile-left-beam" gradientUnits="userSpaceOnUse" x1="3" y1="28" x2="44" y2="58">
+                  <stop offset="0%" stopColor="#fffefb" stopOpacity="0.96" />
+                  <stop offset="14%" stopColor="#fff4ec" stopOpacity="0.72" />
+                  <stop offset="40%" stopColor="#ffd8ca" stopOpacity="0.16" />
+                  <stop offset="64%" stopColor="#ffb2a1" stopOpacity="0.02" />
+                  <stop offset="78%" stopColor="#ff998c" stopOpacity="0" />
+                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0" />
                 </linearGradient>
-                <linearGradient id="hero-mobile-right-beam" x1="1" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.54" />
-                  <stop offset="48%" stopColor="#ffd8ca" stopOpacity="0.22" />
-                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.04" />
+                <linearGradient id="hero-mobile-right-beam" gradientUnits="userSpaceOnUse" x1="97" y1="28" x2="56" y2="58">
+                  <stop offset="0%" stopColor="#fffefb" stopOpacity="0.96" />
+                  <stop offset="14%" stopColor="#fff4ec" stopOpacity="0.72" />
+                  <stop offset="40%" stopColor="#ffd8ca" stopOpacity="0.16" />
+                  <stop offset="64%" stopColor="#ffb2a1" stopOpacity="0.02" />
+                  <stop offset="78%" stopColor="#ff998c" stopOpacity="0" />
+                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0" />
                 </linearGradient>
                 <filter id="hero-mobile-beam-feather" x="-12" y="-12" width="124" height="124" filterUnits="userSpaceOnUse">
                   <feGaussianBlur stdDeviation="4" />
@@ -430,9 +442,9 @@ export default function Hero() {
             <motion.div
               data-hero-mobile-model-flash="true"
               className="absolute inset-0 mix-blend-screen blur-2xl"
-              style={{ background: 'radial-gradient(ellipse at 50% 45%, rgba(255,246,235,0.18) 0%, rgba(255,164,146,0.06) 24%, transparent 45%)' }}
-              initial={{ opacity: prefersReducedMotion ? 0.1 : 0 }}
-              animate={prefersReducedMotion ? { opacity: 0.1 } : lampFlashControls}
+              style={{ background: 'radial-gradient(ellipse at 50% 45%, rgba(255,246,235,0.07) 0%, rgba(255,164,146,0.015) 15%, transparent 30%)' }}
+              initial={{ opacity: prefersReducedMotion ? 0.05 : 0 }}
+              animate={prefersReducedMotion ? { opacity: 0.05 } : lampFlashControls}
             />
             <motion.div
               className="absolute -left-8 top-[24%] w-20 h-auto -rotate-6 drop-shadow-[0_0_12px_rgba(255,245,235,0.28)]"
