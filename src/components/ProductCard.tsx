@@ -294,51 +294,50 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
           </div>
         ) : (
           <>
-          <p className="font-display text-[12px] lg:text-[13px] italic font-light text-[#888880] mb-1.5 lg:mb-2.5 line-clamp-1 leading-tight">
-            {product.slogan}
-          </p>
-          <div className="flex flex-col lg:flex-row items-center lg:justify-between gap-1 lg:gap-3">
-            <div className="flex items-center gap-2.5">
-              <ProductPrice
-                price={product.price}
-                compareAtPrice={product.originalPrice}
-                className="gap-2"
-                priceClassName="text-[14px] lg:text-[15px] font-bold lg:font-medium text-[#1A1A1A]"
-                compareClassName="text-[12px] lg:text-[13px] text-[#888880] line-through"
-              />
+            <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_auto_auto] lg:items-end lg:gap-x-3">
+              <div className="min-w-0">
+                <p className="font-display text-[12px] lg:text-[13px] italic font-light text-[#888880] mb-1.5 lg:mb-2 line-clamp-1 leading-tight">
+                  {product.slogan}
+                </p>
+                <ProductPrice
+                  price={product.price}
+                  compareAtPrice={product.originalPrice}
+                  className="justify-center gap-2 whitespace-nowrap lg:justify-start"
+                  priceClassName="text-[14px] lg:text-[15px] font-bold lg:font-medium text-[#1A1A1A]"
+                  compareClassName="text-[12px] lg:text-[13px] text-[#888880] line-through"
+                />
+              </div>
               <button
                 type="button"
                 aria-label={`Quick add ${product.name}`}
                 onClick={handleQuickAdd}
-                className="hidden lg:inline-flex min-h-8 flex-none items-center gap-1.5 rounded-full bg-[#1A1A1A] px-3.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-white shadow-[0_5px_14px_rgba(26,26,26,0.12)] transition-all hover:-translate-y-0.5 hover:bg-[#C0132A] hover:shadow-[0_7px_18px_rgba(192,19,42,0.18)]"
+                className="hidden lg:inline-flex min-h-10 min-w-[104px] flex-none items-center justify-center rounded-[11px] border-2 border-[#C0132A] bg-white px-4 font-display text-[12px] font-semibold uppercase tracking-[0.12em] text-[#C0132A] transition-all hover:-translate-y-0.5 hover:bg-[#C0132A] hover:text-white hover:shadow-[0_7px_18px_rgba(192,19,42,0.16)]"
               >
-                <ShoppingBag size={12} />
                 Quick Add
               </button>
+              <div className="hidden gap-1.5 pb-1 lg:flex">
+                {product.colors.slice(0, 3).map((color, i) => (
+                  <button
+                    type="button"
+                    aria-label={`Colour option ${i + 1}: ${color}`}
+                    key={i}
+                    className="h-2.5 w-2.5 cursor-pointer rounded-full border border-[#E8E4E0] transition-transform duration-200 hover:scale-130"
+                    style={{ backgroundColor: color }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                ))}
+              </div>
             </div>
-          <div className="flex gap-1.5 hidden lg:flex">
-            {product.colors.slice(0, 3).map((color, i) => (
-              <button
-                type="button"
-                aria-label={`Colour option ${i + 1}: ${color}`}
-                key={i}
-                className="w-2.5 h-2.5 rounded-full border border-[#E8E4E0] cursor-pointer transition-transform duration-200 hover:scale-130"
-                style={{ backgroundColor: color }}
-                onClick={(e) => e.stopPropagation()}
-              />
-            ))}
-          </div>
-        </div>
-        <button
-          type="button"
-          aria-label={`Quick add ${product.name}`}
-          className="lg:hidden mt-2.5 min-h-10 w-full border border-[#C0132A] bg-white px-3 text-[10px] font-semibold tracking-[0.14em] uppercase text-[#C0132A] transition-colors active:bg-[#C0132A] active:text-white flex items-center justify-center gap-2"
-          onClick={handleQuickAdd}
-        >
-          <ShoppingBag size={14} aria-hidden="true" />
-          Quick Add
-        </button>
-        </>
+            <button
+              type="button"
+              aria-label={`Quick add ${product.name}`}
+              className="mt-2.5 flex min-h-10 w-full items-center justify-center gap-2 border border-[#C0132A] bg-white px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#C0132A] transition-colors active:bg-[#C0132A] active:text-white lg:hidden"
+              onClick={handleQuickAdd}
+            >
+              <ShoppingBag size={14} aria-hidden="true" />
+              Quick Add
+            </button>
+          </>
         )}
       </div>
       </div>
