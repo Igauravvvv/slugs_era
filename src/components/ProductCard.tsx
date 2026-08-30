@@ -331,11 +331,6 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
             ))}
           </div>
         </div>
-        {product.category === 'tshirts' && (
-          <p className="mt-2 text-[9px] font-semibold uppercase tracking-[0.11em] text-[#C0132A]">
-            New launch · 2 for ₹1,999 · 3 for ₹2,699 · code 2burpy
-          </p>
-        )}
         <button
           type="button"
           aria-label={`Quick add ${product.name}`}

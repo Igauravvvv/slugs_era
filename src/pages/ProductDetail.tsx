@@ -405,14 +405,6 @@ export default function ProductDetail() {
               )}
             </div>
 
-            {selectedProduct.category === 'tshirts' && !isComingSoon && !isSoldOut && (
-              <div className="mb-5 rounded-xl border border-[#E8D7CB] bg-[#FFF9F2] px-4 py-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.17em] text-[#C0132A]">New launch sale</p>
-                <p className="mt-1 text-sm text-[#3F3A36]">Pick any 2 tees for <strong>₹1,999</strong> or any 3 for <strong>₹2,699</strong>.</p>
-                <p className="mt-1 text-[11px] text-[#7A716A]">Use code <strong className="text-[#1A1A1A]">2burpy</strong> in your bag.</p>
-              </div>
-            )}
-
             {/* Launch date for pre-book */}
             {isFullPreBook && selectedProduct.launchDate && (
               <div className="flex items-center gap-2 mb-4 px-3 py-2 bg-amber-50 border border-amber-200 text-amber-800 text-xs">
