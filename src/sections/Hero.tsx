@@ -41,9 +41,9 @@ function LampFaceShade({
 }) {
   return (
     <motion.div
-      className="absolute -inset-[8%] rounded-[50%] bg-[#020202]"
-      initial={{ opacity: reducedMotion ? 0 : 1 }}
-      animate={reducedMotion ? { opacity: 0 } : controls}
+      className="absolute inset-0 origin-top bg-[#020202]"
+      initial={{ scaleY: reducedMotion ? 0 : 1 }}
+      animate={reducedMotion ? { scaleY: 0 } : controls}
     />
   );
 }
@@ -117,17 +117,17 @@ export default function Hero() {
 
     lampFaceControls.stop();
     lampFlashControls.stop();
-    lampFaceControls.set({ opacity: 1 });
+    lampFaceControls.set({ scaleY: 0 });
     lampFlashControls.set({ opacity: 0 });
 
-    // Open from black to a clean white lamp, then let the light decay back to black.
+    // Reveal the white reflector with the flash, then let a black shutter close from top to bottom.
     void lampFaceControls.start({
-      opacity: [1, 0, 0, 0.28, 1],
-      transition: { duration: 1.35, ease: 'easeInOut', times: [0, 0.09, 0.28, 0.58, 1] },
+      scaleY: [0, 0, 1],
+      transition: { duration: 2.2, ease: [0.4, 0, 0.2, 1], times: [0, 0.18, 1] },
     });
     void lampFlashControls.start({
       opacity: [0, 0.82, 0.48, 0.16, 0],
-      transition: { duration: 1.28, ease: 'easeOut', times: [0, 0.1, 0.3, 0.66, 1] },
+      transition: { duration: 1.75, ease: 'easeOut', times: [0, 0.1, 0.32, 0.7, 1] },
     });
     playShutterSound(0.12);
   }, [lampFaceControls, lampFlashControls, playShutterSound, prefersReducedMotion]);
@@ -439,7 +439,7 @@ export default function Hero() {
               animate={{ opacity: 0.82, filter: 'brightness(1.04)' }}
             >
               <img src="/images/studio_spotlight_overlay.webp" alt="" width="420" height="522" className="block h-auto w-full" />
-              <div className="absolute left-[38%] top-[36%] h-[46%] w-[62%] -rotate-[42deg] overflow-hidden rounded-[50%]">
+              <div className="hero-mobile-lamp-face-frame absolute left-[41.5%] top-[41%] h-[39%] w-[57%] overflow-hidden">
                 <LampFaceShade controls={lampFaceControls} reducedMotion={Boolean(prefersReducedMotion)} />
               </div>
             </motion.div>
@@ -448,7 +448,7 @@ export default function Hero() {
               animate={{ opacity: 0.82, filter: 'brightness(1.04)' }}
             >
               <img src="/images/studio_spotlight_overlay.webp" alt="" width="420" height="522" className="block h-auto w-full" />
-              <div className="absolute left-[38%] top-[36%] h-[46%] w-[62%] -rotate-[42deg] overflow-hidden rounded-[50%]">
+              <div className="hero-mobile-lamp-face-frame absolute left-[41.5%] top-[41%] h-[39%] w-[57%] overflow-hidden">
                 <LampFaceShade controls={lampFaceControls} reducedMotion={Boolean(prefersReducedMotion)} />
               </div>
             </motion.div>
