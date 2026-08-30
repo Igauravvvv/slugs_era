@@ -31,8 +31,10 @@
 .hero-mobile-lamp-face-frame,
 .hero-lamp-face-frame--left,
 .hero-lamp-face-frame--right {
+  --hero-lamp-black: #090909;
   transform-origin: top center;
-  filter: drop-shadow(0 0 1.75px #020202);
+  backface-visibility: hidden;
+  filter: drop-shadow(0 0 1.75px var(--hero-lamp-black));
 }
 
 .hero-mobile-lamp-face-frame {

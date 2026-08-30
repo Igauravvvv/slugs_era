@@ -31,6 +31,22 @@ const HERO_DIMENSIONS: Record<(typeof HERO_IMAGES)[number], { width: number; hei
   '/images/green_tshirt_studio_hero.webp': { width: 1672, height: 941 },
   '/images/seedhe%20pahad%20se%20model.webp': { width: 2000, height: 848 },
 };
+const LAMP_CYCLE_SECONDS = 4.8;
+const LAMP_CYCLE_MS = LAMP_CYCLE_SECONDS * 1000;
+const LAMP_CYCLE_TRANSITION = {
+  duration: LAMP_CYCLE_SECONDS,
+  ease: [0.45, 0, 0.55, 1] as const,
+  times: [0, 0.5, 1],
+  repeat: Infinity,
+};
+const LAMP_FACE_VARIANTS = {
+  closed: { scaleY: 1 },
+  cycle: { scaleY: [1, 0, 1], transition: LAMP_CYCLE_TRANSITION },
+};
+const LAMP_FLASH_VARIANTS = {
+  closed: { opacity: 0 },
+  cycle: { opacity: [0, 0.92, 0], transition: LAMP_CYCLE_TRANSITION },
+};
 
 function LampFaceShade({
   controls,
@@ -41,7 +57,9 @@ function LampFaceShade({
 }) {
   return (
     <motion.div
-      className="absolute inset-0 origin-top bg-[#020202]"
+      className="absolute -inset-px origin-top will-change-transform"
+      style={{ backgroundColor: 'var(--hero-lamp-black)', backfaceVisibility: 'hidden' }}
+      variants={LAMP_FACE_VARIANTS}
       initial={{ scaleY: reducedMotion ? 0 : 1 }}
       animate={reducedMotion ? { scaleY: 0 } : controls}
     />
@@ -53,8 +71,7 @@ export default function Hero() {
   const elementsRef = useRef<(HTMLDivElement | null)[]>([]);
   const [currentImage, setCurrentImage] = useState<(typeof HERO_IMAGES)[number]>(HERO_IMAGES[0]);
   const prefersReducedMotion = useReducedMotion();
-  const lampFaceControls = useAnimationControls();
-  const lampFlashControls = useAnimationControls();
+  const lampCycleControls = useAnimationControls();
   const shutterContextRef = useRef<AudioContext | null>(null);
   const soundArmedRef = useRef(false);
 
@@ -112,26 +129,6 @@ export default function Hero() {
     makeClick(0.055, 0.045, 980);
   }, []);
 
-  const triggerLampFlash = useCallback(() => {
-    if (prefersReducedMotion) return;
-
-    lampFaceControls.stop();
-    lampFlashControls.stop();
-    lampFaceControls.set({ scaleY: 0 });
-    lampFlashControls.set({ opacity: 0 });
-
-    // Reveal the white reflector, close the shutter downward, then retract it upward at the same pace.
-    void lampFaceControls.start({
-      scaleY: [0, 0, 1, 1, 0, 0],
-      transition: { duration: 3.4, ease: [0.4, 0, 0.2, 1], times: [0, 0.05, 0.45, 0.55, 0.95, 1] },
-    });
-    void lampFlashControls.start({
-      opacity: [0, 0.82, 0.48, 0.16, 0],
-      transition: { duration: 1.75, ease: 'easeOut', times: [0, 0.1, 0.32, 0.7, 1] },
-    });
-    playShutterSound(0.12);
-  }, [lampFaceControls, lampFlashControls, playShutterSound, prefersReducedMotion]);
-
   // Audio is armed by a real visitor gesture so the shutter respects browser autoplay rules.
   useEffect(() => {
     if (soundArmedRef.current || typeof window === 'undefined') return;
@@ -145,10 +142,6 @@ export default function Hero() {
       shutterContextRef.current = audioContext;
       soundArmedRef.current = true;
       void audioContext.resume();
-
-      if (!prefersReducedMotion && !hasCustomHero && currentImage === HERO_IMAGES[0]) {
-        triggerLampFlash();
-      }
 
       window.removeEventListener('pointerdown', armAudio);
       window.removeEventListener('keydown', armAudio);
@@ -164,7 +157,7 @@ export default function Hero() {
       window.removeEventListener('keydown', armAudio);
       window.removeEventListener('touchstart', armAudio);
     };
-  }, [currentImage, hasCustomHero, prefersReducedMotion, triggerLampFlash]);
+  }, []);
 
   useEffect(() => () => {
     const audioContext = shutterContextRef.current;
@@ -173,17 +166,26 @@ export default function Hero() {
     }
   }, []);
 
-  // The first studio look gets two restrained flash cycles before the carousel advances.
+  // Start fully closed on every first-look load. One shared control keeps the bottom-to-top
+  // shutter opening and light intensity perfectly inverse, with no hold between loop halves.
   useEffect(() => {
+    lampCycleControls.stop();
     if (prefersReducedMotion || hasCustomHero || currentImage !== HERO_IMAGES[0]) return;
 
-    const firstFlash = window.setTimeout(triggerLampFlash, 1150);
-    const secondFlash = window.setTimeout(triggerLampFlash, 4550);
+    lampCycleControls.set('closed');
+    void lampCycleControls.start('cycle');
+
+    let openClickLoop: number | undefined;
+    const firstOpenClick = window.setTimeout(() => {
+      playShutterSound();
+      openClickLoop = window.setInterval(() => playShutterSound(), LAMP_CYCLE_MS);
+    }, LAMP_CYCLE_MS / 2);
     return () => {
-      window.clearTimeout(firstFlash);
-      window.clearTimeout(secondFlash);
+      window.clearTimeout(firstOpenClick);
+      if (openClickLoop !== undefined) window.clearInterval(openClickLoop);
+      lampCycleControls.stop();
     };
-  }, [currentImage, hasCustomHero, prefersReducedMotion, triggerLampFlash]);
+  }, [currentImage, hasCustomHero, lampCycleControls, playShutterSound, prefersReducedMotion]);
 
   // Autoplay Slider
   useEffect(() => {
@@ -358,8 +360,9 @@ export default function Hero() {
               className="absolute inset-0 hidden h-full w-full md:block mix-blend-screen"
               viewBox="0 0 100 100"
               preserveAspectRatio="none"
+              variants={LAMP_FLASH_VARIANTS}
               initial={{ opacity: prefersReducedMotion ? 0.2 : 0 }}
-              animate={prefersReducedMotion ? { opacity: 0.2 } : lampFlashControls}
+              animate={prefersReducedMotion ? { opacity: 0.2 } : lampCycleControls}
               aria-hidden="true"
             >
               <defs>
@@ -391,18 +394,19 @@ export default function Hero() {
               data-hero-model-flash="true"
               className="absolute inset-0 hidden md:block mix-blend-screen blur-2xl"
               style={{ background: 'radial-gradient(ellipse at 50% 46%, rgba(255,246,235,0.09) 0%, rgba(255,164,146,0.02) 16%, transparent 31%)' }}
+              variants={LAMP_FLASH_VARIANTS}
               initial={{ opacity: prefersReducedMotion ? 0.06 : 0 }}
-              animate={prefersReducedMotion ? { opacity: 0.06 } : lampFlashControls}
+              animate={prefersReducedMotion ? { opacity: 0.06 } : lampCycleControls}
             />
           </motion.div>
 
           {/* Black face masks reveal the photographed white lamps only during each flash. */}
           <div className="absolute inset-0 z-[4] hidden overflow-hidden pointer-events-none md:block" aria-hidden="true">
             <div className="hero-lamp-face-frame hero-lamp-face-frame--left">
-              <LampFaceShade controls={lampFaceControls} reducedMotion={Boolean(prefersReducedMotion)} />
+              <LampFaceShade controls={lampCycleControls} reducedMotion={Boolean(prefersReducedMotion)} />
             </div>
             <div className="hero-lamp-face-frame hero-lamp-face-frame--right">
-              <LampFaceShade controls={lampFaceControls} reducedMotion={Boolean(prefersReducedMotion)} />
+              <LampFaceShade controls={lampCycleControls} reducedMotion={Boolean(prefersReducedMotion)} />
             </div>
           </div>
 
@@ -412,8 +416,9 @@ export default function Hero() {
               className="absolute inset-0 h-full w-full mix-blend-screen"
               viewBox="0 0 100 100"
               preserveAspectRatio="none"
+              variants={LAMP_FLASH_VARIANTS}
               initial={{ opacity: prefersReducedMotion ? 0.18 : 0 }}
-              animate={prefersReducedMotion ? { opacity: 0.18 } : lampFlashControls}
+              animate={prefersReducedMotion ? { opacity: 0.18 } : lampCycleControls}
             >
               <defs>
                 <linearGradient id="hero-mobile-left-beam" gradientUnits="userSpaceOnUse" x1="3" y1="28" x2="44" y2="58">
@@ -443,8 +448,9 @@ export default function Hero() {
               data-hero-mobile-model-flash="true"
               className="absolute inset-0 mix-blend-screen blur-2xl"
               style={{ background: 'radial-gradient(ellipse at 50% 45%, rgba(255,246,235,0.07) 0%, rgba(255,164,146,0.015) 15%, transparent 30%)' }}
+              variants={LAMP_FLASH_VARIANTS}
               initial={{ opacity: prefersReducedMotion ? 0.05 : 0 }}
-              animate={prefersReducedMotion ? { opacity: 0.05 } : lampFlashControls}
+              animate={prefersReducedMotion ? { opacity: 0.05 } : lampCycleControls}
             />
             <motion.div
               className="absolute -left-8 top-[24%] w-20 h-auto -rotate-6 drop-shadow-[0_0_12px_rgba(255,245,235,0.28)]"
@@ -452,7 +458,7 @@ export default function Hero() {
             >
               <img src="/images/studio_spotlight_overlay.webp" alt="" width="420" height="522" className="block h-auto w-full" />
               <div className="hero-mobile-lamp-face-frame absolute left-[37%] top-[36%] h-[48%] w-[63%] overflow-hidden">
-                <LampFaceShade controls={lampFaceControls} reducedMotion={Boolean(prefersReducedMotion)} />
+                <LampFaceShade controls={lampCycleControls} reducedMotion={Boolean(prefersReducedMotion)} />
               </div>
             </motion.div>
             <motion.div
@@ -461,7 +467,7 @@ export default function Hero() {
             >
               <img src="/images/studio_spotlight_overlay.webp" alt="" width="420" height="522" className="block h-auto w-full" />
               <div className="hero-mobile-lamp-face-frame absolute left-[37%] top-[36%] h-[48%] w-[63%] overflow-hidden">
-                <LampFaceShade controls={lampFaceControls} reducedMotion={Boolean(prefersReducedMotion)} />
+                <LampFaceShade controls={lampCycleControls} reducedMotion={Boolean(prefersReducedMotion)} />
               </div>
             </motion.div>
           </div>
