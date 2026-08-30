@@ -272,34 +272,21 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
       </div>
 
       <div className={`pt-3 lg:pt-4 px-1 lg:px-0.5 text-center lg:text-left cursor-pointer ${isComingSoon ? 'px-1.5 pb-1' : ''}`} onClick={goToProduct}>
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="min-w-0 flex-1 font-display text-[15px] lg:text-[21px] font-bold lg:font-normal mb-0.5 lg:mb-1 line-clamp-1 text-[#1A1A1A]">
-            <Link
-              to={productUrl}
-              onClick={(e) => {
-                e.stopPropagation();
-                void trackCustomerEvent('product_clicked', {
-                  productId: product.id,
-                  properties: { product_name: product.name, category: product.category, source: 'product_card_title' },
-                });
-              }}
-              className="hover:text-[#C0132A] transition-colors"
-            >
-              {product.name}
-            </Link>
-          </h3>
-          {!isComingSoon && (
-            <button
-              type="button"
-              aria-label={`Quick add ${product.name}`}
-              onClick={handleQuickAdd}
-              className="hidden lg:inline-flex min-h-8 flex-none items-center gap-1.5 rounded-full border border-[#C0132A] px-3 text-[9px] font-semibold uppercase tracking-[0.12em] text-[#C0132A] transition-colors hover:bg-[#C0132A] hover:text-white"
-            >
-              <ShoppingBag size={12} />
-              Quick Add
-            </button>
-          )}
-        </div>
+        <h3 className="font-display text-[15px] lg:text-[21px] font-bold lg:font-normal mb-0.5 lg:mb-1 line-clamp-1 text-[#1A1A1A]">
+          <Link
+            to={productUrl}
+            onClick={(e) => {
+              e.stopPropagation();
+              void trackCustomerEvent('product_clicked', {
+                productId: product.id,
+                properties: { product_name: product.name, category: product.category, source: 'product_card_title' },
+              });
+            }}
+            className="hover:text-[#C0132A] transition-colors"
+          >
+            {product.name}
+          </Link>
+        </h3>
         {isComingSoon ? (
           <div className="flex items-center justify-between pt-2 border-t border-[#E8E4E0] text-[10px] font-medium tracking-[0.14em] uppercase text-[#888880]">
             <span>Coming Soon</span>
@@ -310,14 +297,25 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
           <p className="font-display text-[12px] lg:text-[13px] italic font-light text-[#888880] mb-1.5 lg:mb-2.5 line-clamp-1 leading-tight">
             {product.slogan}
           </p>
-          <div className="flex flex-col lg:flex-row items-center lg:justify-between gap-1 lg:gap-0">
-            <ProductPrice
-              price={product.price}
-              compareAtPrice={product.originalPrice}
-              className="gap-2"
-              priceClassName="text-[14px] lg:text-[15px] font-bold lg:font-medium text-[#1A1A1A]"
-              compareClassName="text-[12px] lg:text-[13px] text-[#888880] line-through"
-            />
+          <div className="flex flex-col lg:flex-row items-center lg:justify-between gap-1 lg:gap-3">
+            <div className="flex items-center gap-2.5">
+              <ProductPrice
+                price={product.price}
+                compareAtPrice={product.originalPrice}
+                className="gap-2"
+                priceClassName="text-[14px] lg:text-[15px] font-bold lg:font-medium text-[#1A1A1A]"
+                compareClassName="text-[12px] lg:text-[13px] text-[#888880] line-through"
+              />
+              <button
+                type="button"
+                aria-label={`Quick add ${product.name}`}
+                onClick={handleQuickAdd}
+                className="hidden lg:inline-flex min-h-8 flex-none items-center gap-1.5 rounded-full bg-[#1A1A1A] px-3.5 text-[9px] font-semibold uppercase tracking-[0.12em] text-white shadow-[0_5px_14px_rgba(26,26,26,0.12)] transition-all hover:-translate-y-0.5 hover:bg-[#C0132A] hover:shadow-[0_7px_18px_rgba(192,19,42,0.18)]"
+              >
+                <ShoppingBag size={12} />
+                Quick Add
+              </button>
+            </div>
           <div className="flex gap-1.5 hidden lg:flex">
             {product.colors.slice(0, 3).map((color, i) => (
               <button

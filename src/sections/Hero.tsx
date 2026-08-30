@@ -208,55 +208,56 @@ export default function Hero() {
       </div>
 
       {/* Slow studio-light pulse for the first look. The physical lamps are baked into the desktop art
-          and rendered as edge overlays on mobile, while the shared glow keeps both breakpoints alive. */}
+          and rendered as restrained edge overlays on mobile. The shortened beams stop before
+          washing across the T-shirt artwork. */}
       {!hasCustomHero && currentImage === HERO_IMAGES[0] && (
         <>
           <motion.div
             className="absolute inset-0 z-[2] pointer-events-none overflow-hidden"
-            animate={prefersReducedMotion ? { opacity: 0.84 } : { opacity: [0.62, 0.92, 0.72, 0.95, 0.62] }}
+            animate={prefersReducedMotion ? { opacity: 0.58 } : { opacity: [0.42, 0.68, 0.5, 0.64, 0.42] }}
             transition={prefersReducedMotion ? undefined : { duration: 8.8, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
             aria-hidden="true"
           >
             <div
               className="absolute inset-0 mix-blend-screen"
-              style={{ background: 'radial-gradient(ellipse at 50% 52%, rgba(255,240,225,0.18), transparent 48%)' }}
+              style={{ background: 'radial-gradient(ellipse at 50% 46%, rgba(255,244,232,0.11), transparent 40%)' }}
             />
 
             {/* Directional beams originate at the photographed lamp faces and converge on the model.
-                This layer sits above the baked hero image, so the flash illuminates the clothing too. */}
+                They now feather out around the shoulders instead of covering the garment. */}
             <motion.svg
               data-hero-beams="true"
               className="absolute inset-0 hidden h-full w-full md:block mix-blend-screen"
               viewBox="0 0 100 100"
               preserveAspectRatio="none"
-              animate={prefersReducedMotion ? { opacity: 0.52 } : { opacity: [0.32, 0.7, 0.42, 0.64, 0.32] }}
+              animate={prefersReducedMotion ? { opacity: 0.34 } : { opacity: [0.2, 0.46, 0.27, 0.42, 0.2] }}
               transition={prefersReducedMotion ? undefined : { duration: 8.8, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
               aria-hidden="true"
             >
               <defs>
                 <linearGradient id="hero-left-beam" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.82" />
-                  <stop offset="42%" stopColor="#ffd8ca" stopOpacity="0.42" />
-                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.16" />
+                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.58" />
+                  <stop offset="48%" stopColor="#ffd8ca" stopOpacity="0.24" />
+                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.05" />
                 </linearGradient>
                 <linearGradient id="hero-right-beam" x1="1" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.82" />
-                  <stop offset="42%" stopColor="#ffd8ca" stopOpacity="0.42" />
-                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.16" />
+                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.58" />
+                  <stop offset="48%" stopColor="#ffd8ca" stopOpacity="0.24" />
+                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.05" />
                 </linearGradient>
                 <filter id="hero-beam-feather" x="-10" y="-10" width="120" height="120" filterUnits="userSpaceOnUse">
-                  <feGaussianBlur stdDeviation="2.6" />
+                  <feGaussianBlur stdDeviation="3.2" />
                 </filter>
               </defs>
               {/* These cones follow the photographed lamp angles and the user's marked guide lines. */}
-              <path d="M 4 22 L 44 55 L 35 74 Z" fill="url(#hero-left-beam)" filter="url(#hero-beam-feather)" />
-              <path d="M 96 22 L 49 57 L 60 79 Z" fill="url(#hero-right-beam)" filter="url(#hero-beam-feather)" />
+              <path d="M 4 22 L 40 49 L 34 63 Z" fill="url(#hero-left-beam)" filter="url(#hero-beam-feather)" />
+              <path d="M 96 22 L 58 49 L 65 64 Z" fill="url(#hero-right-beam)" filter="url(#hero-beam-feather)" />
             </motion.svg>
             <motion.div
               data-hero-model-flash="true"
               className="absolute inset-0 hidden md:block mix-blend-screen blur-2xl"
-              style={{ background: 'radial-gradient(ellipse at 51% 59%, rgba(255,236,224,0.28) 0%, rgba(255,139,126,0.1) 32%, transparent 58%)' }}
-              animate={prefersReducedMotion ? { opacity: 0.42 } : { opacity: [0.22, 0.55, 0.32, 0.5, 0.22] }}
+              style={{ background: 'radial-gradient(ellipse at 50% 46%, rgba(255,246,235,0.22) 0%, rgba(255,164,146,0.07) 25%, transparent 44%)' }}
+              animate={prefersReducedMotion ? { opacity: 0.28 } : { opacity: [0.14, 0.34, 0.2, 0.3, 0.14] }}
               transition={prefersReducedMotion ? undefined : { duration: 8.8, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
             />
           </motion.div>
@@ -267,32 +268,32 @@ export default function Hero() {
               className="absolute inset-0 h-full w-full mix-blend-screen"
               viewBox="0 0 100 100"
               preserveAspectRatio="none"
-              animate={prefersReducedMotion ? { opacity: 0.5 } : { opacity: [0.3, 0.7, 0.42, 0.62, 0.3] }}
+              animate={prefersReducedMotion ? { opacity: 0.32 } : { opacity: [0.18, 0.42, 0.25, 0.38, 0.18] }}
               transition={prefersReducedMotion ? undefined : { duration: 9.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
             >
               <defs>
                 <linearGradient id="hero-mobile-left-beam" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.78" />
-                  <stop offset="44%" stopColor="#ffd8ca" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.14" />
+                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.54" />
+                  <stop offset="48%" stopColor="#ffd8ca" stopOpacity="0.22" />
+                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.04" />
                 </linearGradient>
                 <linearGradient id="hero-mobile-right-beam" x1="1" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.78" />
-                  <stop offset="44%" stopColor="#ffd8ca" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.14" />
+                  <stop offset="0%" stopColor="#fff9f2" stopOpacity="0.54" />
+                  <stop offset="48%" stopColor="#ffd8ca" stopOpacity="0.22" />
+                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0.04" />
                 </linearGradient>
                 <filter id="hero-mobile-beam-feather" x="-12" y="-12" width="124" height="124" filterUnits="userSpaceOnUse">
-                  <feGaussianBlur stdDeviation="3.4" />
+                  <feGaussianBlur stdDeviation="4" />
                 </filter>
               </defs>
-              <path d="M 3 28 L 56 57 L 40 79 Z" fill="url(#hero-mobile-left-beam)" filter="url(#hero-mobile-beam-feather)" />
-              <path d="M 97 28 L 44 57 L 60 79 Z" fill="url(#hero-mobile-right-beam)" filter="url(#hero-mobile-beam-feather)" />
+              <path d="M 3 28 L 48 51 L 39 66 Z" fill="url(#hero-mobile-left-beam)" filter="url(#hero-mobile-beam-feather)" />
+              <path d="M 97 28 L 52 51 L 61 66 Z" fill="url(#hero-mobile-right-beam)" filter="url(#hero-mobile-beam-feather)" />
             </motion.svg>
             <motion.div
               data-hero-mobile-model-flash="true"
               className="absolute inset-0 mix-blend-screen blur-2xl"
-              style={{ background: 'radial-gradient(ellipse at 50% 59%, rgba(255,236,224,0.25) 0%, rgba(255,139,126,0.09) 32%, transparent 60%)' }}
-              animate={prefersReducedMotion ? { opacity: 0.4 } : { opacity: [0.2, 0.52, 0.3, 0.46, 0.2] }}
+              style={{ background: 'radial-gradient(ellipse at 50% 45%, rgba(255,246,235,0.18) 0%, rgba(255,164,146,0.06) 24%, transparent 45%)' }}
+              animate={prefersReducedMotion ? { opacity: 0.25 } : { opacity: [0.13, 0.31, 0.18, 0.28, 0.13] }}
               transition={prefersReducedMotion ? undefined : { duration: 9.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
             />
             <motion.img
@@ -300,8 +301,8 @@ export default function Hero() {
               alt=""
               width="420"
               height="522"
-              className="absolute -left-14 top-[21%] w-28 h-auto -rotate-6 drop-shadow-[0_0_18px_rgba(255,245,235,0.35)]"
-              animate={prefersReducedMotion ? { opacity: 0.9, filter: 'brightness(1.12)' } : { opacity: [0.7, 0.98, 0.78, 1, 0.7], filter: ['brightness(0.95)', 'brightness(1.22)', 'brightness(1.02)', 'brightness(1.28)', 'brightness(0.95)'] }}
+              className="absolute -left-8 top-[24%] w-20 h-auto -rotate-6 drop-shadow-[0_0_12px_rgba(255,245,235,0.28)]"
+              animate={prefersReducedMotion ? { opacity: 0.78, filter: 'brightness(1.06)' } : { opacity: [0.66, 0.86, 0.72, 0.88, 0.66], filter: ['brightness(0.98)', 'brightness(1.12)', 'brightness(1.02)', 'brightness(1.14)', 'brightness(0.98)'] }}
               transition={prefersReducedMotion ? undefined : { duration: 9.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1] }}
             />
             <motion.img
@@ -309,8 +310,8 @@ export default function Hero() {
               alt=""
               width="420"
               height="522"
-              className="absolute -right-14 top-[21%] w-28 h-auto rotate-6 scale-x-[-1] drop-shadow-[0_0_18px_rgba(255,245,235,0.35)]"
-              animate={prefersReducedMotion ? { opacity: 0.9, filter: 'brightness(1.12)' } : { opacity: [0.7, 0.98, 0.78, 1, 0.7], filter: ['brightness(0.95)', 'brightness(1.22)', 'brightness(1.02)', 'brightness(1.28)', 'brightness(0.95)'] }}
+              className="absolute -right-8 top-[24%] w-20 h-auto rotate-6 scale-x-[-1] drop-shadow-[0_0_12px_rgba(255,245,235,0.28)]"
+              animate={prefersReducedMotion ? { opacity: 0.78, filter: 'brightness(1.06)' } : { opacity: [0.66, 0.86, 0.72, 0.88, 0.66], filter: ['brightness(0.98)', 'brightness(1.12)', 'brightness(1.02)', 'brightness(1.14)', 'brightness(0.98)'] }}
               transition={prefersReducedMotion ? undefined : { duration: 9.2, repeat: Infinity, ease: 'easeInOut', times: [0, 0.28, 0.55, 0.78, 1], delay: 0.45 }}
             />
           </div>
