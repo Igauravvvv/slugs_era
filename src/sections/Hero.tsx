@@ -120,10 +120,10 @@ export default function Hero() {
     lampFaceControls.set({ scaleY: 0 });
     lampFlashControls.set({ opacity: 0 });
 
-    // Reveal the white reflector with the flash, then let a black shutter close from top to bottom.
+    // Reveal the white reflector, close the shutter downward, then retract it upward at the same pace.
     void lampFaceControls.start({
-      scaleY: [0, 0, 1],
-      transition: { duration: 2.2, ease: [0.4, 0, 0.2, 1], times: [0, 0.18, 1] },
+      scaleY: [0, 0, 1, 1, 0, 0],
+      transition: { duration: 3.4, ease: [0.4, 0, 0.2, 1], times: [0, 0.05, 0.45, 0.55, 0.95, 1] },
     });
     void lampFlashControls.start({
       opacity: [0, 0.82, 0.48, 0.16, 0],
@@ -177,8 +177,8 @@ export default function Hero() {
   useEffect(() => {
     if (prefersReducedMotion || hasCustomHero || currentImage !== HERO_IMAGES[0]) return;
 
-    const firstFlash = window.setTimeout(triggerLampFlash, 1350);
-    const secondFlash = window.setTimeout(triggerLampFlash, 5100);
+    const firstFlash = window.setTimeout(triggerLampFlash, 1150);
+    const secondFlash = window.setTimeout(triggerLampFlash, 4550);
     return () => {
       window.clearTimeout(firstFlash);
       window.clearTimeout(secondFlash);
