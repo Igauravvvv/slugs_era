@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import crypto from 'crypto';
-import { priceCheckout } from '../_lib/checkout';
+import { priceCheckout } from '../_lib/checkout.js';
 
 function config() {
   const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;

@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import crypto from 'crypto';
-import { parsePromoCodes, priceCheckout } from '../_lib/checkout';
+import { parsePromoCodes, priceCheckout } from '../_lib/checkout.js';
 
 function config() {
   const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
