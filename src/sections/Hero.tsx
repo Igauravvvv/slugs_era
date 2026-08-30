@@ -439,7 +439,7 @@ export default function Hero() {
               animate={{ opacity: 0.82, filter: 'brightness(1.04)' }}
             >
               <img src="/images/studio_spotlight_overlay.webp" alt="" width="420" height="522" className="block h-auto w-full" />
-              <div className="hero-mobile-lamp-face-frame absolute left-[41.5%] top-[41%] h-[39%] w-[57%] overflow-hidden">
+              <div className="hero-mobile-lamp-face-frame absolute left-[37%] top-[36%] h-[48%] w-[63%] overflow-hidden">
                 <LampFaceShade controls={lampFaceControls} reducedMotion={Boolean(prefersReducedMotion)} />
               </div>
             </motion.div>
@@ -448,7 +448,7 @@ export default function Hero() {
               animate={{ opacity: 0.82, filter: 'brightness(1.04)' }}
             >
               <img src="/images/studio_spotlight_overlay.webp" alt="" width="420" height="522" className="block h-auto w-full" />
-              <div className="hero-mobile-lamp-face-frame absolute left-[41.5%] top-[41%] h-[39%] w-[57%] overflow-hidden">
+              <div className="hero-mobile-lamp-face-frame absolute left-[37%] top-[36%] h-[48%] w-[63%] overflow-hidden">
                 <LampFaceShade controls={lampFaceControls} reducedMotion={Boolean(prefersReducedMotion)} />
               </div>
             </motion.div>
