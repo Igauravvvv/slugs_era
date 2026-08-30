@@ -2,13 +2,13 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
-import { useStore } from '@/store';
 import type { Product } from '@/types';
 import { generateSlug } from '@/types';
 import { ShoppingBag, ChevronLeft, ChevronRight, Eye, LockKeyhole } from 'lucide-react';
 import { trackCustomerEvent } from '@/lib/customerAnalytics';
 import ProductPrice from '@/components/ProductPrice';
 import { isVideoMedia, optimizedProductImageSrcSet, optimizedProductImageUrl, preloadProductImage } from '@/lib/cdn';
+import { useCartLogin } from '@/context/CartLoginContext';
 
 interface ProductCardProps {
   product: Product;
@@ -18,7 +18,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, index = 0, onQuickView, customVariants }: ProductCardProps) {
-  const { addToCart } = useStore();
+  const { addToCartWithLogin } = useCartLogin();
   const navigate = useNavigate();
   const [imageIndex, setImageIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
@@ -104,12 +104,13 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
-    addToCart({
+    const added = addToCartWithLogin({
       product,
       quantity: 1,
       size: product.sizes[0],
       color: product.colors[0],
     });
+    if (!added) return;
     void trackCustomerEvent('quick_add', {
       productId: product.id,
       properties: { product_name: product.name, size: product.sizes[0] || '', quantity: 1 },
@@ -126,7 +127,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
     }, 1400);
   };
 
-  const defaultVariants = {
+  const defaultVariants: Variants = {
     hidden: { opacity: 0, y: 50 },
     visible: { 
       opacity: 1, 
@@ -258,41 +259,47 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
           </>
         )}
 
-        {!isComingSoon && <div className="quick-add z-[25] hidden lg:flex gap-2">
-          <button
-            className="quick-add-btn flex items-center gap-2"
-            onClick={handleQuickAdd}
-          >
-            <ShoppingBag size={14} />
-            Quick Add
-          </button>
-          {onQuickView && (
+        {!isComingSoon && onQuickView && <div className="quick-add z-[25] hidden lg:flex gap-2">
             <button
+              type="button"
+              aria-label={`Quick view ${product.name}`}
               className="pointer-events-auto w-9 h-9 flex items-center justify-center bg-white text-[#1A1A1A] hover:bg-[#C0132A] hover:text-white transition-all duration-200"
               onClick={(e) => { e.stopPropagation(); onQuickView(product); }}
             >
               <Eye size={14} />
             </button>
-          )}
         </div>}
       </div>
 
       <div className={`pt-3 lg:pt-4 px-1 lg:px-0.5 text-center lg:text-left cursor-pointer ${isComingSoon ? 'px-1.5 pb-1' : ''}`} onClick={goToProduct}>
-        <h3 className="font-display text-[15px] lg:text-[21px] font-bold lg:font-normal mb-0.5 lg:mb-1 line-clamp-1 text-[#1A1A1A]">
-          <Link
-            to={productUrl}
-            onClick={(e) => {
-              e.stopPropagation();
-              void trackCustomerEvent('product_clicked', {
-                productId: product.id,
-                properties: { product_name: product.name, category: product.category, source: 'product_card_title' },
-              });
-            }}
-            className="hover:text-[#C0132A] transition-colors"
-          >
-            {product.name}
-          </Link>
-        </h3>
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="min-w-0 flex-1 font-display text-[15px] lg:text-[21px] font-bold lg:font-normal mb-0.5 lg:mb-1 line-clamp-1 text-[#1A1A1A]">
+            <Link
+              to={productUrl}
+              onClick={(e) => {
+                e.stopPropagation();
+                void trackCustomerEvent('product_clicked', {
+                  productId: product.id,
+                  properties: { product_name: product.name, category: product.category, source: 'product_card_title' },
+                });
+              }}
+              className="hover:text-[#C0132A] transition-colors"
+            >
+              {product.name}
+            </Link>
+          </h3>
+          {!isComingSoon && (
+            <button
+              type="button"
+              aria-label={`Quick add ${product.name}`}
+              onClick={handleQuickAdd}
+              className="hidden lg:inline-flex min-h-8 flex-none items-center gap-1.5 rounded-full border border-[#C0132A] px-3 text-[9px] font-semibold uppercase tracking-[0.12em] text-[#C0132A] transition-colors hover:bg-[#C0132A] hover:text-white"
+            >
+              <ShoppingBag size={12} />
+              Quick Add
+            </button>
+          )}
+        </div>
         {isComingSoon ? (
           <div className="flex items-center justify-between pt-2 border-t border-[#E8E4E0] text-[10px] font-medium tracking-[0.14em] uppercase text-[#888880]">
             <span>Coming Soon</span>
@@ -324,6 +331,11 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
             ))}
           </div>
         </div>
+        {product.category === 'tshirts' && (
+          <p className="mt-2 text-[9px] font-semibold uppercase tracking-[0.11em] text-[#C0132A]">
+            New launch · 2 for ₹1,999 · 3 for ₹2,699 · code 2burpy
+          </p>
+        )}
         <button
           type="button"
           aria-label={`Quick add ${product.name}`}

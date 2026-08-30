@@ -139,20 +139,6 @@ export default function Collections() {
     subtitleText = `A specialized collection of ${sub.toLowerCase()} ${selectedCategory}. Uncompromising quality and distinct aesthetics.`;
   }
 
-  // Animation variants
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
-  };
-
-  const item = {
-    hidden: { opacity: 0, y: 30 },
-    show: { opacity: 1, y: 0, transition: { duration: 1.1, ease: [0.22, 1, 0.36, 1] as const } }
-  };
-
   return (
     <>
       <SEOHead
@@ -223,18 +209,13 @@ export default function Collections() {
 
         {/* Product Grid */}
         {filteredProducts.length > 0 ? (
-          <motion.div
-            variants={container}
-            initial="hidden"
-            animate="show"
-            className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-2 gap-y-6 sm:gap-x-8 sm:gap-y-16"
-          >
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-2 gap-y-6 sm:gap-x-8 sm:gap-y-16">
             {filteredProducts.map((product) => (
-              <motion.div key={product.id} variants={item}>
+              <div key={product.id}>
                 <ProductCard product={product} />
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
         ) : (
           <motion.div
             initial={{ opacity: 0 }}

@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ShoppingBag, Heart, Star, ChevronLeft, ChevronRight, Check } from 'lucide-react';
-import { Product } from '@/types';
-import { useStore } from '@/store';
-import { useAuth } from '@/context/AuthContext';
+import { X, ShoppingBag, Heart, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import type { Product } from '@/types';
 import ProductPrice from '@/components/ProductPrice';
+import { useCartLogin } from '@/context/CartLoginContext';
 
 interface QuickViewProps {
   product: Product | null;
@@ -17,26 +16,22 @@ export default function QuickView({ product, onClose }: QuickViewProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [addedToCart, setAddedToCart] = useState(false);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
-  const { addToCart } = useStore();
-  const { user, signInWithGoogle } = useAuth();
+  const { addToCartWithLogin } = useCartLogin();
 
   if (!product) return null;
 
   const images = product.images?.length > 0 ? product.images : [product.image];
 
   const handleAddToCart = () => {
-    if (!user) {
-      signInWithGoogle();
-      return;
-    }
     if (!selectedSize) return;
 
-    addToCart({
+    const added = addToCartWithLogin({
       product,
       quantity: 1,
       size: selectedSize,
       color: selectedColor || product.colors[0],
     });
+    if (!added) return;
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
   };

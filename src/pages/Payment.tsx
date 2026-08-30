@@ -1,29 +1,37 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, CreditCard, Wallet, Banknote, Shield, Check, Lock } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CreditCard, Wallet, Banknote, Shield, Lock } from 'lucide-react';
 import { useStore } from '@/store';
 import { useAuth } from '@/context/AuthContext';
 import { trackPurchase } from '@/lib/analytics';
 import { calculateShipping } from '@/utils/shipping';
 import ProductPrice from '@/components/ProductPrice';
-import { getCartCompareAtTotal } from '@/lib/pricing';
 import { api } from '@/lib/api';
-
-type PaymentMethod = 'card' | 'upi' | 'cod';
+import {
+  FIRST_BUYER_DISCOUNT,
+  TSHIRT_BUNDLE_CODE,
+  calculateLaunchSale,
+  isFirstBuyerCode,
+  isTshirtBundleCode,
+} from '@/utils/launchSale';
 
 const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || '';
 
 export default function Payment() {
   const navigate = useNavigate();
-  const { cart, getCartTotal, selectedAddress, clearCart, setLastCompletedOrderId } = useStore();
+  const { cart, getCartTotal, selectedAddress, clearCart, setLastCompletedOrderId, promoCode, bundlePromoCode } = useStore();
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
 
   const subtotal = getCartTotal();
-  const compareAtSubtotal = getCartCompareAtTotal(cart);
+  const launchPricing = calculateLaunchSale(cart, isTshirtBundleCode(bundlePromoCode));
+  const welcomeDiscount = isFirstBuyerCode(promoCode)
+    ? Math.min(FIRST_BUYER_DISCOUNT, launchPricing.saleSubtotal)
+    : 0;
   const shipping = calculateShipping(subtotal);
   const total = subtotal + shipping;
+  const promoCodes = [bundlePromoCode, promoCode].filter((code): code is string => Boolean(code));
 
   // Redirect if no address or cart
   useEffect(() => {
@@ -56,7 +64,7 @@ export default function Payment() {
 
       // 1. Create order on backend
       const checkoutItems = cart.map(i => ({ productId: i.product.id, size: i.size, color: i.color, quantity: i.quantity }));
-      const orderData = await api.post<any>('/api/payment/create-order', { items: checkoutItems });
+      const orderData = await api.post<any>('/api/payment/create-order', { items: checkoutItems, promoCodes });
 
       // 2. Open Razorpay modal
       const options = {
@@ -90,6 +98,7 @@ export default function Payment() {
                 country: 'India',
               } : null,
               items: checkoutItems,
+              promoCodes,
           });
 
           if (verifyData.success) {
@@ -227,15 +236,27 @@ export default function Payment() {
 
             <div className="space-y-4 mb-6">
               <div className="flex justify-between text-sm">
-                <span className="text-[#888880]">Subtotal</span>
-                <ProductPrice
-                  price={subtotal}
-                  compareAtPrice={compareAtSubtotal}
-                  className="justify-end gap-2"
-                  priceClassName="text-sm text-[#1A1A1A]"
-                  compareClassName="text-xs text-[#888880] line-through"
-                />
+                <span className="text-[#888880]">Items subtotal</span>
+                <span>₹{launchPricing.retailSubtotal.toLocaleString()}</span>
               </div>
+              {launchPricing.discount > 0 && (
+                <div className="flex justify-between text-sm text-emerald-700">
+                  <span>{TSHIRT_BUNDLE_CODE} bundle savings</span>
+                  <span>−₹{launchPricing.discount.toLocaleString()}</span>
+                </div>
+              )}
+              {welcomeDiscount > 0 && (
+                <div className="flex justify-between text-sm text-emerald-700">
+                  <span>First-buyer offer</span>
+                  <span>−₹{welcomeDiscount.toLocaleString()}</span>
+                </div>
+              )}
+              {(launchPricing.discount > 0 || welcomeDiscount > 0) && (
+                <div className="flex justify-between text-sm font-medium">
+                  <span>Discounted subtotal</span>
+                  <span>₹{subtotal.toLocaleString()}</span>
+                </div>
+              )}
               <div className="flex justify-between text-sm">
                 <span className="text-[#888880]">Shipping</span>
                 <span>{shipping === 0 ? 'Free' : `₹${shipping}`}</span>

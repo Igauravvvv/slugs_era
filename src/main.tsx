@@ -8,6 +8,7 @@ import App from './App.tsx'
 import { AuthProvider } from './context/AuthContext'
 import { SiteContentProvider } from './context/SiteContentContext'
 import ErrorBoundary from './components/ErrorBoundary'
+import { CartLoginProvider } from './context/CartLoginContext'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,9 +31,11 @@ createRoot(rootElement).render(
         <QueryClientProvider client={queryClient}>
           <BrowserRouter>
             <AuthProvider>
-              <SiteContentProvider>
-                <App />
-              </SiteContentProvider>
+              <CartLoginProvider>
+                <SiteContentProvider>
+                  <App />
+                </SiteContentProvider>
+              </CartLoginProvider>
             </AuthProvider>
           </BrowserRouter>
         </QueryClientProvider>

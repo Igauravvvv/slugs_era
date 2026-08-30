@@ -11,11 +11,13 @@ import { trackCustomerEvent } from '@/lib/customerAnalytics';
 import { supabase } from '@/lib/supabase';
 import ProductPrice from '@/components/ProductPrice';
 import { isVideoMedia, optimizedProductImageSrcSet, optimizedProductImageUrl, preloadProductImage } from '@/lib/cdn';
+import { useCartLogin } from '@/context/CartLoginContext';
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { addToCart, products, toggleWishlist, isInWishlist } = useStore();
+  const { products, toggleWishlist, isInWishlist } = useStore();
+  const { addToCartWithLogin } = useCartLogin();
   
   // Find product by slug — try multiple strategies:
   // 1. Match by DB slug field (if mapped)
@@ -159,13 +161,14 @@ export default function ProductDetail() {
 
   const handleAddToCart = () => {
     if (isOutOfStock || isComingSoon || isSoldOut) return;
-    addToCart({
+    const added = addToCartWithLogin({
       product: selectedProduct,
       quantity,
       size: selectedSize,
       color: selectedColor,
       isPreOrder: isPreOrder || false,
     });
+    if (!added) return;
     trackAddToCart({
       id: selectedProduct.id,
       name: selectedProduct.name,
@@ -401,6 +404,14 @@ export default function ProductDetail() {
                 />
               )}
             </div>
+
+            {selectedProduct.category === 'tshirts' && !isComingSoon && !isSoldOut && (
+              <div className="mb-5 rounded-xl border border-[#E8D7CB] bg-[#FFF9F2] px-4 py-3">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.17em] text-[#C0132A]">New launch sale</p>
+                <p className="mt-1 text-sm text-[#3F3A36]">Pick any 2 tees for <strong>₹1,999</strong> or any 3 for <strong>₹2,699</strong>.</p>
+                <p className="mt-1 text-[11px] text-[#7A716A]">Use code <strong className="text-[#1A1A1A]">2burpy</strong> in your bag.</p>
+              </div>
+            )}
 
             {/* Launch date for pre-book */}
             {isFullPreBook && selectedProduct.launchDate && (

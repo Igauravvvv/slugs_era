@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag, ArrowRight, Truck, RotateCcw, ShieldCheck } from 'lucide-react';
@@ -6,8 +7,16 @@ import { calculateShipping } from '@/utils/shipping';
 import { getSizeStock } from '@/types';
 import { generateSlug } from '@/types';
 import ProductPrice from '@/components/ProductPrice';
-import { getCartCompareAtTotal } from '@/lib/pricing';
 import InstagramFeed from '@/components/InstagramFeed';
+import {
+  FIRST_BUYER_CODE,
+  FIRST_BUYER_DISCOUNT,
+  TSHIRT_BUNDLE_CODE,
+  calculateLaunchSale,
+  getBundleProgressMessage,
+  isFirstBuyerCode,
+  isTshirtBundleCode,
+} from '@/utils/launchSale';
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -19,13 +28,25 @@ export default function Cart() {
     getCartCount,
     products,
     setCollectionFilter,
+    promoCode,
+    setPromoCode,
+    bundlePromoCode,
+    setBundlePromoCode,
   } = useStore();
+
+  const [offerCode, setOfferCode] = useState(promoCode || bundlePromoCode || '');
+  const [offerMessage, setOfferMessage] = useState('');
 
   const subtotal = getCartTotal();
   const shipping = calculateShipping(subtotal);
   const total = subtotal + shipping;
   const itemCount = getCartCount();
-  const compareAtSubtotal = getCartCompareAtTotal(cart);
+  const bundleCodeApplied = isTshirtBundleCode(bundlePromoCode);
+  const launchPricing = calculateLaunchSale(cart, bundleCodeApplied);
+  const potentialLaunchPricing = calculateLaunchSale(cart, true);
+  const welcomeDiscount = isFirstBuyerCode(promoCode)
+    ? Math.min(FIRST_BUYER_DISCOUNT, launchPricing.saleSubtotal)
+    : 0;
   const cartCategories = Array.from(new Set(cart.map((item) => item.product.category)));
   const recommendationGroups = cartCategories.map((category) => ({
     category,
@@ -45,6 +66,22 @@ export default function Cart() {
     const sizeStock = getSizeStock(item.product, item.size);
     if (item.isPreOrder || sizeStock?.preOrder) return 5;
     return sizeStock?.stock ?? (item.product.inStock ? 10 : 0);
+  };
+
+  const applyOfferCode = () => {
+    if (isTshirtBundleCode(offerCode)) {
+      setBundlePromoCode(TSHIRT_BUNDLE_CODE);
+      setOfferCode(TSHIRT_BUNDLE_CODE);
+      setOfferMessage('Launch bundle code applied.');
+      return;
+    }
+    if (isFirstBuyerCode(offerCode)) {
+      setPromoCode(FIRST_BUYER_CODE);
+      setOfferCode(FIRST_BUYER_CODE);
+      setOfferMessage('₹99 first-buyer offer applied.');
+      return;
+    }
+    setOfferMessage('That code is not part of the current launch offers.');
   };
 
   if (cart.length === 0) {
@@ -249,17 +286,70 @@ export default function Cart() {
               Order Summary
             </h3>
 
+            {launchPricing.eligibleTshirtCount > 0 && (
+              <div className="mb-4 rounded-2xl border border-[#E8D7CB] bg-[#FFF9F2] p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C0132A]">New launch sale</p>
+                <p className="mt-1 text-sm font-medium text-[#1A1A1A]">2 tees ₹1,999 · 3 tees ₹2,699</p>
+                <p className="mt-1 text-xs leading-relaxed text-[#706961]">{getBundleProgressMessage(launchPricing.eligibleTshirtCount)}</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBundlePromoCode(TSHIRT_BUNDLE_CODE);
+                    setOfferCode(TSHIRT_BUNDLE_CODE);
+                    setOfferMessage('Launch bundle code applied.');
+                  }}
+                  className={`mt-3 rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-[0.12em] transition-colors ${
+                    bundleCodeApplied ? 'bg-[#1A1A1A] text-white' : 'border border-[#C0132A] text-[#C0132A] hover:bg-[#C0132A] hover:text-white'
+                  }`}
+                >
+                  {bundleCodeApplied ? `✓ ${TSHIRT_BUNDLE_CODE} applied` : `Apply code ${TSHIRT_BUNDLE_CODE}`}
+                </button>
+                {potentialLaunchPricing.discount > 0 && !bundleCodeApplied && (
+                  <p className="mt-2 text-[11px] font-medium text-emerald-700">Apply now to save ₹{potentialLaunchPricing.discount.toLocaleString()}.</p>
+                )}
+              </div>
+            )}
+
+            <div className="mb-6 rounded-2xl border border-[#E8E4E0] bg-white p-4">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C0132A]">First 100 buyers · ₹99 off</p>
+              <p className="mt-1 text-xs text-[#706961]">Welcome code: <strong className="text-[#1A1A1A]">{FIRST_BUYER_CODE}</strong></p>
+              <div className="mt-3 flex gap-2">
+                <input
+                  value={offerCode}
+                  onChange={(event) => { setOfferCode(event.target.value); setOfferMessage(''); }}
+                  onKeyDown={(event) => { if (event.key === 'Enter') applyOfferCode(); }}
+                  aria-label="Offer code"
+                  placeholder="Enter offer code"
+                  className="min-w-0 flex-1 rounded-full border border-[#DCD5CF] bg-[#F9F7F5] px-4 py-2 text-xs outline-none focus:border-[#C0132A]"
+                />
+                <button type="button" onClick={applyOfferCode} className="rounded-full bg-[#1A1A1A] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-white">Apply</button>
+              </div>
+              {offerMessage && <p className="mt-2 text-[11px] text-[#706961]">{offerMessage}</p>}
+            </div>
+
             <div className="space-y-4 mb-6">
               <div className="flex justify-between text-sm">
-                <span className="text-[#888880]">Subtotal</span>
-                <ProductPrice
-                  price={subtotal}
-                  compareAtPrice={compareAtSubtotal}
-                  className="justify-end gap-2"
-                  priceClassName="text-sm text-[#1A1A1A]"
-                  compareClassName="text-xs text-[#888880] line-through"
-                />
+                <span className="text-[#888880]">Items subtotal</span>
+                <span>₹{launchPricing.retailSubtotal.toLocaleString()}</span>
               </div>
+              {launchPricing.discount > 0 && (
+                <div className="flex justify-between text-sm text-emerald-700">
+                  <span>{TSHIRT_BUNDLE_CODE} bundle savings</span>
+                  <span>−₹{launchPricing.discount.toLocaleString()}</span>
+                </div>
+              )}
+              {welcomeDiscount > 0 && (
+                <div className="flex justify-between text-sm text-emerald-700">
+                  <span>First-buyer offer</span>
+                  <span>−₹{welcomeDiscount.toLocaleString()}</span>
+                </div>
+              )}
+              {(launchPricing.discount > 0 || welcomeDiscount > 0) && (
+                <div className="flex justify-between text-sm font-medium">
+                  <span>Discounted subtotal</span>
+                  <span>₹{subtotal.toLocaleString()}</span>
+                </div>
+              )}
               <div className="flex justify-between text-sm">
                 <span className="text-[#888880]">Shipping</span>
                 <span>{shipping === 0 ? 'Free' : `₹${shipping}`}</span>

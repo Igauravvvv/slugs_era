@@ -2,6 +2,12 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CartItem, Address, User, Product } from '@/types';
 import { calculateShipping } from '@/utils/shipping';
+import {
+  FIRST_BUYER_DISCOUNT,
+  calculateLaunchSale,
+  isFirstBuyerCode,
+  isTshirtBundleCode,
+} from '@/utils/launchSale';
 
 interface AppState {
   // Collection filters (used by Collections page via URL params too)
@@ -32,6 +38,10 @@ interface AppState {
   getCartCount: () => number;
   getShipping: () => number;
   getOrderTotal: () => number;
+  promoCode: string | null;
+  setPromoCode: (code: string | null) => void;
+  bundlePromoCode: string | null;
+  setBundlePromoCode: (code: string | null) => void;
 
   // User
   user: User | null;
@@ -83,6 +93,10 @@ export const useStore = create<AppState>()(
 
       // Cart
       cart: [],
+      promoCode: null,
+      setPromoCode: (promoCode) => set({ promoCode }),
+      bundlePromoCode: null,
+      setBundlePromoCode: (bundlePromoCode) => set({ bundlePromoCode }),
       addToCart: (item) => {
         const { cart } = get();
         const existingIndex = cart.findIndex(
@@ -111,9 +125,12 @@ export const useStore = create<AppState>()(
         );
         set({ cart: newCart });
       },
-      clearCart: () => set({ cart: [] }),
+      clearCart: () => set({ cart: [], promoCode: null, bundlePromoCode: null }),
       getCartTotal: () => {
-        return get().cart.reduce((total, item) => total + item.product.price * item.quantity, 0);
+        const state = get();
+        const launchPricing = calculateLaunchSale(state.cart, isTshirtBundleCode(state.bundlePromoCode));
+        const welcomeDiscount = isFirstBuyerCode(state.promoCode) ? FIRST_BUYER_DISCOUNT : 0;
+        return Math.max(0, launchPricing.saleSubtotal - welcomeDiscount);
       },
       getCartCount: () => {
         return get().cart.reduce((count, item) => count + item.quantity, 0);
@@ -155,7 +172,7 @@ export const useStore = create<AppState>()(
     {
       name: 'slugs-era-store',
       version: 2,
-      migrate: (persisted: any, version: number) => {
+      migrate: (persisted: any, _version: number) => {
         // v0/v1 → v2: no breaking changes, just return persisted state
         return persisted;
       },
@@ -164,6 +181,8 @@ export const useStore = create<AppState>()(
         user: state.user,
         addresses: state.addresses,
         wishlist: state.wishlist,
+        promoCode: state.promoCode,
+        bundlePromoCode: state.bundlePromoCode,
       }),
       merge: (persisted: any, current: AppState) => ({
         ...current,
