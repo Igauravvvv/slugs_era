@@ -196,7 +196,7 @@ export default function Hero() {
                 !hasCustomHero && currentImage === HERO_IMAGES[0]
                   ? 'hero-black-vinyl-image object-center'
                   : !hasCustomHero && currentImage === HERO_IMAGES[1]
-                    ? 'object-center md:object-[center_58%]'
+                      ? 'object-center md:object-[center_64%]'
                   : !hasCustomHero && currentImage === '/images/seedhe%20pahad%20se%20model.webp'
                     ? 'object-[80%_center] sm:object-center'
                     : 'object-center'
