@@ -193,6 +193,8 @@ export default function Hero() {
               className={`absolute inset-0 w-full h-full object-cover ${
                 !hasCustomHero && currentImage === HERO_IMAGES[0]
                   ? 'object-center md:object-[center_40%]'
+                  : !hasCustomHero && currentImage === HERO_IMAGES[1]
+                    ? 'object-center md:object-[center_58%]'
                   : !hasCustomHero && currentImage === '/images/seedhe%20pahad%20se%20model.webp'
                     ? 'object-[80%_center] sm:object-center'
                     : 'object-center'
