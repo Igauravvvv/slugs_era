@@ -1,5 +1,5 @@
-import { useRef, useEffect, useState, useCallback } from 'react';
-import { motion, useScroll, useTransform, useReducedMotion, useAnimationControls, AnimatePresence } from 'framer-motion';
+import { useRef, useEffect, useState } from 'react';
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { useSiteSection } from '@/context/SiteContentContext';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '@/store';
@@ -31,49 +31,11 @@ const HERO_DIMENSIONS: Record<(typeof HERO_IMAGES)[number], { width: number; hei
   '/images/green_tshirt_studio_hero.webp': { width: 1672, height: 941 },
   '/images/seedhe%20pahad%20se%20model.webp': { width: 2000, height: 848 },
 };
-const LAMP_CYCLE_SECONDS = 4.8;
-const LAMP_CYCLE_MS = LAMP_CYCLE_SECONDS * 1000;
-const LAMP_CYCLE_TRANSITION = {
-  duration: LAMP_CYCLE_SECONDS,
-  ease: [0.45, 0, 0.55, 1] as const,
-  times: [0, 0.5, 1],
-  repeat: Infinity,
-};
-const LAMP_FACE_VARIANTS = {
-  closed: { scaleY: 1 },
-  cycle: { scaleY: [1, 0, 1], transition: LAMP_CYCLE_TRANSITION },
-};
-const LAMP_FLASH_VARIANTS = {
-  closed: { opacity: 0 },
-  cycle: { opacity: [0, 0.92, 0], transition: LAMP_CYCLE_TRANSITION },
-};
-
-function LampFaceShade({
-  controls,
-  reducedMotion,
-}: {
-  controls: ReturnType<typeof useAnimationControls>;
-  reducedMotion: boolean;
-}) {
-  return (
-    <motion.div
-      className="absolute -inset-px origin-top will-change-transform"
-      style={{ backgroundColor: 'var(--hero-lamp-black)', backfaceVisibility: 'hidden' }}
-      variants={LAMP_FACE_VARIANTS}
-      initial={{ scaleY: reducedMotion ? 0 : 1 }}
-      animate={reducedMotion ? { scaleY: 0 } : controls}
-    />
-  );
-}
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const elementsRef = useRef<(HTMLDivElement | null)[]>([]);
   const [currentImage, setCurrentImage] = useState<(typeof HERO_IMAGES)[number]>(HERO_IMAGES[0]);
-  const prefersReducedMotion = useReducedMotion();
-  const lampCycleControls = useAnimationControls();
-  const shutterContextRef = useRef<AudioContext | null>(null);
-  const soundArmedRef = useRef(false);
 
   const { section } = useSiteSection('hero');
   const ctaText = section?.cta_text || 'Shop now';
@@ -92,100 +54,6 @@ export default function Hero() {
 
   const rightBlockX = useTransform(scrollYProgress, [0, 1], [0, 400]);
   const leftBlockX = useTransform(scrollYProgress, [0, 1], [0, -400]);
-
-  const playShutterSound = useCallback((delaySeconds = 0) => {
-    const audioContext = shutterContextRef.current;
-    if (!soundArmedRef.current || !audioContext || audioContext.state === 'closed') return;
-
-    if (audioContext.state === 'suspended') {
-      void audioContext.resume();
-    }
-
-    const startAt = audioContext.currentTime + delaySeconds;
-    const noiseBuffer = audioContext.createBuffer(1, Math.ceil(audioContext.sampleRate * 0.08), audioContext.sampleRate);
-    const samples = noiseBuffer.getChannelData(0);
-    for (let i = 0; i < samples.length; i += 1) {
-      samples[i] = (Math.random() * 2 - 1) * Math.exp(-i / (samples.length * 0.18));
-    }
-
-    const makeClick = (offset: number, volume: number, pitch: number) => {
-      const source = audioContext.createBufferSource();
-      const filter = audioContext.createBiquadFilter();
-      const gain = audioContext.createGain();
-      source.buffer = noiseBuffer;
-      filter.type = 'bandpass';
-      filter.frequency.setValueAtTime(pitch, startAt + offset);
-      filter.Q.setValueAtTime(0.7, startAt + offset);
-      gain.gain.setValueAtTime(0.0001, startAt + offset);
-      gain.gain.exponentialRampToValueAtTime(volume, startAt + offset + 0.004);
-      gain.gain.exponentialRampToValueAtTime(0.0001, startAt + offset + 0.055);
-      source.connect(filter).connect(gain).connect(audioContext.destination);
-      source.start(startAt + offset);
-      source.stop(startAt + offset + 0.075);
-    };
-
-    // Two tiny mechanical transients read as a camera shutter without feeling loud or gimmicky.
-    makeClick(0, 0.07, 1450);
-    makeClick(0.055, 0.045, 980);
-  }, []);
-
-  // Audio is armed by a real visitor gesture so the shutter respects browser autoplay rules.
-  useEffect(() => {
-    if (soundArmedRef.current || typeof window === 'undefined') return;
-
-    const armAudio = () => {
-      const AudioContextConstructor = window.AudioContext
-        || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-      if (!AudioContextConstructor) return;
-
-      const audioContext = new AudioContextConstructor();
-      shutterContextRef.current = audioContext;
-      soundArmedRef.current = true;
-      void audioContext.resume();
-
-      window.removeEventListener('pointerdown', armAudio);
-      window.removeEventListener('keydown', armAudio);
-      window.removeEventListener('touchstart', armAudio);
-    };
-
-    window.addEventListener('pointerdown', armAudio, { passive: true });
-    window.addEventListener('keydown', armAudio);
-    window.addEventListener('touchstart', armAudio, { passive: true });
-
-    return () => {
-      window.removeEventListener('pointerdown', armAudio);
-      window.removeEventListener('keydown', armAudio);
-      window.removeEventListener('touchstart', armAudio);
-    };
-  }, []);
-
-  useEffect(() => () => {
-    const audioContext = shutterContextRef.current;
-    if (audioContext && audioContext.state !== 'closed') {
-      void audioContext.close();
-    }
-  }, []);
-
-  // Start fully closed on every first-look load. One shared control keeps the bottom-to-top
-  // shutter opening and light intensity perfectly inverse, with no hold between loop halves.
-  useEffect(() => {
-    lampCycleControls.stop();
-    if (prefersReducedMotion || hasCustomHero || currentImage !== HERO_IMAGES[0]) return;
-
-    lampCycleControls.set('closed');
-    void lampCycleControls.start('cycle');
-
-    let openClickLoop: number | undefined;
-    const firstOpenClick = window.setTimeout(() => {
-      playShutterSound();
-      openClickLoop = window.setInterval(() => playShutterSound(), LAMP_CYCLE_MS);
-    }, LAMP_CYCLE_MS / 2);
-    return () => {
-      window.clearTimeout(firstOpenClick);
-      if (openClickLoop !== undefined) window.clearInterval(openClickLoop);
-      lampCycleControls.stop();
-    };
-  }, [currentImage, hasCustomHero, lampCycleControls, playShutterSound, prefersReducedMotion]);
 
   // Autoplay Slider
   useEffect(() => {
@@ -337,142 +205,6 @@ export default function Hero() {
         {/* Subtle overlay to make text readable if needed */}
         <div className="absolute inset-0 bg-black/10 mix-blend-overlay"></div>
       </div>
-
-      {/* Slow studio-light pulse for the first look. The physical lamps are baked into the desktop art
-          and rendered as restrained edge overlays on mobile. The shortened beams stop before
-          washing across the T-shirt artwork. */}
-      {!hasCustomHero && currentImage === HERO_IMAGES[0] && (
-        <>
-          <motion.div
-            className="absolute inset-0 z-[2] pointer-events-none overflow-hidden"
-            animate={{ opacity: prefersReducedMotion ? 0.42 : 0.62 }}
-            aria-hidden="true"
-          >
-            <div
-              className="absolute inset-0 mix-blend-screen"
-              style={{ background: 'radial-gradient(ellipse at 50% 46%, rgba(255,244,232,0.11), transparent 40%)' }}
-            />
-
-            {/* Directional beams are brightest at the photographed lamp faces, then disappear
-                before their guide shapes reach the garment. */}
-            <motion.svg
-              data-hero-beams="true"
-              className="absolute inset-0 hidden h-full w-full md:block mix-blend-screen"
-              viewBox="0 0 100 100"
-              preserveAspectRatio="none"
-              variants={LAMP_FLASH_VARIANTS}
-              initial={{ opacity: prefersReducedMotion ? 0.2 : 0 }}
-              animate={prefersReducedMotion ? { opacity: 0.2 } : lampCycleControls}
-              aria-hidden="true"
-            >
-              <defs>
-                <linearGradient id="hero-left-beam" gradientUnits="userSpaceOnUse" x1="4" y1="22" x2="37" y2="56">
-                  <stop offset="0%" stopColor="#fffefb" stopOpacity="1" />
-                  <stop offset="14%" stopColor="#fff4ec" stopOpacity="0.78" />
-                  <stop offset="40%" stopColor="#ffd8ca" stopOpacity="0.18" />
-                  <stop offset="64%" stopColor="#ffb2a1" stopOpacity="0.025" />
-                  <stop offset="78%" stopColor="#ff998c" stopOpacity="0" />
-                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0" />
-                </linearGradient>
-                <linearGradient id="hero-right-beam" gradientUnits="userSpaceOnUse" x1="96" y1="22" x2="62" y2="56">
-                  <stop offset="0%" stopColor="#fffefb" stopOpacity="1" />
-                  <stop offset="14%" stopColor="#fff4ec" stopOpacity="0.78" />
-                  <stop offset="40%" stopColor="#ffd8ca" stopOpacity="0.18" />
-                  <stop offset="64%" stopColor="#ffb2a1" stopOpacity="0.025" />
-                  <stop offset="78%" stopColor="#ff998c" stopOpacity="0" />
-                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0" />
-                </linearGradient>
-                <filter id="hero-beam-feather" x="-10" y="-10" width="120" height="120" filterUnits="userSpaceOnUse">
-                  <feGaussianBlur stdDeviation="3.2" />
-                </filter>
-              </defs>
-              {/* These cones follow the photographed lamp angles and the user's marked guide lines. */}
-              <path d="M 4 22 L 40 49 L 34 63 Z" fill="url(#hero-left-beam)" filter="url(#hero-beam-feather)" />
-              <path d="M 96 22 L 58 49 L 65 64 Z" fill="url(#hero-right-beam)" filter="url(#hero-beam-feather)" />
-            </motion.svg>
-            <motion.div
-              data-hero-model-flash="true"
-              className="absolute inset-0 hidden md:block mix-blend-screen blur-2xl"
-              style={{ background: 'radial-gradient(ellipse at 50% 46%, rgba(255,246,235,0.09) 0%, rgba(255,164,146,0.02) 16%, transparent 31%)' }}
-              variants={LAMP_FLASH_VARIANTS}
-              initial={{ opacity: prefersReducedMotion ? 0.06 : 0 }}
-              animate={prefersReducedMotion ? { opacity: 0.06 } : lampCycleControls}
-            />
-          </motion.div>
-
-          {/* Black face masks reveal the photographed white lamps only during each flash. */}
-          <div className="absolute inset-0 z-[4] hidden overflow-hidden pointer-events-none md:block" aria-hidden="true">
-            <div className="hero-lamp-face-frame hero-lamp-face-frame--left">
-              <LampFaceShade controls={lampCycleControls} reducedMotion={Boolean(prefersReducedMotion)} />
-            </div>
-            <div className="hero-lamp-face-frame hero-lamp-face-frame--right">
-              <LampFaceShade controls={lampCycleControls} reducedMotion={Boolean(prefersReducedMotion)} />
-            </div>
-          </div>
-
-          <div className="absolute inset-0 z-[3] pointer-events-none overflow-hidden md:hidden" aria-hidden="true">
-            <motion.svg
-              data-hero-mobile-beams="true"
-              className="absolute inset-0 h-full w-full mix-blend-screen"
-              viewBox="0 0 100 100"
-              preserveAspectRatio="none"
-              variants={LAMP_FLASH_VARIANTS}
-              initial={{ opacity: prefersReducedMotion ? 0.18 : 0 }}
-              animate={prefersReducedMotion ? { opacity: 0.18 } : lampCycleControls}
-            >
-              <defs>
-                <linearGradient id="hero-mobile-left-beam" gradientUnits="userSpaceOnUse" x1="3" y1="28" x2="44" y2="58">
-                  <stop offset="0%" stopColor="#fffefb" stopOpacity="0.96" />
-                  <stop offset="14%" stopColor="#fff4ec" stopOpacity="0.72" />
-                  <stop offset="40%" stopColor="#ffd8ca" stopOpacity="0.16" />
-                  <stop offset="64%" stopColor="#ffb2a1" stopOpacity="0.02" />
-                  <stop offset="78%" stopColor="#ff998c" stopOpacity="0" />
-                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0" />
-                </linearGradient>
-                <linearGradient id="hero-mobile-right-beam" gradientUnits="userSpaceOnUse" x1="97" y1="28" x2="56" y2="58">
-                  <stop offset="0%" stopColor="#fffefb" stopOpacity="0.96" />
-                  <stop offset="14%" stopColor="#fff4ec" stopOpacity="0.72" />
-                  <stop offset="40%" stopColor="#ffd8ca" stopOpacity="0.16" />
-                  <stop offset="64%" stopColor="#ffb2a1" stopOpacity="0.02" />
-                  <stop offset="78%" stopColor="#ff998c" stopOpacity="0" />
-                  <stop offset="100%" stopColor="#ff998c" stopOpacity="0" />
-                </linearGradient>
-                <filter id="hero-mobile-beam-feather" x="-12" y="-12" width="124" height="124" filterUnits="userSpaceOnUse">
-                  <feGaussianBlur stdDeviation="4" />
-                </filter>
-              </defs>
-              <path d="M 3 28 L 48 51 L 39 66 Z" fill="url(#hero-mobile-left-beam)" filter="url(#hero-mobile-beam-feather)" />
-              <path d="M 97 28 L 52 51 L 61 66 Z" fill="url(#hero-mobile-right-beam)" filter="url(#hero-mobile-beam-feather)" />
-            </motion.svg>
-            <motion.div
-              data-hero-mobile-model-flash="true"
-              className="absolute inset-0 mix-blend-screen blur-2xl"
-              style={{ background: 'radial-gradient(ellipse at 50% 45%, rgba(255,246,235,0.07) 0%, rgba(255,164,146,0.015) 15%, transparent 30%)' }}
-              variants={LAMP_FLASH_VARIANTS}
-              initial={{ opacity: prefersReducedMotion ? 0.05 : 0 }}
-              animate={prefersReducedMotion ? { opacity: 0.05 } : lampCycleControls}
-            />
-            <motion.div
-              className="absolute -left-8 top-[24%] w-20 h-auto -rotate-6 drop-shadow-[0_0_12px_rgba(255,245,235,0.28)]"
-              animate={{ opacity: 0.82, filter: 'brightness(1.04)' }}
-            >
-              <img src="/images/studio_spotlight_overlay.webp" alt="" width="420" height="522" className="block h-auto w-full" />
-              <div className="hero-mobile-lamp-face-frame absolute left-[37%] top-[36%] h-[48%] w-[63%] overflow-hidden">
-                <LampFaceShade controls={lampCycleControls} reducedMotion={Boolean(prefersReducedMotion)} />
-              </div>
-            </motion.div>
-            <motion.div
-              className="absolute -right-8 top-[24%] w-20 h-auto rotate-6 scale-x-[-1] drop-shadow-[0_0_12px_rgba(255,245,235,0.28)]"
-              animate={{ opacity: 0.82, filter: 'brightness(1.04)' }}
-            >
-              <img src="/images/studio_spotlight_overlay.webp" alt="" width="420" height="522" className="block h-auto w-full" />
-              <div className="hero-mobile-lamp-face-frame absolute left-[37%] top-[36%] h-[48%] w-[63%] overflow-hidden">
-                <LampFaceShade controls={lampCycleControls} reducedMotion={Boolean(prefersReducedMotion)} />
-              </div>
-            </motion.div>
-          </div>
-        </>
-      )}
 
       {/* Swipe Interceptor Layer */}
       <motion.div
