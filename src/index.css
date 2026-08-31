@@ -26,6 +26,22 @@
 @tailwind components;
 @tailwind utilities;
 
+.hero-black-vinyl-frame {
+  background: #3b0005;
+}
+
+@media (min-width: 768px) {
+  .hero-black-vinyl-image {
+    inset: auto;
+    left: 50%;
+    top: 50%;
+    width: 95%;
+    height: auto;
+    max-width: none;
+    transform: translate(-50%, -50%);
+  }
+}
+
 @layer base {
   :root {
     --red: #C0132A;

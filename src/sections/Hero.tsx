@@ -10,7 +10,7 @@ const HERO_IMAGES = [
   '/images/green_tshirt_studio_hero.webp',
   '/images/seedhe%20pahad%20se%20model.webp'
 ] as const;
-const FIRST_HERO_MOBILE_SRCSET = '/images/cdn/hero-black-vinyl-mobile-640.webp 640w, /images/cdn/hero-black-vinyl-mobile-960.webp 960w, /images/cdn/hero-black-vinyl-mobile-1440.webp 1440w';
+const FIRST_HERO_MOBILE_SRCSET = '/images/cdn/hero-black-vinyl-mobile-framed-v2-640.webp 640w, /images/cdn/hero-black-vinyl-mobile-framed-v2-960.webp 960w, /images/cdn/hero-black-vinyl-mobile-framed-v2-1440.webp 1440w';
 const BLUE_TURTLE_MOBILE_SRCSET = '/images/cdn/hero-blue-turtle-mobile-640.webp 640w, /images/cdn/hero-blue-turtle-mobile-960.webp 960w, /images/cdn/hero-blue-turtle-mobile-1440.webp 1440w';
 const GREEN_STUDIO_SRCSET = '/images/cdn/hero-green-studio-640.webp 640w, /images/cdn/hero-green-studio-1280.webp 1280w, /images/cdn/hero-green-studio-1672.webp 1672w';
 const HERO_ALT: Record<(typeof HERO_IMAGES)[number], string> = {
@@ -166,7 +166,9 @@ export default function Hero() {
         <AnimatePresence mode="sync">
           <motion.picture
             key={hasCustomHero ? `${desktopHeroImage}:${mobileHeroImage}` : currentImage}
-            className="absolute inset-0 block w-full h-full"
+            className={`absolute inset-0 block w-full h-full ${
+              !hasCustomHero && currentImage === HERO_IMAGES[0] ? 'hero-black-vinyl-frame' : ''
+            }`}
             initial={{ opacity: 0, scale: 1.025 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
@@ -192,7 +194,7 @@ export default function Hero() {
               height={hasCustomHero ? 1125 : HERO_DIMENSIONS[currentImage].height}
               className={`absolute inset-0 w-full h-full object-cover ${
                 !hasCustomHero && currentImage === HERO_IMAGES[0]
-                  ? 'object-center md:object-[center_40%]'
+                  ? 'hero-black-vinyl-image object-center'
                   : !hasCustomHero && currentImage === HERO_IMAGES[1]
                     ? 'object-center md:object-[center_58%]'
                   : !hasCustomHero && currentImage === '/images/seedhe%20pahad%20se%20model.webp'
