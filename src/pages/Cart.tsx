@@ -11,10 +11,13 @@ import InstagramFeed from '@/components/InstagramFeed';
 import {
   FIRST_BUYER_CODE,
   FIRST_BUYER_DISCOUNT,
+  PRIVATE_COUPON_CODE,
   TSHIRT_BUNDLE_CODE,
+  calculatePrivateCouponDiscount,
   calculateLaunchSale,
   getBundleProgressMessage,
   isFirstBuyerCode,
+  isPrivateCouponCode,
   isTshirtBundleCode,
 } from '@/utils/launchSale';
 
@@ -41,12 +44,14 @@ export default function Cart() {
   const shipping = calculateShipping(subtotal);
   const total = subtotal + shipping;
   const itemCount = getCartCount();
-  const bundleCodeApplied = isTshirtBundleCode(bundlePromoCode);
+  const privateCouponApplied = isPrivateCouponCode(promoCode);
+  const bundleCodeApplied = !privateCouponApplied && isTshirtBundleCode(bundlePromoCode);
   const launchPricing = calculateLaunchSale(cart, bundleCodeApplied);
   const potentialLaunchPricing = calculateLaunchSale(cart, true);
-  const welcomeDiscount = isFirstBuyerCode(promoCode)
+  const welcomeDiscount = !privateCouponApplied && isFirstBuyerCode(promoCode)
     ? Math.min(FIRST_BUYER_DISCOUNT, launchPricing.saleSubtotal)
     : 0;
+  const privateDiscount = calculatePrivateCouponDiscount(cart, privateCouponApplied);
   const cartCategories = Array.from(new Set(cart.map((item) => item.product.category)));
   const recommendationGroups = cartCategories.map((category) => ({
     category,
@@ -69,6 +74,13 @@ export default function Cart() {
   };
 
   const applyOfferCode = () => {
+    if (isPrivateCouponCode(offerCode)) {
+      setPromoCode(PRIVATE_COUPON_CODE);
+      setBundlePromoCode(null);
+      setOfferCode('');
+      setOfferMessage('Private offer applied.');
+      return;
+    }
     if (isTshirtBundleCode(offerCode)) {
       setBundlePromoCode(TSHIRT_BUNDLE_CODE);
       setOfferCode(TSHIRT_BUNDLE_CODE);
@@ -344,7 +356,13 @@ export default function Cart() {
                   <span>−₹{welcomeDiscount.toLocaleString()}</span>
                 </div>
               )}
-              {(launchPricing.discount > 0 || welcomeDiscount > 0) && (
+              {privateDiscount > 0 && (
+                <div className="flex justify-between text-sm text-emerald-700">
+                  <span>Private offer</span>
+                  <span>−₹{privateDiscount.toLocaleString()}</span>
+                </div>
+              )}
+              {(launchPricing.discount > 0 || welcomeDiscount > 0 || privateDiscount > 0) && (
                 <div className="flex justify-between text-sm font-medium">
                   <span>Discounted subtotal</span>
                   <span>₹{subtotal.toLocaleString()}</span>

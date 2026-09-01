@@ -11,8 +11,10 @@ import { api } from '@/lib/api';
 import {
   FIRST_BUYER_DISCOUNT,
   TSHIRT_BUNDLE_CODE,
+  calculatePrivateCouponDiscount,
   calculateLaunchSale,
   isFirstBuyerCode,
+  isPrivateCouponCode,
   isTshirtBundleCode,
 } from '@/utils/launchSale';
 
@@ -25,10 +27,12 @@ export default function Payment() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const subtotal = getCartTotal();
-  const launchPricing = calculateLaunchSale(cart, isTshirtBundleCode(bundlePromoCode));
-  const welcomeDiscount = isFirstBuyerCode(promoCode)
+  const privateCouponApplied = isPrivateCouponCode(promoCode);
+  const launchPricing = calculateLaunchSale(cart, !privateCouponApplied && isTshirtBundleCode(bundlePromoCode));
+  const welcomeDiscount = !privateCouponApplied && isFirstBuyerCode(promoCode)
     ? Math.min(FIRST_BUYER_DISCOUNT, launchPricing.saleSubtotal)
     : 0;
+  const privateDiscount = calculatePrivateCouponDiscount(cart, privateCouponApplied);
   const shipping = calculateShipping(subtotal);
   const total = subtotal + shipping;
   const promoCodes = [bundlePromoCode, promoCode].filter((code): code is string => Boolean(code));
@@ -251,7 +255,13 @@ export default function Payment() {
                   <span>−₹{welcomeDiscount.toLocaleString()}</span>
                 </div>
               )}
-              {(launchPricing.discount > 0 || welcomeDiscount > 0) && (
+              {privateDiscount > 0 && (
+                <div className="flex justify-between text-sm text-emerald-700">
+                  <span>Private offer</span>
+                  <span>−₹{privateDiscount.toLocaleString()}</span>
+                </div>
+              )}
+              {(launchPricing.discount > 0 || welcomeDiscount > 0 || privateDiscount > 0) && (
                 <div className="flex justify-between text-sm font-medium">
                   <span>Discounted subtotal</span>
                   <span>₹{subtotal.toLocaleString()}</span>

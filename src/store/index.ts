@@ -4,8 +4,10 @@ import type { CartItem, Address, User, Product } from '@/types';
 import { calculateShipping } from '@/utils/shipping';
 import {
   FIRST_BUYER_DISCOUNT,
+  calculatePrivateCouponDiscount,
   calculateLaunchSale,
   isFirstBuyerCode,
+  isPrivateCouponCode,
   isTshirtBundleCode,
 } from '@/utils/launchSale';
 
@@ -128,9 +130,14 @@ export const useStore = create<AppState>()(
       clearCart: () => set({ cart: [], promoCode: null, bundlePromoCode: null }),
       getCartTotal: () => {
         const state = get();
-        const launchPricing = calculateLaunchSale(state.cart, isTshirtBundleCode(state.bundlePromoCode));
-        const welcomeDiscount = isFirstBuyerCode(state.promoCode) ? FIRST_BUYER_DISCOUNT : 0;
-        return Math.max(0, launchPricing.saleSubtotal - welcomeDiscount);
+        const privateCouponApplied = isPrivateCouponCode(state.promoCode);
+        const launchPricing = calculateLaunchSale(
+          state.cart,
+          !privateCouponApplied && isTshirtBundleCode(state.bundlePromoCode),
+        );
+        const welcomeDiscount = !privateCouponApplied && isFirstBuyerCode(state.promoCode) ? FIRST_BUYER_DISCOUNT : 0;
+        const privateDiscount = calculatePrivateCouponDiscount(state.cart, privateCouponApplied);
+        return Math.max(0, launchPricing.saleSubtotal - welcomeDiscount - privateDiscount);
       },
       getCartCount: () => {
         return get().cart.reduce((count, item) => count + item.quantity, 0);

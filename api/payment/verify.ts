@@ -55,6 +55,39 @@ async function razorpay(path: string, init?: RequestInit) {
   return body;
 }
 
+async function ensureOrderNotification(order: any, url: string, dbHeaders: Record<string, string>) {
+  try {
+    const lookup = new URL(`${url}/rest/v1/notifications`);
+    lookup.searchParams.set('select', 'id');
+    lookup.searchParams.set('type', 'eq.new_order');
+    lookup.searchParams.set('metadata->>order_id', `eq.${order.id}`);
+    lookup.searchParams.set('limit', '1');
+    const existingResponse = await fetch(lookup, { headers: dbHeaders });
+    const existing = existingResponse.ok ? await existingResponse.json() as Array<{ id: string }> : [];
+    const message = `Order ${order.order_number || order.id} — ₹${order.total}`;
+    if (existing[0]) {
+      await fetch(`${url}/rest/v1/notifications?id=eq.${existing[0].id}`, {
+        method: 'PATCH',
+        headers: { ...dbHeaders, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: 'You received an order', message }),
+      });
+      return;
+    }
+    await fetch(`${url}/rest/v1/notifications`, {
+      method: 'POST',
+      headers: { ...dbHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'new_order',
+        title: 'You received an order',
+        message,
+        metadata: { order_id: order.id, order_number: order.order_number || '', total: order.total },
+      }),
+    });
+  } catch {
+    // The paid order is already safely stored; notification delivery is retried by the dashboard polling flow.
+  }
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ success: false, error: 'Method not allowed' });
@@ -140,6 +173,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         promoCodes: checkout.promoCodes,
         launchDiscount: checkout.launchDiscount,
         welcomeDiscount: checkout.welcomeDiscount,
+        privateDiscount: checkout.privateDiscount,
       } : null,
       items: checkout.items,
       subtotal: checkout.subtotal,
@@ -157,6 +191,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       throw new Error('Payment succeeded, but the order could not be saved. Please contact support with your payment ID.');
     }
     const inserted = await insertResponse.json() as any[];
+    await ensureOrderNotification(inserted[0], url, dbHeaders);
     return res.status(200).json({
       success: true,
       data: { message: 'Payment verified and order saved', orderNumber, order: inserted[0] },

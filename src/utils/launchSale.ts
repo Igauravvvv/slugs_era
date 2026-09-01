@@ -8,6 +8,8 @@ export const LAUNCH_SALE = {
 export const FIRST_BUYER_CODE = 'TheOneOfHundred';
 export const FIRST_BUYER_DISCOUNT = 99;
 export const TSHIRT_BUNDLE_CODE = '2burpy';
+export const PRIVATE_COUPON_CODE = 'maddy';
+export const PRIVATE_TSHIRT_PRICE = 11;
 
 export type LaunchSalePricing = {
   retailSubtotal: number;
@@ -24,7 +26,20 @@ export const isFirstBuyerCode = (code?: string | null) =>
 export const isTshirtBundleCode = (code?: string | null) =>
   code?.trim().toLowerCase() === TSHIRT_BUNDLE_CODE.toLowerCase();
 
+export const isPrivateCouponCode = (code?: string | null) =>
+  code?.trim().toLowerCase() === PRIVATE_COUPON_CODE.toLowerCase();
+
 export const isTshirtProduct = (item: CartItem['product']) => item.category === 'tshirts';
+
+export function calculatePrivateCouponDiscount(cart: CartItem[], enabled = true) {
+  if (!enabled) return 0;
+  return cart.reduce((discount, item) => {
+    const unitPrice = Number(item.product.price);
+    return isTshirtProduct(item.product) && unitPrice === 1199
+      ? discount + (unitPrice - PRIVATE_TSHIRT_PRICE) * item.quantity
+      : discount;
+  }, 0);
+}
 
 export function calculateLaunchSaleFromUnits(
   retailSubtotal: number,

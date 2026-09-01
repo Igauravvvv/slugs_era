@@ -29,8 +29,8 @@ export function useNotifications() {
         return [];
       }
     },
-    refetchInterval: 60_000,
-    staleTime: 30_000,
+    refetchInterval: 15_000,
+    staleTime: 10_000,
     retry: false,
   });
 }

@@ -1,8 +1,10 @@
 export const FIRST_BUYER_CODE = 'TheOneOfHundred';
 export const TSHIRT_BUNDLE_CODE = '2burpy';
+export const PRIVATE_COUPON_CODE = 'maddy';
 const FIRST_BUYER_DISCOUNT = 99;
 const TWO_TSHIRT_PRICE = 1999;
 const THREE_TSHIRT_PRICE = 2699;
+const PRIVATE_TSHIRT_PRICE = 11;
 
 type CheckoutConfig = { url: string; serviceKey: string };
 type PriceCheckoutOptions = CheckoutConfig & {
@@ -26,9 +28,10 @@ export function parsePromoCodes(raw: unknown): string[] {
   for (const code of submitted) {
     if (code.toLowerCase() === TSHIRT_BUNDLE_CODE.toLowerCase()) codes.add(TSHIRT_BUNDLE_CODE);
     else if (code.toLowerCase() === FIRST_BUYER_CODE.toLowerCase()) codes.add(FIRST_BUYER_CODE);
+    else if (code.toLowerCase() === PRIVATE_COUPON_CODE.toLowerCase()) codes.add(PRIVATE_COUPON_CODE);
     else throw httpError('This offer code is not valid.', 400);
   }
-  return [TSHIRT_BUNDLE_CODE, FIRST_BUYER_CODE].filter((code) => codes.has(code));
+  return [TSHIRT_BUNDLE_CODE, FIRST_BUYER_CODE, PRIVATE_COUPON_CODE].filter((code) => codes.has(code));
 }
 
 function calculateTshirtBundle(unitPrices: number[]) {
@@ -106,28 +109,38 @@ export async function priceCheckout(raw: unknown, options: PriceCheckoutOptions)
     return { ...item, name: product.name, price, category: String(product.category || '') };
   });
   const promoCodes = parsePromoCodes(options.promoCodes);
+  const privateCouponApplied = promoCodes.includes(PRIVATE_COUPON_CODE);
   const retailSubtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const tshirtPrices = items.flatMap((item) => item.category === 'tshirts'
     ? Array.from({ length: item.quantity }, () => item.price)
     : []);
   const tshirtRetail = tshirtPrices.reduce((sum, price) => sum + price, 0);
-  const bundledTshirtTotal = promoCodes.includes(TSHIRT_BUNDLE_CODE)
+  const bundledTshirtTotal = !privateCouponApplied && promoCodes.includes(TSHIRT_BUNDLE_CODE)
     ? calculateTshirtBundle(tshirtPrices)
     : tshirtRetail;
   const launchDiscount = Math.max(0, tshirtRetail - bundledTshirtTotal);
   const afterBundle = retailSubtotal - launchDiscount;
-  if (promoCodes.includes(FIRST_BUYER_CODE) && !options.honorReservedPromos) {
+  if (!privateCouponApplied && promoCodes.includes(FIRST_BUYER_CODE) && !options.honorReservedPromos) {
     await assertFirstBuyerEligible(options, options.userId);
   }
-  const welcomeDiscount = promoCodes.includes(FIRST_BUYER_CODE)
+  const welcomeDiscount = !privateCouponApplied && promoCodes.includes(FIRST_BUYER_CODE)
     ? Math.min(FIRST_BUYER_DISCOUNT, afterBundle)
     : 0;
-  const subtotal = Math.max(0, afterBundle - welcomeDiscount);
+  const privateDiscount = privateCouponApplied
+    ? items.reduce((discount, item) => item.category === 'tshirts' && item.price === 1199
+      ? discount + (item.price - PRIVATE_TSHIRT_PRICE) * item.quantity
+      : discount, 0)
+    : 0;
+  if (privateCouponApplied && privateDiscount === 0) {
+    throw httpError('This private offer only applies to eligible ₹1,199 shirts.', 409);
+  }
+  const subtotal = Math.max(0, afterBundle - welcomeDiscount - privateDiscount);
   return {
     items,
     retailSubtotal,
     launchDiscount,
     welcomeDiscount,
+    privateDiscount,
     subtotal,
     shippingFee: 0,
     total: subtotal,

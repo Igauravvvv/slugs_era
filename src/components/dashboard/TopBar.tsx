@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, Bell, Search, Moon, Sun, User, Check } from 'lucide-react';
 import type { DashboardView } from './Sidebar';
 import { useMarkNotificationsRead, useNotifications } from '@/hooks/useNotifications';
+import { useDashboardToast } from '@/store/dashboardToast';
 
 const viewTitles: Record<string, string> = {
   overview: 'Overview',
@@ -60,7 +61,25 @@ export default function TopBar({
   const searchRef = useRef<HTMLInputElement>(null);
   const notifications = useNotifications();
   const markRead = useMarkNotificationsRead();
+  const addToast = useDashboardToast((state) => state.addToast);
+  const seenOrderNotifications = useRef(new Set<string>());
+  const orderNotificationsInitialized = useRef(false);
   const unread = (notifications.data || []).filter((item) => !item.is_read);
+
+  useEffect(() => {
+    const newOrderNotifications = (notifications.data || []).filter((item) => item.type === 'new_order');
+    const unseen = newOrderNotifications.filter((item) => !seenOrderNotifications.current.has(item.id));
+    if (orderNotificationsInitialized.current && unseen.length > 0) {
+      const latest = unseen[0];
+      addToast({
+        type: 'info',
+        title: 'You received an order',
+        message: latest.message || 'A new order was added to your order list.',
+      });
+    }
+    newOrderNotifications.forEach((item) => seenOrderNotifications.current.add(item.id));
+    orderNotificationsInitialized.current = true;
+  }, [addToast, notifications.data]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -175,7 +194,7 @@ export default function TopBar({
                     <Check size={10} /> Mark all read
                   </button>
                 </div>
-                {notifications.isLoading ? <div className="py-6 text-center text-xs text-[var(--cms-text-muted)]">Loading notifications…</div> : unread.length === 0 ? <div className="py-6 text-center"><Bell size={24} className="mx-auto text-[var(--cms-text-muted)] mb-2" /><p className="text-xs text-[var(--cms-text-secondary)]">You are all caught up</p></div> : <div className="divide-y divide-[var(--cms-border)]">{unread.slice(0, 8).map((item) => <button key={item.id} onClick={() => markRead.mutate([item.id])} className="w-full text-left p-4 hover:bg-[var(--cms-surface-2)] transition-colors"><p className="text-xs font-semibold text-[var(--cms-text)]">{item.title}</p>{item.message && <p className="text-[11px] text-[var(--cms-text-secondary)] mt-1 line-clamp-2">{item.message}</p>}<p className="text-[10px] text-[var(--cms-text-muted)] mt-1.5">{new Date(item.created_at).toLocaleString('en-IN')}</p></button>)}</div>}
+                {notifications.isLoading ? <div className="py-6 text-center text-xs text-[var(--cms-text-muted)]">Loading notifications…</div> : unread.length === 0 ? <div className="py-6 text-center"><Bell size={24} className="mx-auto text-[var(--cms-text-muted)] mb-2" /><p className="text-xs text-[var(--cms-text-secondary)]">You are all caught up</p></div> : <div className="divide-y divide-[var(--cms-border)]">{unread.slice(0, 8).map((item) => <button key={item.id} onClick={() => markRead.mutate([item.id])} className="w-full text-left p-4 hover:bg-[var(--cms-surface-2)] transition-colors"><p className="text-xs font-semibold text-[var(--cms-text)]">{item.type === 'new_order' ? 'You received an order' : item.title}</p>{item.message && <p className="text-[11px] text-[var(--cms-text-secondary)] mt-1 line-clamp-2">{item.message}</p>}<p className="text-[10px] text-[var(--cms-text-muted)] mt-1.5">{new Date(item.created_at).toLocaleString('en-IN')}</p></button>)}</div>}
               </motion.div>
             )}
           </AnimatePresence>

@@ -31,6 +31,8 @@
     { "source": "/api/cron", "destination": "/api/cron" },
     { "source": "/api/payment/create-order", "destination": "/api/payment/create-order" },
     { "source": "/api/payment/verify", "destination": "/api/payment/verify" },
+    { "source": "/api/admin/notifications", "destination": "/api/admin/notifications" },
+    { "source": "/api/admin/notifications/read", "destination": "/api/admin/notifications/read" },
     { "source": "/product/(.*)", "destination": "/index" },
     { "source": "/cart", "destination": "/index" },
     { "source": "/checkout/(.*)", "destination": "/index" },

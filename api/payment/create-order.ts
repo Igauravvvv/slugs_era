@@ -78,6 +78,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         retailSubtotal: checkout.retailSubtotal,
         launchDiscount: checkout.launchDiscount,
         welcomeDiscount: checkout.welcomeDiscount,
+        privateDiscount: checkout.privateDiscount,
         subtotal: checkout.subtotal,
         shippingFee: checkout.shippingFee,
         total: checkout.total,
