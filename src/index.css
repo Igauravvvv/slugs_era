@@ -30,25 +30,6 @@
   background: #3b0005;
 }
 
-@media (min-width: 768px) {
-  .hero-black-vinyl-frame {
-    background:
-      radial-gradient(ellipse at 50% 45%, #b60018 0%, #79000d 48%, #4b0007 78%, #360004 100%);
-  }
-
-  .hero-black-vinyl-image {
-    inset: auto;
-    left: 50%;
-    top: 50%;
-    width: 75%;
-    height: auto;
-    max-width: none;
-    transform: translate(-50%, -50%);
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 5%, #000 97%, transparent 100%);
-    mask-image: linear-gradient(to right, transparent 0%, #000 5%, #000 97%, transparent 100%);
-  }
-}
-
 @layer base {
   :root {
     --red: #C0132A;

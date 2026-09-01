@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '@/store';
 
 const HERO_IMAGES = [
-  '/images/blackvinylmodel.webp',
+  '/images/blackvinylmodel-desktop-smaller.webp',
   '/images/blue_turtle_hero_desktop.webp',
   '/images/green_tshirt_studio_hero.webp',
   '/images/seedhe%20pahad%20se%20model.webp'
@@ -14,19 +14,19 @@ const FIRST_HERO_MOBILE_SRCSET = '/images/cdn/hero-black-vinyl-mobile-framed-v2-
 const BLUE_TURTLE_MOBILE_SRCSET = '/images/cdn/hero-blue-turtle-mobile-640.webp 640w, /images/cdn/hero-blue-turtle-mobile-960.webp 960w, /images/cdn/hero-blue-turtle-mobile-1440.webp 1440w';
 const GREEN_STUDIO_SRCSET = '/images/cdn/hero-green-studio-640.webp 640w, /images/cdn/hero-green-studio-1280.webp 1280w, /images/cdn/hero-green-studio-1672.webp 1672w';
 const HERO_ALT: Record<(typeof HERO_IMAGES)[number], string> = {
-  '/images/blackvinylmodel.webp': 'Model wearing the Slugsera Let The Moment Play Black Vinyl oversized graphic T-shirt',
+  '/images/blackvinylmodel-desktop-smaller.webp': 'Model wearing the Slugsera Let The Moment Play Black Vinyl oversized graphic T-shirt',
   '/images/blue_turtle_hero_desktop.webp': 'Model wearing the blue Slugsera Slow Steady Savage turtle T-shirt at sea',
   '/images/green_tshirt_studio_hero.webp': 'Model wearing a green Slugsera T-shirt in a botanical photo studio',
   '/images/seedhe%20pahad%20se%20model.webp': 'Model wearing the Slugsera Seedhe Pahad Se graphic streetwear T-shirt',
 };
 const HERO_RESPONSIVE: Record<(typeof HERO_IMAGES)[number], string> = {
-  '/images/blackvinylmodel.webp': 'hero-black-vinyl',
+  '/images/blackvinylmodel-desktop-smaller.webp': 'hero-black-vinyl-smaller',
   '/images/blue_turtle_hero_desktop.webp': 'hero-blue-turtle-desktop',
   '/images/green_tshirt_studio_hero.webp': 'hero-green-studio',
   '/images/seedhe%20pahad%20se%20model.webp': 'hero-pahad',
 };
 const HERO_DIMENSIONS: Record<(typeof HERO_IMAGES)[number], { width: number; height: number }> = {
-  '/images/blackvinylmodel.webp': { width: 2400, height: 1351 },
+  '/images/blackvinylmodel-desktop-smaller.webp': { width: 2400, height: 1351 },
   '/images/blue_turtle_hero_desktop.webp': { width: 2400, height: 1351 },
   '/images/green_tshirt_studio_hero.webp': { width: 1672, height: 941 },
   '/images/seedhe%20pahad%20se%20model.webp': { width: 2000, height: 848 },
