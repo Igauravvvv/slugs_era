@@ -9,11 +9,21 @@ function config() {
   if (!url || !anonKey || !serviceKey || !process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
     throw Object.assign(new Error('Checkout is not configured.'), { statusCode: 500 });
   }
+  const browserKeyId = process.env.VITE_RAZORPAY_KEY_ID;
+  const serverKeyId = process.env.RAZORPAY_KEY_ID;
+  const browserMode = browserKeyId?.startsWith('rzp_live_') ? 'live' : browserKeyId?.startsWith('rzp_test_') ? 'test' : 'unknown';
+  const serverMode = serverKeyId.startsWith('rzp_live_') ? 'live' : serverKeyId.startsWith('rzp_test_') ? 'test' : 'unknown';
+  if (browserMode !== 'unknown' && serverMode !== browserMode) {
+    throw Object.assign(
+      new Error(`Razorpay key mismatch: the website is in ${browserMode} mode but the payment server is in ${serverMode} mode. Update the Production Razorpay keys in Vercel.`),
+      { statusCode: 503, source: 'razorpay' },
+    );
+  }
   return {
     url,
     anonKey,
     serviceKey,
-    razorpayId: process.env.RAZORPAY_KEY_ID,
+    razorpayId: serverKeyId,
     razorpaySecret: process.env.RAZORPAY_KEY_SECRET,
   };
 }
