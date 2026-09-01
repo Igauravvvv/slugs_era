@@ -106,7 +106,7 @@ export async function priceCheckout(raw: unknown, options: PriceCheckoutOptions)
       && product.stock_quantity < (quantities.get(item.productId) || 0))) {
       throw httpError(`${product.name} is unavailable in that quantity.`, 409);
     }
-    return { ...item, name: product.name, price, category: String(product.category || '') };
+    return { ...item, name: product.name, price, category: String(product.category || ''), image: product.image || (Array.isArray(product.images) ? product.images[0] : null) };
   });
   const promoCodes = parsePromoCodes(options.promoCodes);
   const privateCouponApplied = promoCodes.includes(PRIVATE_COUPON_CODE);

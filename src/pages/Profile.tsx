@@ -233,27 +233,44 @@ export default function Profile() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.05 }}
-                        className="border border-[#E8E4E0] overflow-hidden"
+                        className="border border-[#E8E4E0] overflow-hidden bg-white"
                       >
                         <button
                           onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
                           className="w-full flex items-center justify-between p-4 hover:bg-[#F9F7F5]/50 transition-colors text-left"
                         >
                           <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: config.bg }}>
-                              <StatusIcon size={16} style={{ color: config.color }} />
+                            <div className="w-12 h-16 bg-[#F5F5F5] overflow-hidden flex-shrink-0 flex items-center justify-center">
+                              {order.items?.[0]?.image ? (
+                                <img src={order.items[0].image} alt="Product" className="w-full h-full object-cover" />
+                              ) : (
+                                <Package size={20} className="text-[#1A1A1A]/20" />
+                              )}
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-[#1A1A1A]">{order.order_id || order.id}</p>
-                              <p className="text-xs text-[#1A1A1A]/40">{new Date(order.created_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                              <p className="text-sm font-bold text-[#1A1A1A] line-clamp-1">
+                                {order.items?.[0]?.name || order.items?.[0]?.product_name || `Order ${order.order_number || ''}`}
+                                {order.items?.length > 1 ? ` + ${order.items.length - 1} more` : ''}
+                              </p>
+                              {order.items?.[0]?.category && (
+                                <p className="text-[10px] text-[#1A1A1A]/50 uppercase tracking-wider mt-0.5">{order.items[0].category}</p>
+                              )}
+                              <div className="flex items-center gap-2 mt-1">
+                                <p className="text-[11px] text-[#1A1A1A]/40">{new Date(order.created_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                                <span className="text-[#1A1A1A]/20">•</span>
+                                <p className="text-[11px] text-[#1A1A1A]/40 font-mono text-[9px]">{order.order_number || order.id.slice(0, 8)}</p>
+                              </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-4">
-                            <div className="text-right">
+                            <div className="text-right flex flex-col items-end">
                               <p className="text-sm font-bold text-[#1A1A1A]">₹{(order.total || order.amount || 0).toLocaleString('en-IN')}</p>
-                              <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: config.color }}>
-                                {config.label}
-                              </span>
+                              <div className="flex items-center gap-1.5 mt-1" style={{ color: config.color }}>
+                                <StatusIcon size={10} />
+                                <span className="text-[9px] font-bold uppercase tracking-wider">
+                                  {config.label}
+                                </span>
+                              </div>
                             </div>
                             <motion.div animate={{ rotate: isExpanded ? 90 : 0 }}>
                               <ChevronRight size={16} className="text-[#1A1A1A]/30" />
