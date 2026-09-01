@@ -3,6 +3,9 @@ ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS tracking_number TEXT;
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS courier TEXT;
 ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS shipping_status TEXT DEFAULT 'pending';
 
+-- Add missing email column if it doesn't exist (needed for profile matching)
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS email TEXT;
+
 -- One-time update to backfill email for orders missing it (but having customer_email)
 UPDATE public.orders 
 SET email = customer_email 
