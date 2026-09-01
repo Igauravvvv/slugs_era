@@ -1,5 +1,5 @@
-import { useRef, useEffect, useState } from 'react';
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { useRef, useEffect, useMemo, useState } from 'react';
+import { motion, useScroll, useTransform, useReducedMotion, AnimatePresence } from 'framer-motion';
 import { useSiteSection } from '@/context/SiteContentContext';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '@/store';
@@ -35,6 +35,7 @@ export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const elementsRef = useRef<(HTMLDivElement | null)[]>([]);
   const [currentImage, setCurrentImage] = useState<(typeof HERO_IMAGES)[number]>(HERO_IMAGES[0]);
+  const prefersReducedMotion = useReducedMotion();
 
   const { section } = useSiteSection('hero');
   const ctaText = section?.cta_text || 'Shop now';
@@ -125,13 +126,16 @@ export default function Hero() {
   };
 
   // Generate some random positions for floating elements
-  const floatingElements = Array.from({ length: 15 }).map((_, i) => ({
+  const floatingElements = useMemo(() => Array.from({ length: 15 }).map((_, i) => ({
     id: i,
     top: `${Math.random() * 90 + 5}%`,
     left: `${Math.random() * 90 + 5}%`,
     scale: Math.random() * 0.8 + 0.4,
     rotation: Math.random() * 360,
-  }));
+    driftX: 8 + (i % 4) * 4,
+    driftY: 10 + (i % 3) * 5,
+    duration: 4.8 + (i % 5) * 0.75,
+  })), []);
 
   const ButterflySVG = () => (
     <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
@@ -234,15 +238,29 @@ export default function Hero() {
             transform: `scale(${el.scale}) rotate(${el.rotation}deg)`,
           }}
         >
-          {index % 4 === 0 ? (
-            <div className="w-12 h-12 text-white/50"><ButterflySVG /></div>
-          ) : index % 4 === 1 ? (
-            <div className="w-8 h-8 text-white/40"><ButterflySVG /></div>
-          ) : index % 4 === 2 ? (
-            <div className="w-4 h-4 rounded-full bg-white/50 blur-[2px]" />
-          ) : (
-            <div className="text-3xl font-light text-white/40">+</div>
-          )}
+          <motion.div
+            animate={prefersReducedMotion ? undefined : {
+              x: [0, el.driftX, -el.driftX * 0.45, 0],
+              y: [0, -el.driftY, el.driftY * 0.4, 0],
+              rotate: [0, 8, -5, 0],
+            }}
+            transition={{
+              duration: el.duration,
+              delay: index * 0.12,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          >
+            {index % 4 === 0 ? (
+              <div className="w-6 h-6 sm:w-12 sm:h-12 text-white/50"><ButterflySVG /></div>
+            ) : index % 4 === 1 ? (
+              <div className="w-4 h-4 sm:w-8 sm:h-8 text-white/40"><ButterflySVG /></div>
+            ) : index % 4 === 2 ? (
+              <div className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-white/50 blur-[2px]" />
+            ) : (
+              <div className="text-xl sm:text-3xl font-light text-white/40">+</div>
+            )}
+          </motion.div>
         </div>
       ))}
 
@@ -272,8 +290,8 @@ export default function Hero() {
         layout
         className={`absolute top-[100px] sm:top-32 md:top-48 z-20 flex flex-col w-[calc(100%-3rem)] sm:w-full max-w-2xl ${
           isTitleRightAligned
-            ? 'left-6 sm:left-auto sm:right-6 md:right-12 lg:right-24 items-start sm:items-end text-left sm:text-right'
-            : 'left-6 sm:left-12 md:left-24 lg:left-40 items-start text-left'
+            ? 'left-auto right-5 sm:right-6 md:right-12 lg:right-24 items-end text-right'
+            : 'left-5 right-auto sm:left-12 md:left-24 lg:left-40 items-start text-left'
         }`}
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
