@@ -213,106 +213,105 @@ export default function Profile() {
           >
             {/* Orders */}
             {activeTab === 'orders' && (
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {ordersLoading ? (
-                  <div className="text-center py-16">
+                  <div className="col-span-full text-center py-16">
                     <div className="w-8 h-8 border-2 border-[#C0132A] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                     <p className="text-xs text-[#1A1A1A]/40">Loading orders...</p>
                   </div>
                 ) : orders.length === 0 ? (
-                  <EmptyState icon={Package} title="No orders yet" description="Start shopping to see your orders here" action={() => navigate('/collections')} actionLabel="Browse Collection" />
+                  <div className="col-span-full">
+                    <EmptyState icon={Package} title="No orders yet" description="Start shopping to see your orders here" action={() => navigate('/collections')} actionLabel="Browse Collection" />
+                  </div>
                 ) : (
                   orders.map((order: any, i: number) => {
                     const status = order.status || 'processing';
                     const config = statusConfig[status] || statusConfig.pending;
                     const StatusIcon = config.icon;
-                    const isExpanded = expandedOrder === order.id;
                     return (
                       <motion.div
                         key={order.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.05 }}
-                        className="border border-[#E8E4E0] overflow-hidden bg-white"
+                        className="group flex flex-col bg-white border border-[#E8E4E0] overflow-hidden hover:border-[#C0132A]/30 transition-colors"
                       >
-                        <button
-                          onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
-                          className="w-full flex items-center justify-between p-4 hover:bg-[#F9F7F5]/50 transition-colors text-left"
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-16 bg-[#F5F5F5] overflow-hidden flex-shrink-0 flex items-center justify-center">
-                              {order.items?.[0]?.image ? (
-                                <img src={order.items[0].image} alt="Product" className="w-full h-full object-cover" />
-                              ) : (
-                                <Package size={20} className="text-[#1A1A1A]/20" />
-                              )}
+                        {/* Large Image Header */}
+                        <div className="relative aspect-[4/5] bg-[#F5F5F5] overflow-hidden w-full">
+                          {order.items?.[0]?.image ? (
+                            <img src={order.items[0].image} alt="Product" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                          ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center text-[#1A1A1A]/20">
+                              <Package size={48} className="mb-2" />
+                              <span className="text-[10px] uppercase tracking-wider font-bold">Image Unavailable</span>
                             </div>
+                          )}
+                          
+                          {/* Status Badge */}
+                          <div className="absolute top-4 left-4">
+                            <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5" style={{ background: config.bg, color: config.color }}>
+                              <StatusIcon size={12} />
+                              {config.label}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Order Details Body */}
+                        <div className="p-5 flex flex-col flex-grow">
+                          <div className="flex justify-between items-start mb-4">
                             <div>
-                              <p className="text-sm font-bold text-[#1A1A1A] line-clamp-1">
+                              <h3 className="text-lg font-serif text-[#1A1A1A] line-clamp-1 mb-1">
                                 {order.items?.[0]?.name || order.items?.[0]?.product_name || `Order ${order.order_number || ''}`}
                                 {order.items?.length > 1 ? ` + ${order.items.length - 1} more` : ''}
+                              </h3>
+                              <p className="text-xs text-[#1A1A1A]/50 font-serif italic">
+                                {order.items?.[0]?.category || 'Apparel'}
                               </p>
-                              {order.items?.[0]?.category && (
-                                <p className="text-[10px] text-[#1A1A1A]/50 uppercase tracking-wider mt-0.5">{order.items[0].category}</p>
-                              )}
-                              <div className="flex items-center gap-2 mt-1">
-                                <p className="text-[11px] text-[#1A1A1A]/40">{new Date(order.created_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
-                                <span className="text-[#1A1A1A]/20">•</span>
-                                <p className="text-[11px] text-[#1A1A1A]/40 font-mono text-[9px]">{order.order_number || order.id.slice(0, 8)}</p>
-                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-base font-bold text-[#1A1A1A]">₹{(order.total || order.amount || 0).toLocaleString('en-IN')}</p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-4">
-                            <div className="text-right flex flex-col items-end">
-                              <p className="text-sm font-bold text-[#1A1A1A]">₹{(order.total || order.amount || 0).toLocaleString('en-IN')}</p>
-                              <div className="flex items-center gap-1.5 mt-1" style={{ color: config.color }}>
-                                <StatusIcon size={10} />
-                                <span className="text-[9px] font-bold uppercase tracking-wider">
-                                  {config.label}
-                                </span>
-                              </div>
-                            </div>
-                            <motion.div animate={{ rotate: isExpanded ? 90 : 0 }}>
-                              <ChevronRight size={16} className="text-[#1A1A1A]/30" />
-                            </motion.div>
-                          </div>
-                        </button>
 
-                        {/* Expandable Order Details */}
-                        <AnimatePresence>
-                          {isExpanded && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: 'auto', opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              className="border-t border-[#E8E4E0] bg-[#F9F7F5]/30 overflow-hidden"
-                            >
-                              <div className="p-4 space-y-4">
-                                {order.tracking_number && (
-                                  <div className="flex items-center justify-between p-3 bg-white border border-[#E8E4E0] rounded-sm">
-                                    <div className="flex items-center gap-2">
-                                      <Truck size={14} className="text-[#C0132A]" />
-                                      <span className="text-xs font-medium text-[#1A1A1A]">Tracking: {order.tracking_number}</span>
-                                    </div>
-                                    {order.courier && (
-                                      <span className="text-[10px] text-[#1A1A1A]/50 uppercase tracking-wider">via {order.courier}</span>
-                                    )}
-                                  </div>
-                                )}
-                                
-                                <div className="space-y-2">
-                                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-[#1A1A1A]/50 mb-2">Items</h4>
-                                  {(order.items || []).map((item: any, idx: number) => (
-                                    <div key={idx} className="flex justify-between items-center text-sm">
-                                      <span className="text-[#1A1A1A]/80">{item.name || item.product_name} <span className="text-[#1A1A1A]/40 text-xs">x{item.quantity || item.qty || 1}</span></span>
-                                      <span className="font-medium text-[#1A1A1A]">₹{(item.price || item.unit_price || 0).toLocaleString('en-IN')}</span>
-                                    </div>
-                                  ))}
-                                </div>
+                          {/* Tracking & Info Section */}
+                          <div className="mt-auto space-y-4">
+                            <div className="grid grid-cols-2 gap-4 py-3 border-y border-[#E8E4E0]/50">
+                              <div>
+                                <p className="text-[10px] text-[#1A1A1A]/40 uppercase tracking-wider mb-0.5">Date</p>
+                                <p className="text-xs font-medium text-[#1A1A1A]">{new Date(order.created_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
                               </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
+                              <div className="text-right">
+                                <p className="text-[10px] text-[#1A1A1A]/40 uppercase tracking-wider mb-0.5">Order No.</p>
+                                <p className="text-xs font-medium text-[#1A1A1A] font-mono">{order.order_number || order.id.slice(0, 8)}</p>
+                              </div>
+                            </div>
+
+                            {/* Tracking Box */}
+                            {order.tracking_number ? (
+                              <div className="bg-[#F9F7F5] p-3 border border-[#E8E4E0] flex justify-between items-center">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-[#E8E4E0]">
+                                    <Truck size={14} className="text-[#C0132A]" />
+                                  </div>
+                                  <div>
+                                    <p className="text-[10px] text-[#1A1A1A]/50 uppercase tracking-wider font-bold mb-0.5">Tracking ID</p>
+                                    <p className="text-xs font-medium text-[#1A1A1A]">{order.tracking_number}</p>
+                                  </div>
+                                </div>
+                                {order.courier && (
+                                  <span className="text-[10px] font-bold text-[#C0132A] uppercase tracking-wider bg-white px-2 py-1 border border-[#E8E4E0] rounded-full">
+                                    {order.courier}
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="bg-[#F9F7F5]/50 p-3 border border-transparent flex items-center justify-center gap-2">
+                                <Clock size={12} className="text-[#1A1A1A]/40" />
+                                <p className="text-[10px] text-[#1A1A1A]/40 uppercase tracking-wider">Tracking info will appear here once dispatched</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </motion.div>
                     );
                   })
