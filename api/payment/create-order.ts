@@ -38,6 +38,40 @@ function checkoutHash(userId: string, checkout: Awaited<ReturnType<typeof priceC
   })).digest('hex');
 }
 
+async function createRazorpayOrder(body: Record<string, unknown>, razorpayId: string, razorpaySecret: string) {
+  let lastError: any;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const response = await fetch('https://api.razorpay.com/v1/orders', {
+        method: 'POST',
+        headers: {
+          Authorization: `Basic ${Buffer.from(`${razorpayId}:${razorpaySecret}`).toString('base64')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(15_000),
+      });
+      const order = await response.json().catch(() => ({}));
+      if (response.ok) return order;
+      console.error('[Razorpay] Order creation failed:', JSON.stringify(order));
+      const providerError = Object.assign(
+        new Error(order?.error?.description || 'Razorpay rejected the payment order.'),
+        { statusCode: response.status >= 500 ? 502 : response.status, source: 'razorpay', retryable: response.status >= 500 || response.status === 429 },
+      );
+      if (!providerError.retryable || attempt === 1) throw providerError;
+      lastError = providerError;
+    } catch (error: any) {
+      if (error?.source === 'razorpay' && !error?.retryable) throw error;
+      lastError = error;
+      if (attempt === 1) {
+        if (error?.source === 'razorpay') throw error;
+        throw Object.assign(new Error('Razorpay did not respond. Please retry the payment.'), { statusCode: 502, source: 'razorpay' });
+      }
+    }
+  }
+  throw lastError;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ success: false, error: 'Method not allowed' });
@@ -50,28 +84,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       userId: user.id,
       promoCodes: req.body?.promoCodes ?? req.body?.promoCode,
     });
-    const response = await fetch('https://api.razorpay.com/v1/orders', {
-      method: 'POST',
-      headers: {
-        Authorization: `Basic ${Buffer.from(`${razorpayId}:${razorpaySecret}`).toString('base64')}`,
-        'Content-Type': 'application/json',
+    const order = await createRazorpayOrder({
+      amount: Math.round(checkout.total * 100),
+      currency: 'INR',
+      receipt: `checkout_${Date.now()}`,
+      notes: {
+        user_id: user.id,
+        checkout_hash: checkoutHash(user.id, checkout),
+        promo_codes: checkout.promoCodes.join(','),
       },
-      body: JSON.stringify({
-        amount: Math.round(checkout.total * 100),
-        currency: 'INR',
-        receipt: `checkout_${Date.now()}`,
-        notes: {
-          user_id: user.id,
-          checkout_hash: checkoutHash(user.id, checkout),
-          promo_codes: checkout.promoCodes.join(','),
-        },
-      }),
-    });
-    const order = await response.json();
-    if (!response.ok) {
-      console.error('[Razorpay] Order creation failed:', JSON.stringify(order));
-      throw Object.assign(new Error(order?.error?.description || 'Razorpay order failed.'), { statusCode: response.status });
-    }
+    }, razorpayId, razorpaySecret);
     return res.status(200).json({
       success: true,
       data: order,
@@ -90,6 +112,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(error?.statusCode || 500).json({
       success: false,
       error: error?.message || 'Could not create payment order.',
+      source: error?.source || 'checkout',
     });
   }
 }

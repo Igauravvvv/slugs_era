@@ -19,10 +19,23 @@ async function apiRequest<T>(
   options: RequestInit = {}
 ): Promise<T> {
   const headers = await getAuthHeaders();
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    headers: { ...headers, ...options.headers },
-  });
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 25_000);
+  let response: Response;
+  try {
+    response = await fetch(`${API_URL}${endpoint}`, {
+      ...options,
+      headers: { ...headers, ...options.headers },
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error('The payment server took too long to respond. Please retry once.');
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeout);
+  }
 
   const body = await response.text();
   let parsedBody: unknown;
@@ -37,8 +50,10 @@ async function apiRequest<T>(
   }
 
   if (!response.ok) {
-    const error = parsedBody as { message?: string; error?: string } | undefined;
-    throw new Error(error?.message || error?.error || `API Error: ${response.status}`);
+    const error = parsedBody as { message?: string; error?: string; source?: string } | undefined;
+    const requestError = new Error(error?.message || error?.error || `API Error: ${response.status}`);
+    Object.assign(requestError, { source: error?.source, status: response.status });
+    throw requestError;
   }
 
   // A successful DELETE may deliberately return 204 No Content.

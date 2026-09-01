@@ -25,6 +25,7 @@ export default function Payment() {
   const { cart, getCartTotal, selectedAddress, clearCart, setLastCompletedOrderId, promoCode, bundlePromoCode } = useStore();
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentError, setPaymentError] = useState('');
 
   const subtotal = getCartTotal();
   const privateCouponApplied = isPrivateCouponCode(promoCode);
@@ -56,19 +57,28 @@ export default function Payment() {
       script.onload = () => resolve(true);
       script.onerror = () => resolve(false);
       document.body.appendChild(script);
+      window.setTimeout(() => resolve(Boolean((window as any).Razorpay)), 15_000);
     });
   };
 
   const handlePayment = async () => {
     setIsProcessing(true);
+    setPaymentError('');
     
     try {
       const loaded = await loadRazorpay();
-      if (!loaded) { alert('Razorpay failed to load. Check your connection.'); setIsProcessing(false); return; }
+      if (!loaded) {
+        setPaymentError('Razorpay checkout could not load. Check your connection or disable the browser blocker, then retry.');
+        setIsProcessing(false);
+        return;
+      }
 
       // 1. Create order on backend
       const checkoutItems = cart.map(i => ({ productId: i.product.id, size: i.size, color: i.color, quantity: i.quantity }));
       const orderData = await api.post<any>('/api/payment/create-order', { items: checkoutItems, promoCodes });
+      if (!orderData?.data?.id || !Number.isFinite(Number(orderData?.data?.amount))) {
+        throw new Error('The payment server returned an invalid order. Please retry.');
+      }
 
       // 2. Open Razorpay modal
       const options = {
@@ -117,7 +127,7 @@ export default function Payment() {
             clearCart();
             navigate('/order-success', { state: { orderNumber, orderId, total } });
           } else {
-            alert(verifyData.error || 'Payment verification failed. Contact support.');
+            setPaymentError(verifyData.error || 'Payment verification failed. Contact support.');
           }
           setIsProcessing(false);
         },
@@ -127,10 +137,17 @@ export default function Payment() {
       };
 
       const razorpay = new (window as any).Razorpay(options);
+      razorpay.on('payment.failed', (response: any) => {
+        const description = response?.error?.description || response?.error?.reason || 'Razorpay declined the payment attempt.';
+        setPaymentError(`Razorpay: ${description}`);
+        setIsProcessing(false);
+      });
       razorpay.open();
     } catch (err) {
       console.error('Payment error:', err);
-      alert(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+      const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+      const source = (err as any)?.source;
+      setPaymentError(source === 'razorpay' ? `Razorpay: ${message}` : message);
       setIsProcessing(false);
     }
   };
@@ -301,6 +318,11 @@ export default function Payment() {
                 </>
               )}
             </button>
+            {paymentError && (
+              <div role="alert" className="mt-3 border border-red-200 bg-red-50 px-4 py-3 text-sm leading-relaxed text-red-700">
+                {paymentError}
+              </div>
+            )}
           </motion.div>
         </div>
       </div>
