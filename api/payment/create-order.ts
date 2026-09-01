@@ -69,6 +69,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
     const order = await response.json();
     if (!response.ok) {
+      console.error('[Razorpay] Order creation failed:', JSON.stringify(order));
       throw Object.assign(new Error(order?.error?.description || 'Razorpay order failed.'), { statusCode: response.status });
     }
     return res.status(200).json({

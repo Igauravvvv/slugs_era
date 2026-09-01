@@ -130,7 +130,7 @@ export default function Payment() {
       razorpay.open();
     } catch (err) {
       console.error('Payment error:', err);
-      alert('Something went wrong. Please try again.');
+      alert(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
       setIsProcessing(false);
     }
   };

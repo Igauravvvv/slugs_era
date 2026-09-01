@@ -15,7 +15,7 @@ export const globalLimiter = rateLimit({
 // Stricter limit for payment and auth routes: 5 requests per 15 minutes
 export const strictLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, 
-  max: 5,
+  max: 20,
   message: {
     success: false,
     error: 'Too many attempts, please try again later.',
