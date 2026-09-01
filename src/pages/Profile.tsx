@@ -76,7 +76,7 @@ export default function Profile() {
         const { data, error } = await supabase
           .from('orders')
           .select('*')
-          .eq('email', user.email)
+          .or(`email.eq.${user.email},customer_email.eq.${user.email},user_id.eq.${user.id}`)
           .order('created_at', { ascending: false });
         // Gracefully handle table-not-found or RLS errors
         if (error) {
@@ -92,6 +92,28 @@ export default function Profile() {
       }
     }
     fetchOrders();
+
+    // Subscribe to realtime order updates
+    const subscription = supabase
+      .channel('public:orders')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'orders' },
+        (payload) => {
+          if (payload.new.email === user.email || payload.new.customer_email === user.email || payload.new.user_id === user.id) {
+            setOrders((currentOrders) =>
+              currentOrders.map((order) =>
+                order.id === payload.new.id ? payload.new : order
+              )
+            );
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [user]);
 
   const wishedProducts = products.filter(p => wishlist.includes(p.id));
@@ -238,6 +260,42 @@ export default function Profile() {
                             </motion.div>
                           </div>
                         </button>
+
+                        {/* Expandable Order Details */}
+                        <AnimatePresence>
+                          {isExpanded && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              className="border-t border-[#E8E4E0] bg-[#F9F7F5]/30 overflow-hidden"
+                            >
+                              <div className="p-4 space-y-4">
+                                {order.tracking_number && (
+                                  <div className="flex items-center justify-between p-3 bg-white border border-[#E8E4E0] rounded-sm">
+                                    <div className="flex items-center gap-2">
+                                      <Truck size={14} className="text-[#C0132A]" />
+                                      <span className="text-xs font-medium text-[#1A1A1A]">Tracking: {order.tracking_number}</span>
+                                    </div>
+                                    {order.courier && (
+                                      <span className="text-[10px] text-[#1A1A1A]/50 uppercase tracking-wider">via {order.courier}</span>
+                                    )}
+                                  </div>
+                                )}
+                                
+                                <div className="space-y-2">
+                                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-[#1A1A1A]/50 mb-2">Items</h4>
+                                  {(order.items || []).map((item: any, idx: number) => (
+                                    <div key={idx} className="flex justify-between items-center text-sm">
+                                      <span className="text-[#1A1A1A]/80">{item.name || item.product_name} <span className="text-[#1A1A1A]/40 text-xs">x{item.quantity || item.qty || 1}</span></span>
+                                      <span className="font-medium text-[#1A1A1A]">₹{(item.price || item.unit_price || 0).toLocaleString('en-IN')}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </motion.div>
                     );
                   })

@@ -125,6 +125,8 @@ export interface Order {
   payment_id: string | null;
   status: string;
   notes: string | null;
+  tracking_number?: string | null;
+  courier?: string | null;
   created_at: string;
   updated_at: string;
 }

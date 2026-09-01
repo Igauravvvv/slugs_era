@@ -134,6 +134,7 @@ paymentRouter.post(
         {
           order_number: orderNumber,
           user_id: userId,
+          email: customerEmail || null,
           customer_name: customerName || null,
           customer_email: customerEmail || null,
           customer_phone: customerPhone || null,

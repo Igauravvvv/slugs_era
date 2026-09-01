@@ -20,7 +20,7 @@ export interface AdminProduct {
 }
 export interface AdminProductImage { id: string; product_id: string; url: string; position: number; is_primary: boolean; }
 export interface AdminProductVariant { id: string; product_id: string; variant_name: string | null; size: string | null; color: string | null; sku_suffix: string | null; price_override: number | null; stock_quantity: number; created_at: string; }
-export interface AdminOrder { id: string; order_number: string; customer_name: string; customer_email: string | null; customer_phone: string | null; shipping_address: { street?: string; city?: string; state?: string; pincode?: string; country?: string } | null; items: Array<{ name: string; qty: number; price: number; size?: string }>; subtotal: number; shipping_fee: number; total: number; payment_method: string | null; payment_status: string; status: string; notes: string | null; created_at: string; updated_at: string; }
+export interface AdminOrder { id: string; order_number: string; customer_name: string; customer_email: string | null; customer_phone: string | null; shipping_address: { street?: string; city?: string; state?: string; pincode?: string; country?: string } | null; items: Array<{ name: string; qty: number; price: number; size?: string }>; subtotal: number; shipping_fee: number; total: number; payment_method: string | null; payment_status: string; status: string; notes: string | null; tracking_number: string | null; courier: string | null; created_at: string; updated_at: string; }
 export interface AdminCustomer { id: string; name: string; email: string | null; phone: string | null; city: string | null; state: string | null; total_orders: number; total_spent: number; last_order_at: string | null; created_at: string; }
 export interface AdminAnalyticsEvent { id: string; date: string; sessions: number; unique_visitors: number; page_views: number; source: string | null; created_at: string; }
 export interface CustomerEvent {
@@ -190,6 +190,7 @@ export function useAdminOrders() {
           payment_method: o.payment_method || (o.payment_id ? 'Razorpay' : null),
           payment_status: normalizeOrderStatus(o.payment_status || (o.payment_id ? 'Paid' : 'Pending')),
           status: normalizeOrderStatus(o.status), notes: o.notes ?? o.admin_note ?? null,
+          tracking_number: o.tracking_number || null, courier: o.courier || null,
           created_at: o.created_at, updated_at: o.updated_at || o.created_at,
         }));
     },

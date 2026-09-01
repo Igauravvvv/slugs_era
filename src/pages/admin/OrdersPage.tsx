@@ -73,6 +73,15 @@ export default function OrdersPage() {
     } catch { /* silent */ }
   };
 
+  const handleTrackingChange = async (order: AdminOrder, field: 'tracking_number' | 'courier', value: string) => {
+    try {
+      await updateOrder.mutateAsync({ id: order.id, [field]: value });
+      if (selectedOrder?.id === order.id) {
+        setSelectedOrder({ ...selectedOrder, [field]: value });
+      }
+    } catch { /* silent */ }
+  };
+
   const exportCSV = () => {
     const headers = ['Order #', 'Customer', 'Email', 'Phone', 'Total', 'Status', 'Payment', 'Date'];
     const rows = orders.map(o => [
@@ -246,6 +255,30 @@ export default function OrdersPage() {
                   {['Pending', 'Processing', 'Dispatched', 'Delivered'].map(s => (
                     <span key={s} className="text-[9px] text-[#9E9E9E]">{s}</span>
                   ))}
+                </div>
+              </div>
+
+              {/* Tracking Info */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[11px] font-medium text-[#9E9E9E] uppercase tracking-wider mb-2">Tracking Number</label>
+                  <input
+                    type="text"
+                    defaultValue={selectedOrder.tracking_number || ''}
+                    onBlur={e => handleTrackingChange(selectedOrder, 'tracking_number', e.target.value)}
+                    placeholder="AWB / Tracking ID"
+                    className="w-full px-3 py-2 text-sm border border-[#E5E5E5] rounded-lg bg-white focus:outline-none focus:border-[#C0392B]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-medium text-[#9E9E9E] uppercase tracking-wider mb-2">Courier</label>
+                  <input
+                    type="text"
+                    defaultValue={selectedOrder.courier || ''}
+                    onBlur={e => handleTrackingChange(selectedOrder, 'courier', e.target.value)}
+                    placeholder="Delhivery, Bluedart, etc."
+                    className="w-full px-3 py-2 text-sm border border-[#E5E5E5] rounded-lg bg-white focus:outline-none focus:border-[#C0392B]"
+                  />
                 </div>
               </div>
 
