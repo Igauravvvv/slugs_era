@@ -28,6 +28,15 @@ function config() {
   };
 }
 
+function assertBrowserKeyMatches(browserKeyId: unknown, serverKeyId: string) {
+  if (typeof browserKeyId !== 'string' || !browserKeyId.startsWith('rzp_')) {
+    throw Object.assign(new Error('Razorpay checkout key is missing from the website deployment.'), { statusCode: 503, source: 'razorpay' });
+  }
+  if (browserKeyId !== serverKeyId) {
+    throw Object.assign(new Error('Razorpay key mismatch between the website and payment server.'), { statusCode: 503, source: 'razorpay' });
+  }
+}
+
 async function authenticate(header: string | string[] | undefined) {
   const token = typeof header === 'string' && header.startsWith('Bearer ') ? header.slice(7) : '';
   if (!token) throw Object.assign(new Error('Please sign in before checking out.'), { statusCode: 401 });
@@ -103,11 +112,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ success: false, error: 'Method not allowed' });
   try {
     const user = await authenticate(req.headers.authorization);
+    const paymentConfig = config();
+    assertBrowserKeyMatches(req.body?.browserKeyId, paymentConfig.razorpayId);
     const { razorpay_order_id: orderId, razorpay_payment_id: paymentId, razorpay_signature: signature } = req.body || {};
     if (![orderId, paymentId, signature].every((value) => typeof value === 'string' && value.length > 0)) {
       return res.status(400).json({ success: false, error: 'Missing payment details.' });
     }
-    const expected = crypto.createHmac('sha256', config().razorpaySecret).update(`${orderId}|${paymentId}`).digest('hex');
+    const expected = crypto.createHmac('sha256', paymentConfig.razorpaySecret).update(`${orderId}|${paymentId}`).digest('hex');
     const supplied = Buffer.from(signature, 'hex');
     const expectedBuffer = Buffer.from(expected, 'hex');
     if (supplied.length !== expectedBuffer.length || !crypto.timingSafeEqual(supplied, expectedBuffer)) {

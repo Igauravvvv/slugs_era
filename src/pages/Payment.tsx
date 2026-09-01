@@ -75,7 +75,11 @@ export default function Payment() {
 
       // 1. Create order on backend
       const checkoutItems = cart.map(i => ({ productId: i.product.id, size: i.size, color: i.color, quantity: i.quantity }));
-      const orderData = await api.post<any>('/api/payment/create-order', { items: checkoutItems, promoCodes });
+      const orderData = await api.post<any>('/api/payment/create-order', {
+        items: checkoutItems,
+        promoCodes,
+        browserKeyId: RAZORPAY_KEY_ID,
+      });
       if (!orderData?.data?.id || !Number.isFinite(Number(orderData?.data?.amount))) {
         throw new Error('The payment server returned an invalid order. Please retry.');
       }
@@ -113,6 +117,7 @@ export default function Payment() {
               } : null,
               items: checkoutItems,
               promoCodes,
+              browserKeyId: RAZORPAY_KEY_ID,
           });
 
           if (verifyData.success) {

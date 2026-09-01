@@ -28,6 +28,20 @@ function config() {
   };
 }
 
+function assertBrowserKeyMatches(browserKeyId: unknown, serverKeyId: string) {
+  if (typeof browserKeyId !== 'string' || !browserKeyId.startsWith('rzp_')) {
+    throw Object.assign(new Error('Razorpay checkout key is missing from the website deployment.'), { statusCode: 503, source: 'razorpay' });
+  }
+  if (browserKeyId !== serverKeyId) {
+    const browserMode = browserKeyId.startsWith('rzp_live_') ? 'live' : 'test';
+    const serverMode = serverKeyId.startsWith('rzp_live_') ? 'live' : 'test';
+    throw Object.assign(
+      new Error(`Razorpay key mismatch: the website uses a ${browserMode} key but the payment server uses a different ${serverMode} key. Update the Production Razorpay keys in Vercel.`),
+      { statusCode: 503, source: 'razorpay' },
+    );
+  }
+}
+
 async function authenticate(header: string | string[] | undefined) {
   const token = typeof header === 'string' && header.startsWith('Bearer ') ? header.slice(7) : '';
   if (!token) throw Object.assign(new Error('Please sign in before checking out.'), { statusCode: 401 });
@@ -88,6 +102,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     const user = await authenticate(req.headers.authorization);
     const { url, serviceKey, razorpayId, razorpaySecret } = config();
+    assertBrowserKeyMatches(req.body?.browserKeyId, razorpayId);
     const checkout = await priceCheckout(req.body?.items, {
       url,
       serviceKey,
