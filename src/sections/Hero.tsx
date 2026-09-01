@@ -147,6 +147,7 @@ export default function Hero() {
   );
 
   const isTitleRightAligned = hasCustomHero || currentImage === HERO_IMAGES[0] || currentImage === HERO_IMAGES[2];
+  const isMobileTitleRightAligned = hasCustomHero || currentImage === HERO_IMAGES[1] || currentImage === HERO_IMAGES[3];
 
   const handleNext = () => {
     const currentIndex = HERO_IMAGES.indexOf(currentImage);
@@ -289,9 +290,13 @@ export default function Hero() {
       <motion.div 
         layout
         className={`absolute top-[100px] sm:top-32 md:top-48 z-20 flex flex-col w-[calc(100%-3rem)] sm:w-full max-w-2xl ${
+          isMobileTitleRightAligned
+            ? 'left-auto right-5 items-end text-right'
+            : 'left-5 right-auto items-start text-left'
+        } ${
           isTitleRightAligned
-            ? 'left-auto right-5 sm:right-6 md:right-12 lg:right-24 items-end text-right'
-            : 'left-5 right-auto sm:left-12 md:left-24 lg:left-40 items-start text-left'
+            ? 'sm:left-auto sm:right-6 md:right-12 lg:right-24 sm:items-end sm:text-right'
+            : 'sm:left-12 sm:right-auto md:left-24 lg:left-40 sm:items-start sm:text-left'
         }`}
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
