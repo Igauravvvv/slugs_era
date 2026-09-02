@@ -457,64 +457,57 @@ export default function Header({ minimal = false }: HeaderProps) {
             transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
             className="fixed inset-x-0 bottom-0 top-[76px] z-[500] overflow-y-auto bg-[#F9F7F5] lg:hidden"
           >
-            <nav className="mx-auto flex min-h-full w-full max-w-lg flex-col px-5 pb-7 pt-8">
-              <div className="mb-7">
-                <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#C0132A]">Menu</p>
-                <h2 className="font-serif text-[32px] font-light leading-none text-[#1A1A1A]">Move at your pace.</h2>
-                <p className="mt-2 max-w-xs text-xs leading-relaxed text-[#1A1A1A]/50">Explore the collection, our thinking, and everything saved to your account.</p>
+            <nav className="mx-auto w-full max-w-lg px-6 pb-8 pt-7">
+              <div className="mb-6">
+                <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-[#C0132A]">Menu</p>
+                <h2 className="font-serif text-[28px] font-light leading-tight text-[#1A1A1A]">Explore Slugsera</h2>
               </div>
 
-              <div className="mb-7">
-                <div className="mb-3 flex items-center justify-between">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#1A1A1A]/45">Shop collection</p>
-                  <button onClick={() => { setCollectionFilter(null, null); navigate('/collections'); setIsMobileMenuOpen(false); }} className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#C0132A]">View all</button>
+              <div>
+                <div className="flex items-center justify-between border-b border-[#DCD6D0] pb-2.5">
+                  <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-[#1A1A1A]/40">Shop</p>
+                  <button onClick={() => { setCollectionFilter(null, null); navigate('/collections'); setIsMobileMenuOpen(false); }} className="text-[9px] font-semibold uppercase tracking-[0.14em] text-[#C0132A]">View all</button>
                 </div>
-                <div className="grid grid-cols-2 gap-2.5">
-                  <button onClick={() => { setCollectionFilter('tshirts', null); navigate('/collections/tshirts'); setIsMobileMenuOpen(false); }} className="flex min-h-[82px] flex-col justify-between border border-[#E3DED8] bg-white p-4 text-left transition-colors active:bg-[#F3EFEB]">
-                    <span className="text-[9px] uppercase tracking-[0.16em] text-[#C0132A]">01</span>
-                    <span className="text-sm font-medium uppercase tracking-[0.12em] text-[#1A1A1A]">T-Shirts</span>
-                  </button>
-                  <button onClick={() => { setCollectionFilter('shirts', null); navigate('/collections/shirts'); setIsMobileMenuOpen(false); }} className="flex min-h-[82px] flex-col justify-between border border-[#E3DED8] bg-white p-4 text-left transition-colors active:bg-[#F3EFEB]">
-                    <span className="text-[9px] uppercase tracking-[0.16em] text-[#C0132A]">02</span>
-                    <span className="text-sm font-medium uppercase tracking-[0.12em] text-[#1A1A1A]">Shirts</span>
-                  </button>
-                  <button onClick={() => { setCollectionFilter('hoodies', null); navigate('/collections/hoodies'); setIsMobileMenuOpen(false); }} className="col-span-2 flex min-h-[66px] items-center justify-between bg-[#1A1A1A] px-4 text-left text-white">
-                    <div>
-                      <span className="block text-sm font-medium uppercase tracking-[0.12em]">Hoodies</span>
-                      <span className="mt-1 block text-[9px] uppercase tracking-[0.13em] text-white/50">Embroidery · Patchwork · Printed</span>
-                    </div>
-                    <span className="text-lg text-[#E62A42]">→</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="mb-7 grid grid-cols-2 gap-2.5">
                 {[
-                  { label: 'Our Story', id: 'about', copy: 'Why we move slowly' },
-                  { label: 'Our Values', id: 'values', copy: 'What we stand for' },
+                  { label: 'T-Shirts', category: 'tshirts', href: '/collections/tshirts' },
+                  { label: 'Shirts', category: 'shirts', href: '/collections/shirts' },
+                  { label: 'Hoodies', category: 'hoodies', href: '/collections/hoodies' },
                 ].map((item) => (
-                  <button key={item.id} onClick={() => scrollToSection(item.id)} className="border-t border-[#D8D1CA] py-4 text-left">
-                    <span className="block text-xs font-semibold uppercase tracking-[0.13em] text-[#1A1A1A]">{item.label}</span>
-                    <span className="mt-1 block text-[10px] text-[#1A1A1A]/45">{item.copy}</span>
+                  <button key={item.category} onClick={() => { setCollectionFilter(item.category, null); navigate(item.href); setIsMobileMenuOpen(false); }} className="group flex w-full items-center justify-between border-b border-[#E8E3DE] py-4 text-left transition-colors active:text-[#C0132A]">
+                    <span className="text-[13px] font-medium uppercase tracking-[0.12em] text-[#1A1A1A] group-active:text-[#C0132A]">{item.label}</span>
+                    <span className="text-sm text-[#C0132A] transition-transform group-active:translate-x-1">→</span>
                   </button>
                 ))}
               </div>
 
-              <div className="mt-auto bg-[#C0132A] p-5 text-white">
-                <div className="mb-4 flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/12"><User size={17} /></div>
-                  <div>
-                    <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-white/60">Your Slugsera</p>
-                    <p className="mt-0.5 font-serif text-lg">{user ? `Hey, ${user.user_metadata?.full_name || user.email?.split('@')[0] || 'there'}` : 'Join the slow club'}</p>
+              <div className="grid grid-cols-2 gap-6 border-b border-[#DCD6D0] py-5">
+                {[
+                  { label: 'Our Story', id: 'about' },
+                  { label: 'Our Values', id: 'values' },
+                ].map((item) => (
+                  <button key={item.id} onClick={() => scrollToSection(item.id)} className="text-left text-[11px] font-semibold uppercase tracking-[0.13em] text-[#1A1A1A]/70 transition-colors active:text-[#C0132A]">
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-6 bg-white px-4 py-4 shadow-[0_8px_30px_rgba(26,26,26,0.04)] ring-1 ring-[#E8E3DE]">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#C0132A] text-white"><User size={15} /></div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-serif text-[16px] text-[#1A1A1A]">{user ? `Hey, ${user.user_metadata?.full_name || user.email?.split('@')[0] || 'there'}` : 'Your Slugsera account'}</p>
+                    <p className="mt-0.5 text-[9px] uppercase tracking-[0.12em] text-[#1A1A1A]/40">Orders, saved pieces & details</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <button onClick={() => { setIsMobileMenuOpen(false); if (user) { navigate('/profile'); window.scrollTo(0, 0); } else signInWithGoogle(); }} className="flex items-center justify-center gap-2 bg-white px-3 py-3 text-[10px] font-bold uppercase tracking-[0.13em] text-[#C0132A]">
-                    <User size={14} /> {user ? 'My Profile' : 'Sign In'}
+                <div className="mt-4 flex items-center gap-5 border-t border-[#EEE9E4] pt-3.5">
+                  <button onClick={() => { setIsMobileMenuOpen(false); if (user) { navigate('/profile'); window.scrollTo(0, 0); } else signInWithGoogle(); }} className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.13em] text-[#C0132A]">
+                    <User size={12} /> {user ? 'My Profile' : 'Sign In'}
                   </button>
-                  <button disabled={!user} onClick={() => { navigate('/profile?tab=settings'); setIsMobileMenuOpen(false); window.scrollTo(0, 0); }} className="flex items-center justify-center gap-2 border border-white/35 px-3 py-3 text-[10px] font-bold uppercase tracking-[0.13em] text-white disabled:cursor-not-allowed disabled:opacity-45">
-                    <Settings size={14} /> Settings
-                  </button>
+                  {user && (
+                    <button onClick={() => { navigate('/profile?tab=settings'); setIsMobileMenuOpen(false); window.scrollTo(0, 0); }} className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.13em] text-[#1A1A1A]/55">
+                      <Settings size={12} /> Settings
+                    </button>
+                  )}
                 </div>
               </div>
             </nav>
