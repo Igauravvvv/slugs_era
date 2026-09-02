@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '@/store';
-import { ShoppingBag, X, Menu, User } from 'lucide-react';
+import { ShoppingBag, X, Menu, User, Settings } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { CDN } from '@/lib/cdn';
 
@@ -482,6 +482,29 @@ export default function Header({ minimal = false }: HeaderProps) {
                   {item.label}
                 </button>
               ))}
+
+              <div className="mt-2 border-t border-[#E8E4E0] pt-4 space-y-2">
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    if (user) { navigate('/profile'); window.scrollTo(0, 0); }
+                    else signInWithGoogle();
+                  }}
+                  className="flex w-full items-center gap-3 py-2 text-left text-sm font-medium uppercase tracking-[0.15em] text-[#1A1A1A]"
+                >
+                  <User size={17} className="text-[#C0132A]" />
+                  {user ? 'My Profile' : 'Sign In'}
+                </button>
+                {user && (
+                  <button
+                    onClick={() => { navigate('/profile?tab=settings'); setIsMobileMenuOpen(false); window.scrollTo(0, 0); }}
+                    className="flex w-full items-center gap-3 py-2 text-left text-sm font-medium uppercase tracking-[0.15em] text-[#1A1A1A]"
+                  >
+                    <Settings size={17} className="text-[#C0132A]" />
+                    Profile Settings
+                  </button>
+                )}
+              </div>
             </nav>
           </motion.div>
         )}

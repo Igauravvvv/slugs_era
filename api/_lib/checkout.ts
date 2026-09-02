@@ -13,7 +13,14 @@ type PriceCheckoutOptions = CheckoutConfig & {
   honorReservedPromos?: boolean;
 };
 type RequestedItem = { productId: string; size?: string; color?: string; quantity: number };
-type PricedItem = RequestedItem & { name: string; price: number; category: string };
+type PricedItem = RequestedItem & { name: string; price: number; category: string; image?: string };
+
+function primaryProductImage(rawImages: unknown): string | undefined {
+  if (!Array.isArray(rawImages)) return undefined;
+  const images = rawImages.filter((image): image is { url?: unknown; isPrimary?: unknown } => Boolean(image) && typeof image === 'object');
+  const primary = images.find((image) => image.isPrimary === true) || images[0];
+  return typeof primary?.url === 'string' && primary.url.trim() ? primary.url : undefined;
+}
 
 function httpError(message: string, statusCode: number) {
   return Object.assign(new Error(message), { statusCode });
@@ -87,7 +94,7 @@ export async function priceCheckout(raw: unknown, options: PriceCheckoutOptions)
   }
   const ids = [...new Set(requested.map((item) => item.productId))];
   const productsUrl = new URL(`${options.url}/rest/v1/products`);
-  productsUrl.searchParams.set('select', 'id,name,price,category,is_published,stock_quantity');
+  productsUrl.searchParams.set('select', 'id,name,price,category,images,is_published,stock_quantity');
   productsUrl.searchParams.set('id', `in.(${ids.join(',')})`);
   const response = await fetch(productsUrl, {
     headers: { apikey: options.serviceKey, Authorization: `Bearer ${options.serviceKey}` },
@@ -106,7 +113,13 @@ export async function priceCheckout(raw: unknown, options: PriceCheckoutOptions)
       && product.stock_quantity < (quantities.get(item.productId) || 0))) {
       throw httpError(`${product.name} is unavailable in that quantity.`, 409);
     }
-    return { ...item, name: product.name, price, category: String(product.category || ''), image: product.image || (Array.isArray(product.images) ? product.images[0] : null) };
+    return {
+      ...item,
+      name: product.name,
+      price,
+      category: String(product.category || ''),
+      image: primaryProductImage(product.images),
+    };
   });
   const promoCodes = parsePromoCodes(options.promoCodes);
   const privateCouponApplied = promoCodes.includes(PRIVATE_COUPON_CODE);

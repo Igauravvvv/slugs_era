@@ -1,72 +1,89 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
 import { useStore } from '@/store';
 import {
-  User, Package, Heart, MapPin, LogOut, ChevronRight,
-  ShoppingBag, Clock, CheckCircle, Truck, XCircle, ArrowLeft,
-  Settings, Star, Medal, Edit
+  Package, Heart, MapPin, LogOut, ShoppingBag, Clock, CheckCircle,
+  Truck, XCircle, ArrowLeft, Settings, Star, Medal, Edit, Sparkles,
+  Headphones, ChevronDown
 } from 'lucide-react';
-import { CDN } from '@/lib/cdn';
 import { supabase } from '@/lib/supabase';
 import { generateSlug } from '@/types';
+import type { Product } from '@/types';
+import type { Order } from '@/types/dashboard';
 import ProductPrice from '@/components/ProductPrice';
 
 type ProfileTab = 'orders' | 'addresses' | 'wishlist' | 'settings';
 
-// Mock order data
-const mockOrders = [
-  {
-    id: 'SE-20260415-019',
-    date: 'Apr 15, 2026',
-    total: 5697,
-    status: 'processing',
-    items: [
-      { name: 'The Tortoise', size: 'L', color: 'Blue', qty: 1, price: 1899, image: CDN.TORTOISE },
-      { name: 'Slow Down', size: 'XL', color: 'Green', qty: 1, price: 1899, image: CDN.SLOTH },
-      { name: 'NYT & WAVES', size: 'M', color: 'Navy', qty: 1, price: 2299, image: CDN.NYT_WAVES },
-    ],
-  },
-  {
-    id: 'SE-20260408-001',
-    date: 'Apr 8, 2026',
-    total: 2299,
-    status: 'delivered',
-    items: [
-      { name: 'SUNLIGHT & WAVES', size: 'L', color: 'Blue', qty: 1, price: 2299, image: CDN.SUNLIGHT_WAVES },
-    ],
-  },
-  {
-    id: 'SE-20260325-004',
-    date: 'Mar 25, 2026',
-    total: 3798,
-    status: 'delivered',
-    items: [
-      { name: 'Let The Moment Play', size: 'M', color: 'Black', qty: 2, price: 1899, image: CDN.VINYL_MOMENT },
-    ],
-  },
-];
-
-const statusConfig: Record<string, { color: string; bg: string; icon: React.ElementType; label: string }> = {
-  pending: { color: '#f59e0b', bg: '#fef3c7', icon: Clock, label: 'Pending' },
-  processing: { color: '#3b82f6', bg: '#dbeafe', icon: Package, label: 'Processing' },
-  shipped: { color: '#8b5cf6', bg: '#ede9fe', icon: Truck, label: 'Shipped' },
-  delivered: { color: '#10b981', bg: '#d1fae5', icon: CheckCircle, label: 'Delivered' },
-  cancelled: { color: '#ef4444', bg: '#fee2e2', icon: XCircle, label: 'Cancelled' },
+type DisplayItem = {
+  productId?: string;
+  name: string;
+  size?: string;
+  color?: string;
+  quantity: number;
+  price: number;
+  image?: string;
 };
+
+const statusConfig: Record<string, { color: string; bg: string; icon: React.ElementType; label: string; message: string }> = {
+  pending: { color: '#b56a00', bg: '#fff5d6', icon: Clock, label: 'Order received', message: "We've got your order. Our small team is checking every detail before it moves forward." },
+  confirmed: { color: '#2563eb', bg: '#e8f0ff', icon: CheckCircle, label: 'Confirmed', message: 'Everything is confirmed. Your pieces are being prepared with care.' },
+  processing: { color: '#2563eb', bg: '#e8f0ff', icon: Package, label: 'Being prepared', message: 'Your pieces are in our hands now. We are packing them carefully for the journey to you.' },
+  packed: { color: '#7c3aed', bg: '#f1eaff', icon: Package, label: 'Packed with care', message: 'Your order is packed, checked, and nearly ready to leave us.' },
+  shipped: { color: '#7c3aed', bg: '#f1eaff', icon: Truck, label: 'On its way', message: 'Your order has left us and is making its way to you. We hope you love every piece.' },
+  delivered: { color: '#087f5b', bg: '#e1f7ef', icon: CheckCircle, label: 'Delivered', message: 'It made it home. Thank you for choosing slower, more intentional fashion with us.' },
+  cancelled: { color: '#c92a2a', bg: '#ffebeb', icon: XCircle, label: 'Cancelled', message: 'This order was cancelled. If something did not feel right, our team is here to help.' },
+  returned: { color: '#c92a2a', bg: '#ffebeb', icon: XCircle, label: 'Returned', message: 'Your return is being looked after. We will keep you updated as it moves forward.' },
+};
+
+const normalise = (value: unknown) => String(value || '').trim().toLowerCase();
+
+function resolveOrderItems(order: Order, products: Product[]): DisplayItem[] {
+  const catalogueById = new Map(products.map((product) => [product.id, product]));
+  const catalogueByName = new Map(products.map((product) => [normalise(product.name), product]));
+  return (Array.isArray(order.items) ? order.items : []).map((item: any) => {
+    const productId = item.productId || item.product_id;
+    const name = item.name || item.product_name || 'Slugsera piece';
+    const product = catalogueById.get(productId) || catalogueByName.get(normalise(name));
+    return {
+      productId,
+      name,
+      size: item.size,
+      color: item.color,
+      quantity: Number(item.qty ?? item.quantity ?? 1),
+      price: Number(item.price ?? item.unit_price ?? 0),
+      image: typeof item.image === 'string' && item.image ? item.image : product?.image,
+    };
+  });
+}
 
 export default function Profile() {
   const { user, signOut } = useAuth();
   const { addresses, wishlist, products } = useStore();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<ProfileTab>('orders');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get('tab');
+  const initialTab: ProfileTab = requestedTab === 'settings' || requestedTab === 'addresses' || requestedTab === 'wishlist' ? requestedTab : 'orders';
+  const [activeTab, setActiveTab] = useState<ProfileTab>(initialTab);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
-  const [profileName, setProfileName] = useState(user?.email?.split('@')[0] || '');
-  const [profilePhone, setProfilePhone] = useState('');
+  const [profileName, setProfileName] = useState(String(user?.user_metadata?.full_name || user?.email?.split('@')[0] || ''));
+  const [profilePhone, setProfilePhone] = useState(String(user?.user_metadata?.phone || ''));
   const [saving, setSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'settings' || tab === 'addresses' || tab === 'wishlist' || tab === 'orders') setActiveTab(tab);
+  }, [searchParams]);
+
+  const selectTab = (tab: ProfileTab) => {
+    setActiveTab(tab);
+    if (tab === 'orders') setSearchParams({}, { replace: true });
+    else setSearchParams({ tab }, { replace: true });
+  };
 
   // Fetch real orders from Supabase
   useEffect(() => {
@@ -84,7 +101,7 @@ export default function Profile() {
           setOrders([]);
           return;
         }
-        setOrders(data || []);
+        setOrders((data || []) as Order[]);
       } catch {
         setOrders([]);
       } finally {
@@ -103,7 +120,7 @@ export default function Profile() {
           if (payload.new.email === user.email || payload.new.customer_email === user.email || payload.new.user_id === user.id) {
             setOrders((currentOrders) =>
               currentOrders.map((order) =>
-                order.id === payload.new.id ? payload.new : order
+                order.id === payload.new.id ? payload.new as Order : order
               )
             );
           }
@@ -145,7 +162,7 @@ export default function Profile() {
             </div>
             <div>
               <h1 className="font-bebas text-3xl tracking-wider text-[#1A1A1A]">
-                {user?.email?.split('@')[0]?.toUpperCase() || 'MEMBER'}
+                {(profileName || user?.email?.split('@')[0] || 'MEMBER').toUpperCase()}
               </h1>
               <p className="text-sm text-[#1A1A1A]/50">{user?.email || 'member@slugsera.com'}</p>
               <div className="flex items-center gap-2 mt-1">
@@ -184,7 +201,7 @@ export default function Profile() {
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => selectTab(tab.id)}
               className={`flex items-center gap-2 px-5 py-3 text-xs font-medium uppercase tracking-wider transition-all border-b-2 whitespace-nowrap ${
                 activeTab === tab.id
                   ? 'text-[#C0132A] border-[#C0132A]'
@@ -213,106 +230,120 @@ export default function Profile() {
           >
             {/* Orders */}
             {activeTab === 'orders' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-5">
                 {ordersLoading ? (
-                  <div className="col-span-full text-center py-16">
+                  <div className="text-center py-16" role="status">
                     <div className="w-8 h-8 border-2 border-[#C0132A] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                    <p className="text-xs text-[#1A1A1A]/40">Loading orders...</p>
+                    <p className="text-xs text-[#1A1A1A]/50">Gathering your order story…</p>
                   </div>
                 ) : orders.length === 0 ? (
-                  <div className="col-span-full">
-                    <EmptyState icon={Package} title="No orders yet" description="Start shopping to see your orders here" action={() => navigate('/collections')} actionLabel="Browse Collection" />
-                  </div>
+                  <EmptyState icon={Package} title="Your first piece is waiting" description="When you choose something from Slugsera, we’ll keep its full journey right here for you." action={() => navigate('/collections')} actionLabel="Explore the collection" />
                 ) : (
-                  orders.map((order: any, i: number) => {
-                    const status = order.status || 'processing';
+                  orders.map((order, i) => {
+                    const status = normalise(order.status) || 'processing';
                     const config = statusConfig[status] || statusConfig.pending;
                     const StatusIcon = config.icon;
+                    const items = resolveOrderItems(order, products);
+                    const isExpanded = expandedOrder === order.id;
+                    const orderNumber = order.order_number || order.id.slice(0, 8).toUpperCase();
                     return (
-                      <motion.div
+                      <motion.article
                         key={order.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.05 }}
-                        className="group flex flex-col bg-white border border-[#E8E4E0] overflow-hidden hover:border-[#C0132A]/30 transition-colors"
+                        className="overflow-hidden border border-[#E8E4E0] bg-white transition-colors hover:border-[#C0132A]/35"
                       >
-                        {/* Large Image Header */}
-                        <div className="relative aspect-[4/5] bg-[#F5F5F5] overflow-hidden w-full">
-                          {order.items?.[0]?.image ? (
-                            <img src={order.items[0].image} alt="Product" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                          ) : (
-                            <div className="w-full h-full flex flex-col items-center justify-center text-[#1A1A1A]/20">
-                              <Package size={48} className="mb-2" />
-                              <span className="text-[10px] uppercase tracking-wider font-bold">Image Unavailable</span>
-                            </div>
-                          )}
-                          
-                          {/* Status Badge */}
-                          <div className="absolute top-4 left-4">
-                            <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5" style={{ background: config.bg, color: config.color }}>
-                              <StatusIcon size={12} />
-                              {config.label}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Order Details Body */}
-                        <div className="p-5 flex flex-col flex-grow">
-                          <div className="flex justify-between items-start mb-4">
-                            <div>
-                              <h3 className="text-lg font-serif text-[#1A1A1A] line-clamp-1 mb-1">
-                                {order.items?.[0]?.name || order.items?.[0]?.product_name || `Order ${order.order_number || ''}`}
-                                {order.items?.length > 1 ? ` + ${order.items.length - 1} more` : ''}
-                              </h3>
-                              <p className="text-xs text-[#1A1A1A]/50 font-serif italic">
-                                {order.items?.[0]?.category || 'Apparel'}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-base font-bold text-[#1A1A1A]">₹{(order.total || order.amount || 0).toLocaleString('en-IN')}</p>
+                        <div className="grid md:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)]">
+                          <div className="bg-[#F9F7F5] p-3 sm:p-4">
+                            <div className={`grid gap-2 ${items.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                              {items.slice(0, 4).map((item, itemIndex) => (
+                                <div key={`${item.productId || item.name}-${itemIndex}`} className="relative aspect-square overflow-hidden bg-white">
+                                  {item.image ? (
+                                    <img src={item.image} alt={item.name} className="h-full w-full object-cover transition-transform duration-700 hover:scale-[1.03]" loading="lazy" />
+                                  ) : (
+                                    <div className="flex h-full w-full flex-col items-center justify-center gap-2 px-4 text-center text-[#1A1A1A]/35">
+                                      <Package size={30} strokeWidth={1.3} />
+                                      <span className="text-[9px] font-medium uppercase tracking-[0.14em]">{item.name}</span>
+                                    </div>
+                                  )}
+                                  {items.length > 4 && itemIndex === 3 && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/55 text-sm font-medium text-white">+{items.length - 4} more</div>
+                                  )}
+                                </div>
+                              ))}
                             </div>
                           </div>
 
-                          {/* Tracking & Info Section */}
-                          <div className="mt-auto space-y-4">
-                            <div className="grid grid-cols-2 gap-4 py-3 border-y border-[#E8E4E0]/50">
+                          <div className="flex flex-col p-5 sm:p-7">
+                            <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
                               <div>
-                                <p className="text-[10px] text-[#1A1A1A]/40 uppercase tracking-wider mb-0.5">Date</p>
-                                <p className="text-xs font-medium text-[#1A1A1A]">{new Date(order.created_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                                <p className="mb-2 text-[10px] font-medium uppercase tracking-[0.16em] text-[#1A1A1A]/45">Order {orderNumber}</p>
+                                <div className="inline-flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider" style={{ background: config.bg, color: config.color }}>
+                                  <StatusIcon size={13} /> {config.label}
+                                </div>
                               </div>
                               <div className="text-right">
-                                <p className="text-[10px] text-[#1A1A1A]/40 uppercase tracking-wider mb-0.5">Order No.</p>
-                                <p className="text-xs font-medium text-[#1A1A1A] font-mono">{order.order_number || order.id.slice(0, 8)}</p>
+                                <p className="text-lg font-semibold text-[#1A1A1A]">₹{Number(order.total || 0).toLocaleString('en-IN')}</p>
+                                <p className="mt-1 text-[10px] uppercase tracking-wider text-[#1A1A1A]/40">
+                                  {new Date(order.created_at).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}
+                                </p>
                               </div>
                             </div>
 
-                            {/* Tracking Box */}
-                            {order.tracking_number ? (
-                              <div className="bg-[#F9F7F5] p-3 border border-[#E8E4E0] flex justify-between items-center">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center border border-[#E8E4E0]">
-                                    <Truck size={14} className="text-[#C0132A]" />
+                            <div className="mb-5 border-l-2 border-[#C0132A] pl-4">
+                              <div className="mb-1 flex items-center gap-2 text-[#C0132A]">
+                                <Sparkles size={14} />
+                                <p className="text-[10px] font-bold uppercase tracking-[0.14em]">A note from us</p>
+                              </div>
+                              <p className="font-serif text-[17px] leading-relaxed text-[#1A1A1A]/75">{config.message}</p>
+                            </div>
+
+                            <div className="space-y-3">
+                              {items.slice(0, isExpanded ? items.length : 2).map((item, itemIndex) => (
+                                <div key={`${item.name}-detail-${itemIndex}`} className="flex items-center justify-between gap-4 border-b border-[#E8E4E0]/70 pb-3 text-xs">
+                                  <div className="min-w-0">
+                                    <p className="truncate font-medium text-[#1A1A1A]">{item.name}</p>
+                                    <p className="mt-1 text-[10px] uppercase tracking-wider text-[#1A1A1A]/45">
+                                      {[item.size && `Size ${item.size}`, item.color, `Qty ${item.quantity}`].filter(Boolean).join(' · ')}
+                                    </p>
                                   </div>
-                                  <div>
-                                    <p className="text-[10px] text-[#1A1A1A]/50 uppercase tracking-wider font-bold mb-0.5">Tracking ID</p>
-                                    <p className="text-xs font-medium text-[#1A1A1A]">{order.tracking_number}</p>
-                                  </div>
+                                  <p className="shrink-0 font-medium">₹{(item.price * item.quantity).toLocaleString('en-IN')}</p>
                                 </div>
-                                {order.courier && (
-                                  <span className="text-[10px] font-bold text-[#C0132A] uppercase tracking-wider bg-white px-2 py-1 border border-[#E8E4E0] rounded-full">
-                                    {order.courier}
-                                  </span>
-                                )}
-                              </div>
-                            ) : (
-                              <div className="bg-[#F9F7F5]/50 p-3 border border-transparent flex items-center justify-center gap-2">
-                                <Clock size={12} className="text-[#1A1A1A]/40" />
-                                <p className="text-[10px] text-[#1A1A1A]/40 uppercase tracking-wider">Tracking info will appear here once dispatched</p>
-                              </div>
-                            )}
+                              ))}
+                              {items.length > 2 && (
+                                <button onClick={() => setExpandedOrder(isExpanded ? null : order.id)} className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#C0132A]">
+                                  {isExpanded ? 'Show less' : `View all ${items.length} pieces`}
+                                  <ChevronDown size={13} className={`transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                                </button>
+                              )}
+                            </div>
+
+                            <div className="mt-auto pt-5">
+                              {order.tracking_number ? (
+                                <div className="flex items-center justify-between gap-3 bg-[#F9F7F5] p-3">
+                                  <div className="flex items-center gap-3">
+                                    <Truck size={16} className="text-[#C0132A]" />
+                                    <div>
+                                      <p className="text-[9px] font-bold uppercase tracking-wider text-[#1A1A1A]/45">Tracking ID</p>
+                                      <p className="mt-0.5 text-xs font-medium">{order.tracking_number}</p>
+                                    </div>
+                                  </div>
+                                  {order.courier && <span className="text-[9px] font-bold uppercase tracking-wider text-[#C0132A]">{order.courier}</span>}
+                                </div>
+                              ) : status !== 'delivered' && status !== 'cancelled' ? (
+                                <div className="flex items-center gap-2 bg-[#F9F7F5] p-3 text-[10px] uppercase tracking-wider text-[#1A1A1A]/50">
+                                  <Clock size={13} /> Tracking will appear here as soon as your order leaves us.
+                                </div>
+                              ) : null}
+
+                              <button onClick={() => navigate('/contact')} className="mt-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.13em] text-[#1A1A1A]/55 transition-colors hover:text-[#C0132A]">
+                                <Headphones size={14} /> Need help with this order? We’re here.
+                              </button>
+                            </div>
                           </div>
                         </div>
-                      </motion.div>
+                      </motion.article>
                     );
                   })
                 )}
@@ -392,6 +423,10 @@ export default function Profile() {
             {/* Settings */}
             {activeTab === 'settings' && (
               <div className="max-w-lg space-y-6">
+                <div className="border-l-2 border-[#C0132A] pl-4">
+                  <h2 className="font-serif text-2xl text-[#1A1A1A]">Make this space yours.</h2>
+                  <p className="mt-1 text-xs leading-relaxed text-[#1A1A1A]/50">Keep your details current so we can make every delivery and update feel effortless.</p>
+                </div>
                 <div>
                   <label className="text-[10px] font-medium uppercase tracking-wider text-[#1A1A1A]/50">Full Name</label>
                   <input type="text" value={profileName} onChange={e => setProfileName(e.target.value)} className="mt-1 w-full px-4 py-3 border border-[#E8E4E0] text-sm text-[#1A1A1A] focus:outline-none focus:border-[#C0132A] transition-colors" />
@@ -408,30 +443,35 @@ export default function Profile() {
                   <button
                     onClick={async () => {
                       setSaving(true);
+                      setSaveMessage('');
                       try {
-                        await supabase.from('profiles').upsert({
-                          email: user?.email,
-                          full_name: profileName,
-                          phone: profilePhone,
-                        }, { onConflict: 'email' });
-                      } catch { /* table may not exist yet */ }
-                      setSaving(false);
+                        const { error: authError } = await supabase.auth.updateUser({
+                          data: { full_name: profileName.trim(), phone: profilePhone.trim() },
+                        });
+                        if (authError) throw authError;
+
+                        if (user?.id) {
+                          const { error: profileError } = await supabase.from('users').update({
+                            name: profileName.trim(),
+                            phone: profilePhone.trim(),
+                          }).eq('id', user.id);
+                          if (profileError) console.warn('Profile table could not be updated:', profileError.message);
+                        }
+                        setSaveMessage('Saved — we’ll use these details to take better care of your orders.');
+                      } catch (error) {
+                        console.warn('Could not save profile:', error);
+                        setSaveMessage('We could not save that just now. Please try once more.');
+                      } finally {
+                        setSaving(false);
+                      }
                     }}
                     disabled={saving}
                     className="px-6 py-3 text-xs font-bold uppercase tracking-wider bg-[#C0132A] text-white hover:bg-[#a81024] transition-colors disabled:opacity-60"
                   >
                     {saving ? 'Saving...' : 'Save Changes'}
                   </button>
-                  <button onClick={() => {
-                    if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
-                      signOut();
-                      navigate('/');
-                    }
-                  }}
-                    className="px-6 py-3 text-xs font-bold uppercase tracking-wider border border-red-200 text-red-500 hover:bg-red-50 transition-colors">
-                    Delete Account
-                  </button>
                 </div>
+                {saveMessage && <p className="text-xs leading-relaxed text-[#1A1A1A]/60" role="status">{saveMessage}</p>}
               </div>
             )}
           </motion.div>
