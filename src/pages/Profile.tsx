@@ -143,81 +143,76 @@ export default function Profile() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-6xl mx-auto px-4 lg:px-8 py-8">
+    <div className="min-h-screen bg-[#FCFBF9]">
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10">
         {/* Back Button */}
         <button
           onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-[#1A1A1A]/60 hover:text-[#1A1A1A] text-xs uppercase tracking-wider font-medium transition-colors mb-8"
+          className="mb-5 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-[#1A1A1A]/50 transition-colors hover:text-[#C0132A]"
         >
           <ArrowLeft size={14} /> Back to Store
         </button>
 
-        {/* Profile Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold"
-                 style={{ background: 'linear-gradient(135deg, #C0132A, #ff4757)' }}>
-              {user?.email?.[0]?.toUpperCase() || 'G'}
-            </div>
-            <div>
-              <h1 className="font-bebas text-3xl tracking-wider text-[#1A1A1A]">
-                {(profileName || user?.email?.split('@')[0] || 'MEMBER').toUpperCase()}
-              </h1>
-              <p className="text-sm text-[#1A1A1A]/50">{user?.email || 'member@slugsera.com'}</p>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-[#C0132A]/5 text-[#C0132A]">
-                  <Medal size={10} /> Slow Club Member
-                </span>
+        <section className="mb-7 overflow-hidden bg-[#1A1A1A] text-white lg:mb-9">
+          <div className="flex flex-col gap-5 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-7 lg:p-8">
+            <div className="flex min-w-0 items-center gap-4 sm:gap-5">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#C0132A] font-serif text-2xl sm:h-16 sm:w-16">
+                {user?.email?.[0]?.toUpperCase() || 'G'}
+              </div>
+              <div className="min-w-0">
+                <div className="mb-1.5 flex items-center gap-2 text-[#EF5C6F]">
+                  <Medal size={12} />
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.17em]">Slow Club Member</span>
+                </div>
+                <h1 className="truncate font-serif text-[28px] font-light leading-none sm:text-4xl">
+                  Hey, {profileName || user?.email?.split('@')[0] || 'there'}.
+                </h1>
+                <p className="mt-2 truncate text-[11px] text-white/45 sm:text-xs">{user?.email || 'member@slugsera.com'}</p>
               </div>
             </div>
+            <button onClick={() => { signOut(); navigate('/'); }} className="flex w-fit items-center gap-2 border border-white/15 px-4 py-2.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/65 transition-colors hover:border-white/40 hover:text-white">
+              <LogOut size={13} /> Sign Out
+            </button>
           </div>
-          <button
-            onClick={() => { signOut(); navigate('/'); }}
-            className="flex items-center gap-2 px-4 py-2 text-xs font-medium uppercase tracking-wider text-[#1A1A1A]/60 border border-[#E8E4E0] hover:border-[#C0132A] hover:text-[#C0132A] transition-all"
-          >
-            <LogOut size={14} /> Sign Out
-          </button>
-        </div>
 
-        {/* Stats Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
-          {[
-            { label: 'Total Orders', value: orders.length, icon: ShoppingBag },
-            { label: 'Total Spent', value: `₹${orders.reduce((s: number, o: any) => s + (o.total || o.amount || 0), 0).toLocaleString('en-IN')}`, icon: Star },
-            { label: 'Wishlist', value: wishedProducts.length, icon: Heart },
-            { label: 'Addresses', value: addresses.length, icon: MapPin },
-          ].map((stat) => (
-            <div key={stat.label} className="border border-[#E8E4E0] p-4">
-              <stat.icon size={16} className="text-[#C0132A] mb-2" />
-              <p className="font-bebas text-2xl tracking-wider text-[#1A1A1A]">{stat.value}</p>
-              <p className="text-[10px] font-medium uppercase tracking-wider text-[#1A1A1A]/40">{stat.label}</p>
-            </div>
-          ))}
-        </div>
+          <div className="grid grid-cols-2 border-t border-white/10 sm:grid-cols-4">
+            {[
+              { label: 'Orders', value: orders.length, icon: ShoppingBag },
+              { label: 'Invested in slow', value: `₹${orders.reduce((s: number, o: any) => s + (o.total || o.amount || 0), 0).toLocaleString('en-IN')}`, icon: Star },
+              { label: 'Saved pieces', value: wishedProducts.length, icon: Heart },
+              { label: 'Addresses', value: addresses.length, icon: MapPin },
+            ].map((stat) => (
+              <div key={stat.label} className="flex items-center gap-3 border-b border-r border-white/10 px-4 py-3.5 last:border-r-0 sm:border-b-0 sm:px-5">
+                <stat.icon size={15} className="shrink-0 text-[#EF5C6F]" />
+                <div>
+                  <p className="text-base font-medium leading-none text-white">{stat.value}</p>
+                  <p className="mt-1 text-[8px] font-semibold uppercase tracking-[0.14em] text-white/35">{stat.label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
 
-        {/* Tabs */}
-        <div className="flex gap-0 border-b border-[#E8E4E0] mb-8 overflow-x-auto">
+        <div className="lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-8">
+        <nav aria-label="Profile sections" className="mb-5 grid grid-cols-4 gap-1.5 lg:mb-0 lg:flex lg:flex-col lg:gap-1">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => selectTab(tab.id)}
-              className={`flex items-center gap-2 px-5 py-3 text-xs font-medium uppercase tracking-wider transition-all border-b-2 whitespace-nowrap ${
+              className={`relative flex min-w-0 flex-col items-center justify-center gap-1.5 border px-1 py-3 text-[9px] font-semibold uppercase tracking-[0.08em] transition-all lg:flex-row lg:justify-start lg:gap-3 lg:border-0 lg:border-l-2 lg:px-4 lg:py-3.5 lg:text-[10px] lg:tracking-[0.13em] ${
                 activeTab === tab.id
-                  ? 'text-[#C0132A] border-[#C0132A]'
-                  : 'text-[#1A1A1A]/40 border-transparent hover:text-[#1A1A1A]/70'
+                  ? 'border-[#C0132A] bg-white text-[#C0132A] lg:bg-[#F3EEEA]'
+                  : 'border-[#E8E4E0] bg-white text-[#1A1A1A]/45 hover:text-[#1A1A1A]/75 lg:border-transparent lg:bg-transparent'
               }`}
             >
-              <tab.icon size={14} />
-              {tab.label}
+              <tab.icon size={15} />
+              <span className="truncate">{tab.label.replace('My ', '')}</span>
               {tab.count !== undefined && (
-                <span className={`px-1.5 py-0.5 text-[9px] font-bold rounded-full ${
-                  activeTab === tab.id ? 'bg-[#C0132A] text-white' : 'bg-[#E8E4E0] text-[#1A1A1A]/50'
-                }`}>{tab.count}</span>
+                <span className={`absolute right-1.5 top-1.5 min-w-4 rounded-full px-1 py-0.5 text-[8px] font-bold lg:static lg:ml-auto ${activeTab === tab.id ? 'bg-[#C0132A] text-white' : 'bg-[#E8E4E0] text-[#1A1A1A]/50'}`}>{tab.count}</span>
               )}
             </button>
           ))}
-        </div>
+        </nav>
 
         {/* Tab Content */}
         <AnimatePresence mode="wait">
@@ -254,11 +249,11 @@ export default function Profile() {
                         transition={{ delay: i * 0.05 }}
                         className="overflow-hidden border border-[#E8E4E0] bg-white transition-colors hover:border-[#C0132A]/35"
                       >
-                        <div className="grid md:grid-cols-[minmax(0,1.1fr)_minmax(280px,0.9fr)]">
-                          <div className="bg-[#F9F7F5] p-3 sm:p-4">
+                        <div className="grid md:grid-cols-[minmax(260px,0.78fr)_minmax(340px,1.22fr)]">
+                          <div className="bg-[#F2EEEA] p-2.5 sm:p-3">
                             <div className={`grid gap-2 ${items.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}>
                               {items.slice(0, 4).map((item, itemIndex) => (
-                                <div key={`${item.productId || item.name}-${itemIndex}`} className="relative aspect-square overflow-hidden bg-white">
+                                <div key={`${item.productId || item.name}-${itemIndex}`} className={`relative overflow-hidden bg-white ${items.length === 1 ? 'aspect-[4/3] md:aspect-[3/4]' : 'aspect-square'}`}>
                                   {item.image ? (
                                     <img src={item.image} alt={item.name} className="h-full w-full object-cover transition-transform duration-700 hover:scale-[1.03]" loading="lazy" />
                                   ) : (
@@ -476,6 +471,7 @@ export default function Profile() {
             )}
           </motion.div>
         </AnimatePresence>
+        </div>
       </div>
     </div>
   );
