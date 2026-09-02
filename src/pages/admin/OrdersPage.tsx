@@ -35,6 +35,10 @@ export default function OrdersPage() {
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState('All');
   const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
+  const [draftStatus, setDraftStatus] = useState('Pending');
+  const [draftTracking, setDraftTracking] = useState('');
+  const [draftCourier, setDraftCourier] = useState('');
+  const [draftNotes, setDraftNotes] = useState('');
   const [toast, setToast] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
@@ -55,31 +59,35 @@ export default function OrdersPage() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const handleStatusChange = async (order: AdminOrder, newStatus: string) => {
+  const openOrder = (order: AdminOrder) => {
+    setSelectedOrder(order);
+    setDraftStatus(order.status);
+    setDraftTracking(order.tracking_number || '');
+    setDraftCourier(order.courier || '');
+    setDraftNotes(order.notes || '');
+  };
+
+  const handleSaveOrderUpdates = async () => {
+    if (!selectedOrder) return;
     try {
-      await updateOrder.mutateAsync({ id: order.id, status: newStatus });
-      if (selectedOrder?.id === order.id) {
-        setSelectedOrder({ ...selectedOrder, status: newStatus });
-      }
-      showToast(`Order ${order.order_number} → ${newStatus}`);
+      await updateOrder.mutateAsync({
+        id: selectedOrder.id,
+        status: draftStatus,
+        tracking_number: draftTracking.trim() || null,
+        courier: draftCourier.trim() || null,
+        notes: draftNotes.trim() || null,
+      });
+      setSelectedOrder({
+        ...selectedOrder,
+        status: draftStatus,
+        tracking_number: draftTracking.trim() || null,
+        courier: draftCourier.trim() || null,
+        notes: draftNotes.trim() || null,
+      });
+      showToast(`Order ${selectedOrder.order_number} updated for the customer`);
     } catch (err: any) {
       showToast('Error: ' + err.message);
     }
-  };
-
-  const handleNotesChange = async (order: AdminOrder, notes: string) => {
-    try {
-      await updateOrder.mutateAsync({ id: order.id, notes });
-    } catch { /* silent */ }
-  };
-
-  const handleTrackingChange = async (order: AdminOrder, field: 'tracking_number' | 'courier', value: string) => {
-    try {
-      await updateOrder.mutateAsync({ id: order.id, [field]: value });
-      if (selectedOrder?.id === order.id) {
-        setSelectedOrder({ ...selectedOrder, [field]: value });
-      }
-    } catch { /* silent */ }
   };
 
   const exportCSV = () => {
@@ -175,7 +183,7 @@ export default function OrdersPage() {
                   const productNames = items.map(i => i.name).slice(0, 2).join(', ');
                   const moreCount = items.length - 2;
                   return (
-                    <tr key={order.id} className="border-t border-[#E5E5E5] hover:bg-[#F9F9F9] transition-colors cursor-pointer" onClick={() => setSelectedOrder(order)}>
+                    <tr key={order.id} className="border-t border-[#E5E5E5] hover:bg-[#F9F9F9] transition-colors cursor-pointer" onClick={() => openOrder(order)}>
                       <td className="px-5 py-3 font-medium text-[#1A1A1A]">{order.order_number}</td>
                       <td className="px-3 py-3 text-[#6B6B6B]">{order.customer_name}</td>
                       <td className="px-3 py-3 text-[#6B6B6B] truncate max-w-[200px] hidden md:table-cell">
@@ -218,8 +226,8 @@ export default function OrdersPage() {
               <div>
                 <label className="block text-[11px] font-medium text-[#9E9E9E] uppercase tracking-wider mb-2">Order Status</label>
                 <select
-                  value={selectedOrder.status}
-                  onChange={e => handleStatusChange(selectedOrder, e.target.value)}
+                  value={draftStatus}
+                  onChange={e => setDraftStatus(e.target.value)}
                   className="w-full px-3 py-2.5 text-sm border border-[#E5E5E5] rounded-lg bg-white font-medium focus:outline-none focus:border-[#C0392B]"
                 >
                   {ORDER_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
@@ -232,9 +240,9 @@ export default function OrdersPage() {
                 <div className="flex items-center gap-2">
                   {['Pending', 'Processing', 'Dispatched', 'Delivered'].map((step, i) => {
                     const stepOrder = ['Pending', 'Processing', 'Dispatched', 'Delivered'];
-                    const currentIdx = stepOrder.indexOf(selectedOrder.status);
-                    const isComplete = i <= currentIdx && selectedOrder.status !== 'Cancelled';
-                    const isCancelled = selectedOrder.status === 'Cancelled';
+                    const currentIdx = stepOrder.indexOf(draftStatus);
+                    const isComplete = i <= currentIdx && draftStatus !== 'Cancelled';
+                    const isCancelled = draftStatus === 'Cancelled';
                     return (
                       <div key={step} className="flex items-center gap-2 flex-1">
                         <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
@@ -264,8 +272,8 @@ export default function OrdersPage() {
                   <label className="block text-[11px] font-medium text-[#9E9E9E] uppercase tracking-wider mb-2">Tracking Number</label>
                   <input
                     type="text"
-                    defaultValue={selectedOrder.tracking_number || ''}
-                    onBlur={e => handleTrackingChange(selectedOrder, 'tracking_number', e.target.value)}
+                    value={draftTracking}
+                    onChange={e => setDraftTracking(e.target.value)}
                     placeholder="AWB / Tracking ID"
                     className="w-full px-3 py-2 text-sm border border-[#E5E5E5] rounded-lg bg-white focus:outline-none focus:border-[#C0392B]"
                   />
@@ -274,8 +282,8 @@ export default function OrdersPage() {
                   <label className="block text-[11px] font-medium text-[#9E9E9E] uppercase tracking-wider mb-2">Courier</label>
                   <input
                     type="text"
-                    defaultValue={selectedOrder.courier || ''}
-                    onBlur={e => handleTrackingChange(selectedOrder, 'courier', e.target.value)}
+                    value={draftCourier}
+                    onChange={e => setDraftCourier(e.target.value)}
                     placeholder="Delhivery, Bluedart, etc."
                     className="w-full px-3 py-2 text-sm border border-[#E5E5E5] rounded-lg bg-white focus:outline-none focus:border-[#C0392B]"
                   />
@@ -330,12 +338,24 @@ export default function OrdersPage() {
               <div>
                 <label className="block text-[11px] font-medium text-[#9E9E9E] uppercase tracking-wider mb-2">Notes</label>
                 <textarea
-                  defaultValue={selectedOrder.notes || ''}
-                  onBlur={e => handleNotesChange(selectedOrder, e.target.value)}
+                  value={draftNotes}
+                  onChange={e => setDraftNotes(e.target.value)}
                   placeholder="Add a note..."
                   rows={3}
                   className="w-full px-3 py-2 text-sm border border-[#E5E5E5] rounded-lg text-[#1A1A1A] placeholder-[#9E9E9E] focus:outline-none focus:border-[#C0392B] resize-none"
                 />
+              </div>
+
+              <div className="sticky bottom-0 -mx-6 border-t border-[#E5E5E5] bg-white/95 px-6 py-4 backdrop-blur-sm">
+                <button
+                  type="button"
+                  onClick={() => void handleSaveOrderUpdates()}
+                  disabled={updateOrder.isPending}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-[#C0392B] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#A93226] disabled:cursor-wait disabled:opacity-60"
+                >
+                  <Check size={15} /> {updateOrder.isPending ? 'Saving updates…' : 'Save order updates'}
+                </button>
+                <p className="mt-2 text-center text-[10px] text-[#9E9E9E]">Saved status and tracking details appear on the customer’s profile.</p>
               </div>
             </div>
           </div>

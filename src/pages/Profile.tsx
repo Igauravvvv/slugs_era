@@ -31,6 +31,7 @@ const statusConfig: Record<string, { color: string; bg: string; icon: React.Elem
   confirmed: { color: '#2563eb', bg: '#e8f0ff', icon: CheckCircle, label: 'Confirmed', message: 'Everything is confirmed. Your pieces are being prepared with care.' },
   processing: { color: '#2563eb', bg: '#e8f0ff', icon: Package, label: 'Being prepared', message: 'Your pieces are in our hands now. We are packing them carefully for the journey to you.' },
   packed: { color: '#7c3aed', bg: '#f1eaff', icon: Package, label: 'Packed with care', message: 'Your order is packed, checked, and nearly ready to leave us.' },
+  dispatched: { color: '#7c3aed', bg: '#f1eaff', icon: Truck, label: 'Dispatched', message: 'Your order has left our hands and begun its journey to you. Tracking details will stay right here.' },
   shipped: { color: '#7c3aed', bg: '#f1eaff', icon: Truck, label: 'On its way', message: 'Your order has left us and is making its way to you. We hope you love every piece.' },
   delivered: { color: '#087f5b', bg: '#e1f7ef', icon: CheckCircle, label: 'Delivered', message: 'It made it home. Thank you for choosing slower, more intentional fashion with us.' },
   cancelled: { color: '#c92a2a', bg: '#ffebeb', icon: XCircle, label: 'Cancelled', message: 'This order was cancelled. If something did not feel right, our team is here to help.' },
@@ -38,6 +39,19 @@ const statusConfig: Record<string, { color: string; bg: string; icon: React.Elem
 };
 
 const normalise = (value: unknown) => String(value || '').trim().toLowerCase();
+const CUSTOMER_STATUS_FLOW = ['pending', 'processing', 'dispatched', 'delivered'] as const;
+const CUSTOMER_STATUS_LABELS: Record<(typeof CUSTOMER_STATUS_FLOW)[number], string> = {
+  pending: 'Pending',
+  processing: 'Processing',
+  dispatched: 'Dispatched',
+  delivered: 'Delivered',
+};
+
+function customerProgressStatus(status: string) {
+  if (status === 'confirmed' || status === 'packed') return 'processing';
+  if (status === 'shipped') return 'dispatched';
+  return status;
+}
 
 function resolveOrderItems(order: Order, products: Product[]): DisplayItem[] {
   const catalogueById = new Map(products.map((product) => [product.id, product]));
@@ -87,8 +101,13 @@ export default function Profile() {
 
   // Fetch real orders from Supabase
   useEffect(() => {
+    if (!user?.email) {
+      setOrders([]);
+      setOrdersLoading(false);
+      return;
+    }
+
     async function fetchOrders() {
-      if (!user?.email) { setOrdersLoading(false); return; }
       try {
         const { data, error } = await supabase
           .from('orders')
@@ -109,10 +128,15 @@ export default function Profile() {
       }
     }
     fetchOrders();
+    const refreshTimer = window.setInterval(fetchOrders, 15_000);
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === 'visible') void fetchOrders();
+    };
+    document.addEventListener('visibilitychange', refreshWhenVisible);
 
     // Subscribe to realtime order updates
     const subscription = supabase
-      .channel('public:orders')
+      .channel(`customer-orders:${user.id}`)
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'orders' },
@@ -129,6 +153,8 @@ export default function Profile() {
       .subscribe();
 
     return () => {
+      window.clearInterval(refreshTimer);
+      document.removeEventListener('visibilitychange', refreshWhenVisible);
       subscription.unsubscribe();
     };
   }, [user]);
@@ -236,6 +262,8 @@ export default function Profile() {
                 ) : (
                   orders.map((order, i) => {
                     const status = normalise(order.status) || 'processing';
+                    const progressStatus = customerProgressStatus(status);
+                    const progressIndex = CUSTOMER_STATUS_FLOW.indexOf(progressStatus as (typeof CUSTOMER_STATUS_FLOW)[number]);
                     const config = statusConfig[status] || statusConfig.pending;
                     const StatusIcon = config.icon;
                     const items = resolveOrderItems(order, products);
@@ -293,6 +321,30 @@ export default function Profile() {
                               </div>
                               <p className="font-serif text-[17px] leading-relaxed text-[#1A1A1A]/75">{config.message}</p>
                             </div>
+
+                            {status !== 'cancelled' && status !== 'returned' && (
+                              <div className="mb-5 rounded-2xl bg-[#F9F7F5] px-3 py-4 sm:px-4" aria-label={`Order progress: ${config.label}`}>
+                                <div className="flex">
+                                  {CUSTOMER_STATUS_FLOW.map((step, stepIndex) => {
+                                    const reached = progressIndex >= stepIndex;
+                                    const connectorReached = progressIndex >= stepIndex;
+                                    return (
+                                      <div key={step} className="relative flex flex-1 flex-col items-center text-center">
+                                        {stepIndex > 0 && (
+                                          <span className={`absolute right-1/2 top-3 h-px w-full ${connectorReached ? 'bg-[#C0132A]' : 'bg-[#DCD6D0]'}`} />
+                                        )}
+                                        <span className={`relative z-10 flex h-6 w-6 items-center justify-center rounded-full border text-[9px] font-bold transition-colors ${reached ? 'border-[#C0132A] bg-[#C0132A] text-white' : 'border-[#DCD6D0] bg-white text-[#9B948E]'}`}>
+                                          {reached ? <CheckCircle size={13} strokeWidth={2} /> : stepIndex + 1}
+                                        </span>
+                                        <span className={`mt-2 text-[8px] font-semibold uppercase tracking-[0.06em] sm:text-[9px] ${reached ? 'text-[#1A1A1A]' : 'text-[#9B948E]'}`}>
+                                          {CUSTOMER_STATUS_LABELS[step]}
+                                        </span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
 
                             <div className="space-y-3">
                               {items.slice(0, isExpanded ? items.length : 2).map((item, itemIndex) => (

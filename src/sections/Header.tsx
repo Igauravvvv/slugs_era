@@ -23,6 +23,11 @@ export default function Header({ minimal = false }: HeaderProps) {
   const currentView = isHomePage ? 'home' : location.pathname.slice(1);
   const { user, signInWithGoogle } = useAuth();
   const cartCount = getCartCount();
+  const customerFirstName = user
+    ? String(user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'Account')
+        .trim()
+        .split(/\s+/)[0]
+    : null;
 
   useEffect(() => {
     if (!isMobileMenuOpen) return;
@@ -317,7 +322,7 @@ export default function Header({ minimal = false }: HeaderProps) {
             className={`ibtn hidden lg:flex h-9 items-center justify-center gap-2 rounded-full px-3.5 transition-all duration-200 hover:scale-[1.03] ${textColor} ${theme === 'white' ? 'bg-white/10' : 'bg-[#1A1A1A]/5'}`}
           >
             <User size={15} strokeWidth={1.5} />
-            <span className="text-[10px] font-medium uppercase tracking-[0.12em]">{user ? 'Account' : 'Sign in'}</span>
+            <span className="max-w-28 truncate text-[10px] font-medium uppercase tracking-[0.12em]">{user ? customerFirstName : 'Sign in'}</span>
           </button>
         </div>
       </div>
@@ -432,7 +437,7 @@ export default function Header({ minimal = false }: HeaderProps) {
                 className="ibtn hidden lg:flex h-9 items-center justify-center gap-2 rounded-full px-3.5 transition-all duration-200 hover:scale-[1.03] text-[#C0132A] bg-[#1A1A1A]/5 hover:bg-[#C0132A]/10"
               >
                 <User size={15} strokeWidth={1.5} />
-                <span className="text-[10px] font-medium uppercase tracking-[0.12em]">{user ? 'Account' : 'Sign in'}</span>
+                <span className="max-w-28 truncate text-[10px] font-medium uppercase tracking-[0.12em]">{user ? customerFirstName : 'Sign in'}</span>
               </button>
             </div>
           </div>

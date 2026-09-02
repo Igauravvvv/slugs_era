@@ -202,7 +202,7 @@ export function useUpdateAdminOrder() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<AdminOrder> & { id: string }) => {
-      const payload: Record<string, unknown> = { ...updates };
+      const payload: Record<string, unknown> = { ...updates, updated_at: new Date().toISOString() };
       if (updates.notes !== undefined) { payload.admin_note = updates.notes; delete payload.notes; }
       delete payload.customer_name; delete payload.customer_email; delete payload.customer_phone;
       delete payload.shipping_fee; delete payload.payment_method; delete payload.payment_status;
