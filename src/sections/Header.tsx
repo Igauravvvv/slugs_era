@@ -466,14 +466,27 @@ export default function Header({ minimal = false }: HeaderProps) {
       {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && !minimal && (
-          <motion.div
-            initial={{ opacity: 0, x: '-5%' }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '-5%' }}
-            transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-x-0 bottom-0 top-[76px] z-[500] overflow-y-auto bg-[#F9F7F5] lg:hidden"
-          >
-            <nav className="mx-auto w-full max-w-lg px-6 pb-8 pt-7">
+          <>
+            <motion.button
+              key="mobile-menu-backdrop"
+              type="button"
+              aria-label="Close navigation menu"
+              onClick={() => setIsMobileMenuOpen(false)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.24 }}
+              className="fixed inset-x-0 bottom-0 top-[76px] z-[499] bg-black/20 backdrop-blur-[1px] lg:hidden"
+            />
+            <motion.div
+              key="mobile-menu-panel"
+              initial={{ opacity: 0, y: -14, scale: 0.985 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.99 }}
+              transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+              className="fixed inset-x-2 top-[76px] z-[500] max-h-[calc(100dvh-92px)] overflow-y-auto rounded-b-[28px] bg-[#F9F7F5] shadow-[0_24px_60px_rgba(26,26,26,0.20)] lg:hidden"
+            >
+            <nav className="mx-auto w-full max-w-lg px-5 pb-5 pt-6">
               <div className="mb-6">
                 <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-[0.2em] text-[#C0132A]">Menu</p>
                 <h2 className="font-serif text-[28px] font-light leading-tight text-[#1A1A1A]">Explore Slugsera</h2>
@@ -507,7 +520,7 @@ export default function Header({ minimal = false }: HeaderProps) {
                 ))}
               </div>
 
-              <div className="mt-6 bg-white px-4 py-4 shadow-[0_8px_30px_rgba(26,26,26,0.04)] ring-1 ring-[#E8E3DE]">
+              <div className="mt-5 rounded-[20px] bg-white px-4 py-4 shadow-[0_8px_30px_rgba(26,26,26,0.05)] ring-1 ring-[#E8E3DE]">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#C0132A] text-white"><User size={15} /></div>
                   <div className="min-w-0 flex-1">
@@ -527,7 +540,8 @@ export default function Header({ minimal = false }: HeaderProps) {
                 </div>
               </div>
             </nav>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>
