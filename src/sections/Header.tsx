@@ -285,10 +285,10 @@ export default function Header({ minimal = false }: HeaderProps) {
             type="button"
             aria-label={user ? 'Open your profile' : 'Sign in'}
             onClick={() => { if (user) { navigate('/profile'); window.scrollTo(0, 0); } else signInWithGoogle(); }}
-            className={`flex h-9 items-center justify-center gap-1.5 rounded-full px-3 transition-all active:scale-[0.97] lg:hidden ${theme === 'white' ? 'bg-[#710015]/75 text-white backdrop-blur-sm' : 'bg-[#C0132A]/10 text-[#C0132A]'}`}
+            className={`flex h-9 w-9 items-center justify-center gap-1.5 rounded-full px-0 transition-all active:scale-[0.97] min-[440px]:w-auto min-[440px]:px-3 lg:hidden ${theme === 'white' ? 'bg-[#710015]/75 text-white backdrop-blur-sm' : 'bg-[#C0132A]/10 text-[#C0132A]'}`}
           >
             <User size={14} strokeWidth={1.6} />
-            <span className="text-[9px] font-semibold uppercase tracking-[0.1em]">{user ? 'Account' : 'Sign in'}</span>
+            <span className="hidden text-[9px] font-semibold uppercase tracking-[0.1em] min-[440px]:inline">{user ? 'Account' : 'Sign in'}</span>
           </button>
 
           <button
@@ -406,10 +406,10 @@ export default function Header({ minimal = false }: HeaderProps) {
                 type="button"
                 aria-label={user ? 'Open your profile' : 'Sign in'}
                 onClick={() => { if (user) { navigate('/profile'); window.scrollTo(0, 0); } else signInWithGoogle(); }}
-                className="flex h-9 items-center justify-center gap-1.5 rounded-full bg-[#C0132A]/10 px-3 text-[#C0132A] transition-all active:scale-[0.97] lg:hidden"
+                className="flex h-9 w-9 items-center justify-center gap-1.5 rounded-full bg-[#C0132A]/10 px-0 text-[#C0132A] transition-all active:scale-[0.97] min-[440px]:w-auto min-[440px]:px-3 lg:hidden"
               >
                 <User size={14} strokeWidth={1.6} />
-                <span className="text-[9px] font-semibold uppercase tracking-[0.1em]">{user ? 'Account' : 'Sign in'}</span>
+                <span className="hidden text-[9px] font-semibold uppercase tracking-[0.1em] min-[440px]:inline">{user ? 'Account' : 'Sign in'}</span>
               </button>
 
               <button
