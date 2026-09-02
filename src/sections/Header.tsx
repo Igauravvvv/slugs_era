@@ -262,7 +262,7 @@ export default function Header({ minimal = false }: HeaderProps) {
             <motion.span
               role="img"
               aria-label="Slug's Era Logo"
-              className="block h-[52px] lg:h-[72px] w-[89px] lg:w-[123px] transition-transform duration-500 delay-100"
+              className="block h-[46px] w-[76px] transition-transform duration-500 delay-100 lg:h-[72px] lg:w-[123px]"
               style={{
                 backgroundColor: logoColor,
                 WebkitMaskImage: `url(${CDN.LOGO})`,
@@ -280,20 +280,27 @@ export default function Header({ minimal = false }: HeaderProps) {
         </div>
 
         {/* Right Side: Icons */}
-        <div className={`flex items-center justify-end gap-4 ${isTransparent ? 'opacity-0 pointer-events-none' : ''}`}>
+        <div className={`flex items-center justify-end gap-1.5 lg:gap-4 ${isTransparent ? 'opacity-0 pointer-events-none' : ''}`}>
+          <button
+            type="button"
+            aria-label={user ? 'Open your profile' : 'Sign in'}
+            onClick={() => { if (user) { navigate('/profile'); window.scrollTo(0, 0); } else signInWithGoogle(); }}
+            className={`flex h-9 items-center justify-center gap-1.5 rounded-full px-3 transition-all active:scale-[0.97] lg:hidden ${theme === 'white' ? 'bg-[#710015]/75 text-white backdrop-blur-sm' : 'bg-[#C0132A]/10 text-[#C0132A]'}`}
+          >
+            <User size={14} strokeWidth={1.6} />
+            <span className="text-[9px] font-semibold uppercase tracking-[0.1em]">{user ? 'Account' : 'Sign in'}</span>
+          </button>
+
           <button
             type="button"
             aria-label={`Open shopping cart with ${cartCount} items`}
             onClick={goToCart}
-            className={`cartbtn relative lg:w-9 lg:h-9 h-auto py-1.5 px-3 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 gap-1.5 ${theme === 'white' ? 'bg-white text-[#C0132A]' : 'bg-[#C0132A] text-white'
+            className={`cartbtn relative flex h-9 w-9 items-center justify-center rounded-full p-0 transition-all duration-200 hover:scale-105 ${theme === 'white' ? 'bg-white text-[#C0132A]' : 'bg-[#C0132A] text-white'
               }`}
           >
-            <ShoppingBag size={15} strokeWidth={1.5} className="hidden lg:block" />
-            <span className="text-[12px] font-medium tracking-wider lg:hidden">
-              Cart ({cartCount})
-            </span>
+            <ShoppingBag size={15} strokeWidth={1.5} />
             {cartCount > 0 && (
-              <span className={`absolute -top-1 -right-1 text-[9px] w-4 h-4 rounded-full hidden lg:flex items-center justify-center font-medium ${theme === 'white' ? 'bg-[#1A1A1A] text-white' : 'bg-[#1A1A1A] text-white'
+              <span className={`absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-medium ${theme === 'white' ? 'bg-[#1A1A1A] text-white' : 'bg-[#1A1A1A] text-white'
                 }`}>
                 {cartCount}
               </span>
@@ -377,7 +384,7 @@ export default function Header({ minimal = false }: HeaderProps) {
                 <motion.span
                   role="img"
                   aria-label="Slug's Era Logo"
-                  className="block h-[52px] lg:h-[72px] w-[89px] lg:w-[123px] bg-[#C0132A] transition-transform duration-500"
+                  className="block h-[46px] w-[76px] bg-[#C0132A] transition-transform duration-500 lg:h-[72px] lg:w-[123px]"
                   style={{
                     WebkitMaskImage: `url(${CDN.LOGO})`,
                     WebkitMaskPosition: 'center',
@@ -394,17 +401,26 @@ export default function Header({ minimal = false }: HeaderProps) {
             </div>
 
             {/* Right: Cart + User */}
-            <div className="flex items-center justify-end gap-4">
+            <div className="flex items-center justify-end gap-1.5 lg:gap-4">
+              <button
+                type="button"
+                aria-label={user ? 'Open your profile' : 'Sign in'}
+                onClick={() => { if (user) { navigate('/profile'); window.scrollTo(0, 0); } else signInWithGoogle(); }}
+                className="flex h-9 items-center justify-center gap-1.5 rounded-full bg-[#C0132A]/10 px-3 text-[#C0132A] transition-all active:scale-[0.97] lg:hidden"
+              >
+                <User size={14} strokeWidth={1.6} />
+                <span className="text-[9px] font-semibold uppercase tracking-[0.1em]">{user ? 'Account' : 'Sign in'}</span>
+              </button>
+
               <button
                 type="button"
                 aria-label={`Open shopping cart with ${cartCount} items`}
                 onClick={goToCart}
-                className="cartbtn relative lg:w-9 lg:h-9 h-auto py-1.5 px-3 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 gap-1.5 bg-[#C0132A] text-white"
+                className="cartbtn relative flex h-9 w-9 items-center justify-center rounded-full bg-[#C0132A] p-0 text-white transition-all duration-200 hover:scale-105"
               >
-                <ShoppingBag size={15} strokeWidth={1.5} className="hidden lg:block" />
-                <span className="text-[12px] font-medium tracking-wider lg:hidden">Cart ({cartCount})</span>
+                <ShoppingBag size={15} strokeWidth={1.5} />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 text-[9px] w-4 h-4 rounded-full hidden lg:flex items-center justify-center font-medium bg-[#1A1A1A] text-white">
+                  <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#1A1A1A] text-[9px] font-medium text-white">
                     {cartCount}
                   </span>
                 )}
