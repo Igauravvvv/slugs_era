@@ -5,6 +5,7 @@ import { useStore } from '@/store';
 import { useAuth } from '@/context/AuthContext';
 import { initAnalytics, trackPageView } from '@/lib/analytics';
 import { trackCustomerEvent } from '@/lib/customerAnalytics';
+import { startSiteAnalytics } from '@/lib/siteAnalytics';
 
 // Sections — kept eager (above-the-fold on home page)
 import Header from '@/sections/Header';
@@ -297,6 +298,8 @@ function App() {
     trackPageView(location.pathname, document.title);
     void trackCustomerEvent('page_view', { properties: { path: location.pathname } });
   }, [location.pathname]);
+
+  useEffect(() => startSiteAnalytics(location.pathname), [location.pathname]);
 
   // Scroll to top on route change
   useEffect(() => {

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { CDN } from '@/lib/cdn';
 import { useSiteSection } from '@/context/SiteContentContext';
+import { trackSignUp } from '@/lib/analytics';
 
 export default function Newsletter() {
   const [email, setEmail] = useState('');
@@ -34,6 +35,7 @@ export default function Newsletter() {
       const data = await response.json();
 
       if (response.ok) {
+        trackSignUp('newsletter');
         setIsSubmitted(true);
         setEmail('');
         setFeedback({ type: 'success', message: data.message || 'Welcome to The Slow Club!' });

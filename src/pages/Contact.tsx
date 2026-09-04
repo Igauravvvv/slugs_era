@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MessageCircle, Mail, Clock, Send, Instagram } from 'lucide-react';
+import { trackEvent } from '@/lib/analytics';
 
 const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3000');
 
@@ -26,6 +27,7 @@ export default function Contact() {
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.message || 'Unable to send your message.');
+      trackEvent('generate_lead', { form_name: 'contact_form', contact_method: 'website_form' });
       setFeedback({ type: 'success', message: "Message sent. We'll get back to you soon." });
       setFormData({ name: '', email: '', subject: '', message: '' });
     } catch (error) {

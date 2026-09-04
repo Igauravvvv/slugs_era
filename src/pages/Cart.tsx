@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag, ArrowRight, Truck, RotateCcw, ShieldCheck } from 'lucide-react';
@@ -8,6 +8,7 @@ import { getSizeStock } from '@/types';
 import { generateSlug } from '@/types';
 import ProductPrice from '@/components/ProductPrice';
 import InstagramFeed from '@/components/InstagramFeed';
+import { trackAddToCart, trackBeginCheckout, trackRemoveFromCart, trackViewCart } from '@/lib/analytics';
 import {
   FIRST_BUYER_CODE,
   FIRST_BUYER_DISCOUNT,
@@ -59,6 +60,18 @@ export default function Cart() {
       .filter((product) => product.inStock && product.category === category && !cart.some((item) => item.product.id === product.id))
       .slice(0, 3),
   })).filter((group) => group.products.length > 0);
+  const trackedInitialCart = useRef(false);
+
+  useEffect(() => {
+    if (trackedInitialCart.current || cart.length === 0) return;
+    trackedInitialCart.current = true;
+    trackViewCart(total, cart.map((item) => ({
+      id: item.product.id,
+      name: item.product.name,
+      price: item.product.price,
+      quantity: item.quantity,
+    })));
+  }, [cart, total]);
 
   const categoryLabel = (category: string) => ({
     tshirts: 'T-Shirts',
@@ -189,6 +202,14 @@ export default function Cart() {
                       <button
                         aria-label={`Decrease quantity of ${item.product.name}`}
                         onClick={() => {
+                          trackRemoveFromCart({
+                            id: item.product.id,
+                            name: item.product.name,
+                            category: item.product.category,
+                            price: item.product.price,
+                            quantity: 1,
+                            size: item.size,
+                          });
                           if (item.quantity > 1) updateQuantity(item.product.id, item.size, item.color, item.quantity - 1);
                           else removeFromCart(item.product.id, item.size, item.color);
                         }}
@@ -203,6 +224,14 @@ export default function Cart() {
                         onClick={() => {
                           const maxQty = getMaximumQuantity(item);
                           if (item.quantity < maxQty) {
+                            trackAddToCart({
+                              id: item.product.id,
+                              name: item.product.name,
+                              category: item.product.category,
+                              price: item.product.price,
+                              quantity: 1,
+                              size: item.size,
+                            });
                             updateQuantity(item.product.id, item.size, item.color, item.quantity + 1);
                           }
                         }}
@@ -229,7 +258,17 @@ export default function Cart() {
                         compareClassName="text-sm text-[#888880] line-through"
                       />
                       <button
-                        onClick={() => removeFromCart(item.product.id, item.size, item.color)}
+                        onClick={() => {
+                          trackRemoveFromCart({
+                            id: item.product.id,
+                            name: item.product.name,
+                            category: item.product.category,
+                            price: item.product.price,
+                            quantity: item.quantity,
+                            size: item.size,
+                          });
+                          removeFromCart(item.product.id, item.size, item.color);
+                        }}
                         type="button"
                         className="w-10 h-10 sm:w-auto sm:h-auto flex items-center justify-center text-[#888880] hover:text-[#C0132A] transition-colors touch-manipulation"
                       >
@@ -391,6 +430,12 @@ export default function Cart() {
 
             <button
               onClick={() => {
+                trackBeginCheckout(total, cart.map((item) => ({
+                  id: item.product.id,
+                  name: item.product.name,
+                  price: item.product.price,
+                  quantity: item.quantity,
+                })));
                 navigate('/checkout/address');
                 window.scrollTo(0, 0);
               }}

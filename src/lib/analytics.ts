@@ -41,6 +41,7 @@ export function initAnalytics() {
   script.dataset.slugseraAnalytics = 'true';
   document.head.appendChild(script);
   analyticsInitialized = true;
+  window.dispatchEvent(new Event('slugsera:analytics-ready'));
 }
 
 export function disableAnalytics() {
@@ -62,6 +63,10 @@ export function trackPageView(path: string, title?: string) {
 export function trackEvent(eventName: string, params?: Record<string, unknown>) {
   if (!window.gtag || !hasAnalyticsConsent()) return;
   window.gtag('event', eventName, params);
+}
+
+export function isAnalyticsEnabled() {
+  return Boolean(window.gtag && hasAnalyticsConsent() && hasValidMeasurementId());
 }
 
 // ==========================================
@@ -118,6 +123,41 @@ export function trackBeginCheckout(value: number, items: { id: string; name: str
       price: i.price,
       quantity: i.quantity,
     })),
+  });
+}
+
+export function trackViewCart(value: number, items: { id: string; name: string; price: number; quantity: number }[]) {
+  trackEvent('view_cart', {
+    currency: 'INR',
+    value,
+    items: items.map(i => ({
+      item_id: i.id,
+      item_name: i.name,
+      price: i.price,
+      quantity: i.quantity,
+    })),
+  });
+}
+
+export function trackRemoveFromCart(item: {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  quantity: number;
+  size: string;
+}) {
+  trackEvent('remove_from_cart', {
+    currency: 'INR',
+    value: item.price * item.quantity,
+    items: [{
+      item_id: item.id,
+      item_name: item.name,
+      item_category: item.category,
+      price: item.price,
+      quantity: item.quantity,
+      item_variant: item.size,
+    }],
   });
 }
 
