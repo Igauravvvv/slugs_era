@@ -52,7 +52,6 @@ export default function Hero() {
     offset: ["start start", "end start"]
   });
 
-  const rightBlockX = useTransform(scrollYProgress, [0, 1], [0, 400]);
   const leftBlockX = useTransform(scrollYProgress, [0, 1], [0, -400]);
 
   // Autoplay Slider
@@ -145,9 +144,6 @@ export default function Hero() {
       <path d="M12.5,12 C14.5,17 20.5,21 20.5,14 C20.5,11.5 14.5,13.5 12.5,12 Z" />
     </svg>
   );
-
-  const isTitleRightAligned = hasCustomHero || currentImage === HERO_IMAGES[0] || currentImage === HERO_IMAGES[2];
-  const isMobileTitleRightAligned = hasCustomHero || currentImage === HERO_IMAGES[1] || currentImage === HERO_IMAGES[3];
 
   const handleNext = () => {
     const currentIndex = HERO_IMAGES.indexOf(currentImage);
@@ -288,34 +284,21 @@ export default function Hero() {
 
       {/* Top Title Block */}
       <motion.div 
-        layout
-        className={`absolute top-[100px] sm:top-32 md:top-48 z-20 flex flex-col w-[calc(100%-3rem)] sm:w-full max-w-2xl ${
-          isMobileTitleRightAligned
-            ? 'left-auto right-5 items-end text-right'
-            : 'left-5 right-auto items-start text-left'
-        } ${
-          isTitleRightAligned
-            ? 'sm:left-auto sm:right-6 md:right-12 lg:right-24 sm:items-end sm:text-right'
-            : 'sm:left-12 sm:right-auto md:left-24 lg:left-40 sm:items-start sm:text-left'
-        }`}
+        className="absolute top-[100px] left-5 right-auto sm:top-32 sm:left-12 md:top-48 md:left-24 lg:left-40 z-20 flex w-[calc(100%-3rem)] max-w-2xl flex-col items-start text-left"
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.8, layout: { duration: 0.8, ease: "easeInOut" } }}
-        style={{ x: isTitleRightAligned ? rightBlockX : leftBlockX, willChange: "transform" }}
+        transition={{ delay: 0.2, duration: 0.8 }}
       >
         {/* Top Text */}
-        <motion.div layout className={`flex items-center gap-2 sm:gap-4 text-white text-[8px] sm:text-[10px] md:text-xs tracking-[0.15em] sm:tracking-[0.2em] uppercase mb-2 sm:mb-4 md:mb-6 opacity-80 ${
-          isTitleRightAligned ? 'md:mr-6 lg:mr-12' : ''
-        }`}>
+        <div className="mb-2 flex items-center gap-2 text-[8px] uppercase tracking-[0.15em] text-white opacity-80 sm:mb-4 sm:gap-4 sm:text-[10px] sm:tracking-[0.2em] md:mb-6 md:text-xs">
           <span className="w-6 sm:w-8 md:w-12 h-[1px] bg-white/60 hidden sm:block"></span>
           <span>{section?.subtitle || 'MOVEMENT. NOT MERCH — NEW SEASON'}</span>
-        </motion.div>
+        </div>
 
         {/* The logo is the page's primary visual heading. */}
         <h1>
           <span className="sr-only">Slugsera premium oversized streetwear made in India</span>
-          <motion.img
-            layout
+          <img
             src="/images/texttttlogo.webp"
             alt=""
             aria-hidden="true"
