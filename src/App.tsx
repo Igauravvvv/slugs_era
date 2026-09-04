@@ -188,7 +188,7 @@ function HomeView() {
   return (
     <div className="flex flex-col">
       <SEOHead
-        title="Slugsera | Premium Oversized Streetwear Made in India"
+        title="Slug's Era"
         description="Shop Slugsera heavyweight oversized T-shirts, graphic hoodies and printed shirts—independent slow-fashion streetwear designed in Delhi for India."
         keywords={['streetwear Delhi', 'streetwear Noida', 'streetwear Gurugram', 'oversized t-shirts Delhi NCR', 'Indian slow fashion brand']}
         url="/"

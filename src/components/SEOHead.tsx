@@ -61,7 +61,8 @@ export default function SEOHead({
     document.head.querySelectorAll('[data-static-seo="true"]').forEach((element) => element.remove());
   }, []);
 
-  const isBrandIncluded = title?.toLowerCase().includes('slugs') || title?.toLowerCase().includes('slugsera');
+  const normalizedTitle = title?.toLowerCase();
+  const isBrandIncluded = normalizedTitle?.includes(SITE_NAME.toLowerCase()) || normalizedTitle?.includes('slugsera');
   const fullTitle = title 
     ? (isBrandIncluded ? title : `${title} | ${SITE_NAME} (Slugsera)`) 
     : `${SITE_NAME} (Slugsera) — Premium Slow Fashion Streetwear | MOVEMENT. not merch`;
