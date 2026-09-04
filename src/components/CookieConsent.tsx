@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { disableAnalytics, initAnalytics } from '@/lib/analytics';
+import { disableAnalytics, initAnalytics, trackPageView } from '@/lib/analytics';
 
 export const COOKIE_CONSENT_KEY = 'slugsera_cookie_consent_v1';
 type ConsentChoice = 'accepted' | 'rejected';
@@ -17,7 +17,12 @@ export default function CookieConsent() {
   useEffect(() => { if (location.hash === '#cookie-settings') setIsOpen(true); }, [location.hash]);
   const saveChoice = (choice: ConsentChoice) => {
     try { localStorage.setItem(COOKIE_CONSENT_KEY, choice); } catch { /* Storage can be unavailable. */ }
-    if (choice === 'accepted') initAnalytics(); else disableAnalytics();
+    if (choice === 'accepted') {
+      initAnalytics();
+      trackPageView(location.pathname, document.title);
+    } else {
+      disableAnalytics();
+    }
     setIsOpen(false);
     if (location.hash === '#cookie-settings') navigate(location.pathname, { replace: true });
   };
