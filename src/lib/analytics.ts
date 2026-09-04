@@ -25,29 +25,34 @@ function hasValidMeasurementId() {
   return /^G-[A-Z0-9]+$/i.test(GA_ID);
 }
 
-/** Load Google Analytics only after the visitor explicitly accepts analytics cookies. */
+/** Enable the preloaded Google tag only after the visitor accepts analytics cookies. */
 export function initAnalytics() {
   if (analyticsInitialized || !hasAnalyticsConsent() || !hasValidMeasurementId()) return;
 
   window.dataLayer = window.dataLayer || [];
-  window.gtag = (...args: unknown[]) => window.dataLayer.push(args);
-  window.gtag('consent', 'default', { analytics_storage: 'granted' });
-  window.gtag('js', new Date());
+  window.gtag = window.gtag || ((...args: unknown[]) => window.dataLayer.push(args));
+  (window as Window & Record<string, unknown>)[`ga-disable-${GA_ID}`] = false;
+  window.gtag('consent', 'update', {
+    analytics_storage: 'granted',
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+  });
   window.gtag('config', GA_ID, { anonymize_ip: true, send_page_view: false });
-
-  const script = document.createElement('script');
-  script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(GA_ID)}`;
-  script.dataset.slugseraAnalytics = 'true';
-  document.head.appendChild(script);
   analyticsInitialized = true;
   window.dispatchEvent(new Event('slugsera:analytics-ready'));
 }
 
 export function disableAnalytics() {
   if (!hasValidMeasurementId()) return;
-  window.gtag?.('consent', 'update', { analytics_storage: 'denied' });
+  window.gtag?.('consent', 'update', {
+    analytics_storage: 'denied',
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+  });
   (window as Window & Record<string, unknown>)[`ga-disable-${GA_ID}`] = true;
+  analyticsInitialized = false;
 }
 
 /** Track a page view */
