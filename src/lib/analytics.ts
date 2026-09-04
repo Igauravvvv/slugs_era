@@ -25,39 +25,38 @@ function hasValidMeasurementId() {
   return /^G-[A-Z0-9]+$/i.test(GA_ID);
 }
 
-/** Enable the preloaded Google tag only after the visitor accepts analytics cookies. */
-export function initAnalytics() {
-  if (analyticsInitialized || !hasAnalyticsConsent() || !hasValidMeasurementId()) return;
-
-  window.dataLayer = window.dataLayer || [];
-  window.gtag = window.gtag || ((...args: unknown[]) => window.dataLayer.push(args));
-  (window as Window & Record<string, unknown>)[`ga-disable-${GA_ID}`] = false;
+function updateConsent(granted: boolean) {
   window.gtag('consent', 'update', {
-    analytics_storage: 'granted',
+    analytics_storage: granted ? 'granted' : 'denied',
     ad_storage: 'denied',
     ad_user_data: 'denied',
     ad_personalization: 'denied',
   });
+}
+
+/** Initialize advanced consent mode. Without consent, events remain cookieless. */
+export function initAnalytics() {
+  if (!hasValidMeasurementId()) return;
+
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = window.gtag || ((...args: unknown[]) => window.dataLayer.push(args));
+  (window as Window & Record<string, unknown>)[`ga-disable-${GA_ID}`] = false;
+  updateConsent(hasAnalyticsConsent());
+
+  if (analyticsInitialized) return;
   window.gtag('config', GA_ID, { anonymize_ip: true, send_page_view: false });
   analyticsInitialized = true;
   window.dispatchEvent(new Event('slugsera:analytics-ready'));
 }
 
 export function disableAnalytics() {
-  if (!hasValidMeasurementId()) return;
-  window.gtag?.('consent', 'update', {
-    analytics_storage: 'denied',
-    ad_storage: 'denied',
-    ad_user_data: 'denied',
-    ad_personalization: 'denied',
-  });
-  (window as Window & Record<string, unknown>)[`ga-disable-${GA_ID}`] = true;
-  analyticsInitialized = false;
+  if (!hasValidMeasurementId() || !window.gtag) return;
+  updateConsent(false);
 }
 
 /** Track a page view */
 export function trackPageView(path: string, title?: string) {
-  if (!window.gtag || !hasAnalyticsConsent() || !hasValidMeasurementId()) return;
+  if (!window.gtag || !hasValidMeasurementId()) return;
   window.gtag('config', GA_ID, {
     page_path: path,
     page_title: title,
@@ -66,12 +65,12 @@ export function trackPageView(path: string, title?: string) {
 
 /** Track a custom event */
 export function trackEvent(eventName: string, params?: Record<string, unknown>) {
-  if (!window.gtag || !hasAnalyticsConsent()) return;
+  if (!window.gtag || !hasValidMeasurementId()) return;
   window.gtag('event', eventName, params);
 }
 
 export function isAnalyticsEnabled() {
-  return Boolean(window.gtag && hasAnalyticsConsent() && hasValidMeasurementId());
+  return Boolean(window.gtag && hasValidMeasurementId());
 }
 
 // ==========================================
