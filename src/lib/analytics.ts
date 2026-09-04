@@ -8,7 +8,7 @@ declare global {
   }
 }
 
-const GA_ID = import.meta.env.VITE_GA4_MEASUREMENT_ID || '';
+const GA_ID = import.meta.env.VITE_GA4_MEASUREMENT_ID || 'G-K3BM0SRVJ8';
 const CONSENT_KEY = 'slugsera_cookie_consent_v1';
 let analyticsInitialized = false;
 
