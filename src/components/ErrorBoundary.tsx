@@ -40,7 +40,7 @@ export default class ErrorBoundary extends React.Component<ErrorBoundaryProps, E
                 <line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
             </div>
-            <h1 style={{ fontFamily: "'Cormorant Garamond', serif" }} className="text-3xl font-light text-[#1A1A1A] mb-3">
+            <h1 style={{ fontFamily: "'Trap', Arial, sans-serif" }} className="text-3xl font-light text-[#1A1A1A] mb-3">
               Something went wrong
             </h1>
             <p className="text-sm text-[#888880] mb-8 leading-relaxed">

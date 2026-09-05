@@ -234,7 +234,7 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 
   if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-6 px-4 bg-[#F6F6F4]" style={{ fontFamily: "'Inter', 'DM Sans', sans-serif" }}>
+      <div className="flex flex-col items-center justify-center min-h-screen gap-6 px-4 bg-[#F6F6F4]" style={{ fontFamily: "'Trap', Arial, sans-serif" }}>
         <div className="w-16 h-16 rounded-full bg-[#C0132A]/10 flex items-center justify-center">
           <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#C0132A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
@@ -256,7 +256,7 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 
   if (!ADMIN_EMAILS.includes(user.email || '')) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-6 px-4 bg-[#F6F6F4]" style={{ fontFamily: "'Inter', 'DM Sans', sans-serif" }}>
+      <div className="flex flex-col items-center justify-center min-h-screen gap-6 px-4 bg-[#F6F6F4]" style={{ fontFamily: "'Trap', Arial, sans-serif" }}>
         <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
           <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#C0132A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" />

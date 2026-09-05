@@ -90,7 +90,7 @@ export default function Values() {
             x: typeof window !== 'undefined' && window.innerWidth >= 1024 ? contentX : 0,
           }}
         >
-          <h2 className="font-display font-light italic text-4xl md:text-6xl lg:text-[70px] text-[#C0132A] whitespace-nowrap">
+          <h2 className="font-display font-light italic text-4xl md:text-6xl lg:text-[70px] text-[#C0132A] max-w-full">
             {eyebrow}
           </h2>
         </motion.div>

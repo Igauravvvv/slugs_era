@@ -73,7 +73,7 @@ export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
             <Sparkles size={28} className="text-white" />
           </div>
           <h1 className="text-3xl font-bold tracking-wider text-[#F5F5F5]"
-            style={{ fontFamily: "'Playfair Display', serif" }}>
+            style={{ fontFamily: "'Trap', Arial, sans-serif" }}>
             SLUGSERA
           </h1>
           <p className="text-sm text-[#888] mt-1 tracking-wide">CMS Dashboard</p>

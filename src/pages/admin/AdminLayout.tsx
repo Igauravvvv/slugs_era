@@ -81,7 +81,7 @@ export default function AdminLayout() {
   const isProductEditPage = location.pathname.includes('/products/') && (location.pathname.endsWith('/edit') || location.pathname.endsWith('/new'));
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#F6F6F4]" style={{ fontFamily: "'Inter', 'DM Sans', sans-serif" }}>
+    <div className="flex h-screen overflow-hidden bg-[#F6F6F4]" style={{ fontFamily: "'Trap', Arial, sans-serif" }}>
       {/* Mobile overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" onClick={() => setMobileOpen(false)} />
