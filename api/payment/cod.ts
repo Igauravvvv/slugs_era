@@ -1,3 +1,4 @@
+import { sendOrderEmail } from '../_lib/order-email.js';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import crypto from 'crypto';
 import { priceCheckout } from '../_lib/checkout.js';
@@ -65,6 +66,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         message: `Order ${order.order_number} — ₹${order.total} due on delivery`,
         metadata: { order_id: order.id, order_number: order.order_number, total: order.total } }),
     }).catch(() => undefined);
+    await sendOrderEmail(order);
     return respond(order);
   } catch (error: unknown) {
     const failure = error as { statusCode?: number; message?: string };

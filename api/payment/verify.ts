@@ -1,3 +1,4 @@
+import { sendOrderEmail } from '../_lib/order-email.js';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import crypto from 'crypto';
 import { parsePromoCodes, priceCheckout } from '../_lib/checkout.js';
@@ -212,7 +213,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       throw new Error('Payment succeeded, but the order could not be saved. Please contact support with your payment ID.');
     }
     const inserted = await insertResponse.json() as any[];
-    await ensureOrderNotification(inserted[0], url, dbHeaders);
+    await Promise.all([ensureOrderNotification(inserted[0], url, dbHeaders), sendOrderEmail(inserted[0])]);
     return res.status(200).json({
       success: true,
       data: { message: 'Payment verified and order saved', orderNumber, order: inserted[0] },

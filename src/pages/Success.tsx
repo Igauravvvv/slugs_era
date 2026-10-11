@@ -1,11 +1,14 @@
-import { useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Check, Package, Truck, Mail, ArrowRight } from 'lucide-react';
 import { useStore } from '@/store';
+import { supabase } from '@/lib/supabase';
 
 export default function Success() {
   const navigate = useNavigate();
+  const reduceMotion = useReducedMotion();
+  const [savedOrder, setSavedOrder] = useState<{ order_number: string; total: number; shipping_address?: { paymentMethod?: string } } | null>(null);
   const location = useLocation();
   const { lastCompletedOrderId, setLastCompletedOrderId } = useStore();
 
@@ -13,38 +16,53 @@ export default function Success() {
   // or fall back to the store's lastCompletedOrderId
   const navState = location.state as { orderNumber?: string; orderId?: string; total?: number; paymentMethod?: string } | null;
   
-  const orderNumber = navState?.orderNumber
-    || (lastCompletedOrderId ? `SLG-${lastCompletedOrderId.slice(0, 6).toUpperCase()}` : null);
-  const orderTotal = navState?.total;
+  const orderId = navState?.orderId || lastCompletedOrderId;
+  const displayOrderNumber = navState?.orderNumber || savedOrder?.order_number;
+  const orderTotal = navState?.total ?? savedOrder?.total;
+  const paymentMethod = navState?.paymentMethod || savedOrder?.shipping_address?.paymentMethod;
 
-  // Clean up the completed order flag after displaying
   useEffect(() => {
-    return () => {
-      // Clear on unmount so user can't revisit stale success page
-      setLastCompletedOrderId(null);
-    };
-  }, [setLastCompletedOrderId]);
+    if (!orderId) { navigate('/profile', { replace: true }); return; }
+    if (navState?.orderNumber) return;
+    let active = true;
+    supabase.from('orders').select('order_number,total,shipping_address').eq('id', orderId).single().then(({ data, error }) => {
+      if (!active) return;
+      if (error || !data) { setLastCompletedOrderId(null); navigate('/profile', { replace: true }); }
+      else setSavedOrder(data);
+    });
+    return () => { active = false; };
+  }, [orderId, navState?.orderNumber, navigate, setLastCompletedOrderId]);
 
-  // If there's no order context at all, show a generic success
-  // (e.g., user navigated directly to /order-success)
-  const displayOrderNumber = orderNumber || 'N/A';
+  if (!orderId || !displayOrderNumber) return <div className="min-h-[60vh] flex items-center justify-center" role="status">Loading your order…</div>;
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-6 py-16">
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={reduceMotion ? false : { opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
         className="max-w-lg w-full text-center"
       >
+        <div className="relative" aria-hidden="true">
+          {!reduceMotion && Array.from({ length: 16 }, (_, index) => (
+            <motion.span key={index} className="absolute left-1/2 top-12 h-2 w-2 rounded-sm"
+              style={{ backgroundColor: ['#C0132A', '#D6B56D', '#1A1A1A'][index % 3] }}
+              initial={{ x: 0, y: 0, opacity: 0, scale: 0 }}
+              animate={{ x: Math.cos(index * Math.PI / 8) * 140, y: Math.sin(index * Math.PI / 8) * 90, opacity: [0, 1, 0], scale: [0, 1, 0.5], rotate: index * 45 }}
+              transition={{ duration: 1.4, delay: 0.25, ease: 'easeOut' }} />
+          ))}
+        </div>
         {/* Success Icon */}
         <motion.div
-          initial={{ scale: 0 }}
+          initial={reduceMotion ? false : { scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ duration: 0.5, delay: 0.2, type: 'spring' }}
           className="w-24 h-24 bg-[#C0132A] rounded-full flex items-center justify-center mx-auto mb-8"
         >
-          <Check size={48} className="text-white" strokeWidth={2} />
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+            <motion.path d="M10 25L20 35L38 14" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
+              initial={reduceMotion ? false : { pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.5, delay: 0.5 }} />
+          </svg>
         </motion.div>
 
         {/* Title */}
@@ -57,15 +75,20 @@ export default function Success() {
           Thank you for your purchase. We've received your order. You can track its progress in your profile.
         </p>
 
+        <motion.div role="status" aria-live="polite" className="mb-6"
+          initial={reduceMotion ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }}>
+          <p className="text-xs uppercase tracking-[0.18em] text-[#888880]">Your order ID</p>
+          <p className="mt-2 text-2xl font-semibold tracking-wide text-[#C0132A]">{displayOrderNumber}</p>
+        </motion.div>
         {/* Order Details */}
         <div className="bg-[#F9F7F5] p-6 mb-8">
           <div className="flex items-center justify-between mb-4">
             <span className="text-sm text-[#888880]">Order Number</span>
             <span className="font-medium">#{displayOrderNumber}</span>
           </div>
-          {orderTotal && (
+          {orderTotal !== undefined && (
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm text-[#888880]">{navState?.paymentMethod === 'COD' ? 'Due on delivery (COD)' : 'Total Paid'}</span>
+              <span className="text-sm text-[#888880]">{paymentMethod === 'COD' ? 'Due on delivery (COD)' : 'Total Paid'}</span>
               <span className="font-medium">₹{orderTotal.toLocaleString()}</span>
             </div>
           )}

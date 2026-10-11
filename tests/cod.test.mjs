@@ -10,7 +10,7 @@ const dir = await mkdtemp(join(tmpdir(), 'cod-test-'));
 await mkdir(join(dir, '_lib'));
 await mkdir(join(dir, 'payment'));
 await writeFile(join(dir, 'package.json'), '{"type":"module"}');
-for (const file of ['_lib/checkout', 'payment/cod']) {
+for (const file of ['_lib/checkout', '_lib/order-email', 'payment/cod']) {
   const source = await readFile(`api/${file}.ts`, 'utf8');
   await writeFile(join(dir, `${file}.js`), ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText);
 }
@@ -73,5 +73,17 @@ await test('COD authentication, validation, server pricing, stock and retry prot
     assert.equal((await call()).data.data.order.id, results[0].data.data.order.id);
     assert.equal(inserts, 1);
   } finally { globalThis.fetch = originalFetch; }
+});
+const { orderEmail } = await import(pathToFileURL(join(dir, '_lib/order-email.js')));
+await test('order emails include the saved ID, items and correct collection status', () => {
+  const order = { id: 'order-123', order_number: 'SLG-ABC', total: 1999, items: [{ name: 'Shirt', quantity: 2, size: 'M' }], shipping_address: { paymentMethod: 'COD', fullName: 'Buyer', street: '123 Test Street' } };
+  const cod = orderEmail(order);
+  assert.match(cod.subject, /New COD order received/);
+  assert.match(cod.text, /Order ID: order-123/);
+  assert.match(cod.text, /Collect on delivery: INR 1999.00/);
+  assert.match(cod.text, /Shirt × 2 \/ M/);
+  const paid = orderEmail({ ...order, payment_id: 'pay_123', shipping_address: {} });
+  assert.match(paid.text, /Razorpay — paid/);
+  assert.doesNotMatch(paid.text, /Collect on delivery/);
 });
 await rm(dir, { recursive: true, force: true });
