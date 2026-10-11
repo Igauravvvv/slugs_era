@@ -72,7 +72,7 @@ const faqSections: { title: string; icon: React.ElementType; items: FAQItem[] }[
     items: [
       {
         question: 'What payment methods do you accept?',
-        answer: 'We accept all major credit/debit cards, UPI (GPay, PhonePe, Paytm), net banking, and wallets. All payments are processed securely via Razorpay.',
+        answer: 'We accept all major credit/debit cards, UPI (GPay, PhonePe, Paytm), net banking, and wallets. Online payments are processed securely via Razorpay. Cash on delivery (COD) is also available at checkout.',
       },
       {
         question: 'Can I cancel my order?',

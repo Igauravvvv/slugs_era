@@ -1,4 +1,6 @@
 import express from 'express';
+import codHandler from '../../api/payment/cod';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import { body, validationResult } from 'express-validator';
@@ -8,6 +10,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const paymentRouter = express.Router();
+paymentRouter.post('/cod', (req, res) => codHandler(req as unknown as VercelRequest, res as unknown as VercelResponse));
 
 // Instantiate later so we don't crash the server on boot if keys are missing
 

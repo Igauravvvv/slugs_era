@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, CreditCard, Wallet, Banknote, Shield, Lock } from 'lucide-react';
@@ -25,6 +25,8 @@ export default function Payment() {
   const { cart, getCartTotal, selectedAddress, clearCart, setLastCompletedOrderId, promoCode, bundlePromoCode } = useStore();
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'online' | 'cod'>('online');
+  const submissionLock = useRef(false);
   const [paymentError, setPaymentError] = useState('');
 
   const subtotal = getCartTotal();
@@ -62,14 +64,38 @@ export default function Payment() {
   };
 
   const handlePayment = async () => {
+    if (submissionLock.current) return;
+    submissionLock.current = true;
     setIsProcessing(true);
     setPaymentError('');
     
     try {
+      if (paymentMethod === 'cod') {
+        const checkout = {
+          items: cart.map(i => ({ productId: i.product.id, size: i.size, color: i.color, quantity: i.quantity })),
+          promoCodes, customerName: selectedAddress?.fullName, customerPhone: selectedAddress?.phone,
+          shippingAddress: selectedAddress ? {
+            street: [selectedAddress.addressLine1, selectedAddress.addressLine2].filter(Boolean).join(', '),
+            city: selectedAddress.city, state: selectedAddress.state, pincode: selectedAddress.pincode, country: 'India',
+          } : null,
+        };
+        const retryKey = `cod-checkout:${user?.id}:${JSON.stringify(checkout)}`;
+        const requestId = sessionStorage.getItem(retryKey) || crypto.randomUUID();
+        sessionStorage.setItem(retryKey, requestId);
+        const result = await api.post<{ success: boolean; data?: { order: { id: string; order_number: string; total: number } } }>('/api/payment/cod', { ...checkout, requestId });
+        const order = result.data?.order;
+        if (!result.success || !order?.id) throw new Error('Could not confirm your COD order. Please retry.');
+        setLastCompletedOrderId(order.id);
+        clearCart();
+        sessionStorage.removeItem(retryKey);
+        navigate('/order-success', { state: { orderId: order.id, orderNumber: order.order_number, total: order.total, paymentMethod: 'COD' } });
+        setIsProcessing(false); submissionLock.current = false;
+        return;
+      }
       const loaded = await loadRazorpay();
       if (!loaded) {
         setPaymentError('Razorpay checkout could not load. Check your connection or disable the browser blocker, then retry.');
-        setIsProcessing(false);
+        setIsProcessing(false); submissionLock.current = false;
         return;
       }
 
@@ -134,10 +160,10 @@ export default function Payment() {
           } else {
             setPaymentError(verifyData.error || 'Payment verification failed. Contact support.');
           }
-          setIsProcessing(false);
+          setIsProcessing(false); submissionLock.current = false;
         },
         modal: {
-          ondismiss: () => { setIsProcessing(false); },
+          ondismiss: () => { setIsProcessing(false); submissionLock.current = false; },
         },
       };
 
@@ -145,7 +171,7 @@ export default function Payment() {
       razorpay.on('payment.failed', (response: any) => {
         const description = response?.error?.description || response?.error?.reason || 'Razorpay declined the payment attempt.';
         setPaymentError(`Razorpay: ${description}`);
-        setIsProcessing(false);
+        setIsProcessing(false); submissionLock.current = false;
       });
       razorpay.open();
     } catch (err) {
@@ -153,7 +179,7 @@ export default function Payment() {
       const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
       const source = (err as any)?.source;
       setPaymentError(source === 'razorpay' ? `Razorpay: ${message}` : message);
-      setIsProcessing(false);
+      setIsProcessing(false); submissionLock.current = false;
     }
   };
 
@@ -179,8 +205,20 @@ export default function Payment() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-12">
           {/* Payment Methods */}
           <div>
+            <fieldset disabled={isProcessing} className="space-y-3 mb-6">
+              <legend className="font-medium mb-3">Choose payment method</legend>
+              <label className="flex items-center gap-3 border p-4 cursor-pointer">
+                <input type="radio" name="paymentMethod" checked={paymentMethod === 'online'} onChange={() => setPaymentMethod('online')} />
+                Pay online — UPI, cards or netbanking
+              </label>
+              <label className="flex items-center gap-3 border p-4 cursor-pointer">
+                <input type="radio" name="paymentMethod" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} />
+                Cash on delivery — pay when your order arrives
+              </label>
+            </fieldset>
+            {paymentMethod === 'cod' && <p className="mb-6 text-sm">₹{total.toLocaleString()} due on delivery. No online payment required.</p>}
             {/* Payment Method Info */}
-            <div className="space-y-4 mb-8">
+            <div className="space-y-4 mb-8" hidden={paymentMethod === 'cod'}>
               <div className="p-6 border border-[#1A1A1A] bg-[#F9F7F5]">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-10 h-10 rounded-full bg-[#1A1A1A] flex items-center justify-center flex-shrink-0">
@@ -318,7 +356,7 @@ export default function Payment() {
                 </>
               ) : (
                 <>
-                  Pay ₹{total.toLocaleString()}
+                  {paymentMethod === 'cod' ? 'Place COD order' : `Pay ₹${total.toLocaleString()}`}
                   <ArrowRight size={14} />
                 </>
               )}

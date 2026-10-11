@@ -57,11 +57,11 @@ async function assertFirstBuyerEligible({ url, serviceKey }: CheckoutConfig, use
   const headers = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
   const paidOrdersUrl = new URL(`${url}/rest/v1/orders`);
   paidOrdersUrl.searchParams.set('select', 'id');
-  paidOrdersUrl.searchParams.set('payment_id', 'not.is.null');
+  paidOrdersUrl.searchParams.set('or', '(payment_id.not.is.null,shipping_address->>paymentMethod.eq.COD)');
   paidOrdersUrl.searchParams.set('limit', '100');
   const customerOrdersUrl = new URL(`${url}/rest/v1/orders`);
   customerOrdersUrl.searchParams.set('select', 'id');
-  customerOrdersUrl.searchParams.set('payment_id', 'not.is.null');
+  customerOrdersUrl.searchParams.set('or', '(payment_id.not.is.null,shipping_address->>paymentMethod.eq.COD)');
   customerOrdersUrl.searchParams.set('user_id', `eq.${userId}`);
   customerOrdersUrl.searchParams.set('limit', '1');
   const [paidResponse, customerResponse] = await Promise.all([

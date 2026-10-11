@@ -237,11 +237,11 @@ function OrderDetail({ order, onBack, onUpdateStatus, onCancel }: {
           <div className="rounded-2xl p-5" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))', border: '1px solid rgba(255,255,255,0.06)' }}>
             <h3 className="text-white font-semibold mb-3">Payment</h3>
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-gray-400">Method</span><span className="text-white">Razorpay</span></div>
+              <div className="flex justify-between"><span className="text-gray-400">Method</span><span className="text-white">{order.shipping_address?.paymentMethod || order.payment_method || (order.payment_id ? 'Razorpay' : 'Unknown')}</span></div>
               {order.payment_id && <div className="flex justify-between"><span className="text-gray-400">Payment ID</span><span className="text-white text-xs font-mono">{order.payment_id}</span></div>}
               <div className="flex justify-between"><span className="text-gray-400">Status</span>
                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${order.status === 'cancelled' ? 'bg-red-500/10 text-red-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
-                  {order.status === 'cancelled' ? 'REFUNDED' : 'PAID'}
+                  {(order.payment_status || order.shipping_address?.paymentStatus || (order.payment_id ? 'Paid' : 'Pending')).toUpperCase()}
                 </span>
               </div>
             </div>

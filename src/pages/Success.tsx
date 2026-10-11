@@ -11,7 +11,7 @@ export default function Success() {
 
   // Try to get order data from navigation state (passed from Payment)
   // or fall back to the store's lastCompletedOrderId
-  const navState = location.state as { orderNumber?: string; orderId?: string; total?: number } | null;
+  const navState = location.state as { orderNumber?: string; orderId?: string; total?: number; paymentMethod?: string } | null;
   
   const orderNumber = navState?.orderNumber
     || (lastCompletedOrderId ? `SLG-${lastCompletedOrderId.slice(0, 6).toUpperCase()}` : null);
@@ -54,7 +54,7 @@ export default function Success() {
 
         {/* Message */}
         <p className="text-[#888880] mb-6">
-          Thank you for your purchase. We've received your order and will send you a confirmation email shortly.
+          Thank you for your purchase. We've received your order. You can track its progress in your profile.
         </p>
 
         {/* Order Details */}
@@ -65,7 +65,7 @@ export default function Success() {
           </div>
           {orderTotal && (
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm text-[#888880]">Total Paid</span>
+              <span className="text-sm text-[#888880]">{navState?.paymentMethod === 'COD' ? 'Due on delivery (COD)' : 'Total Paid'}</span>
               <span className="font-medium">₹{orderTotal.toLocaleString()}</span>
             </div>
           )}

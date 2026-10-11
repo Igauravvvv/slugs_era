@@ -10,7 +10,8 @@ function readChoice(): ConsentChoice | null {
 }
 
 export default function CookieConsent() {
-  const [isOpen, setIsOpen] = useState(() => readChoice() === null);
+  // Open only when a visitor chooses Cookie Settings in the footer.
+  const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   useEffect(() => { if (readChoice() === 'accepted') initAnalytics(); }, []);

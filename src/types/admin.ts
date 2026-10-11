@@ -22,6 +22,8 @@ export interface OrderItem {
 }
 
 export interface ShippingAddress {
+  paymentMethod?: string;
+  paymentStatus?: string;
   full_name: string;
   phone: string;
   address_line1: string;
@@ -52,6 +54,8 @@ export interface Order {
   tracking_number: string | null;
   courier: string | null;
   payment_id: string | null;
+  payment_method?: string;
+  payment_status?: string;
   shipping_address: ShippingAddress | null;
   admin_note: string;
   created_at: string;
