@@ -136,6 +136,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!existingResponse.ok) throw new Error('Could not check the saved order.');
     const existing = await existingResponse.json() as any[];
     if (existing[0]) {
+      if (existing[0].user_id !== user.id) return res.status(403).json({ success: false, error: 'This order belongs to another account.' });
+      await sendOrderEmail(existing[0]);
       return res.status(200).json({
         success: true,
         data: { message: 'Order already saved', orderNumber: existing[0].order_number, order: existing[0] },

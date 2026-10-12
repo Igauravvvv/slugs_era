@@ -4,10 +4,13 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Check, Package, Truck, Mail, ArrowRight } from 'lucide-react';
 import { useStore } from '@/store';
 import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 
 export default function Success() {
   const navigate = useNavigate();
   const reduceMotion = useReducedMotion();
+  const [emailState, setEmailState] = useState<'checking' | 'sent' | 'pending'>('checking');
+  const [emailAttempt, setEmailAttempt] = useState(0);
   const [savedOrder, setSavedOrder] = useState<{ order_number: string; total: number; shipping_address?: { paymentMethod?: string } } | null>(null);
   const location = useLocation();
   const { lastCompletedOrderId, setLastCompletedOrderId } = useStore();
@@ -32,6 +35,15 @@ export default function Success() {
     });
     return () => { active = false; };
   }, [orderId, navState?.orderNumber, navigate, setLastCompletedOrderId]);
+
+  useEffect(() => {
+    if (!orderId || !displayOrderNumber) return;
+    let active = true;
+    api.post<{ delivery: { customer: boolean } }>('/api/payment/order-notifications', { orderId })
+      .then(result => { if (active) setEmailState(result.delivery.customer ? 'sent' : 'pending'); })
+      .catch(() => { if (active) setEmailState('pending'); });
+    return () => { active = false; };
+  }, [orderId, displayOrderNumber, emailAttempt]);
 
   if (!orderId || !displayOrderNumber) return <div className="min-h-[60vh] flex items-center justify-center" role="status">Loading your order…</div>;
 
@@ -80,6 +92,14 @@ export default function Success() {
           <p className="text-xs uppercase tracking-[0.18em] text-[#888880]">Your order ID</p>
           <p className="mt-2 text-2xl font-semibold tracking-wide text-[#C0132A]">{displayOrderNumber}</p>
         </motion.div>
+        <div className="mb-6 text-sm text-[#666660]" role="status">
+          {emailState === 'checking' && 'Checking your confirmation email…'}
+          {emailState === 'sent' && 'Your order confirmation email has been sent. Please also check Spam or Promotions.'}
+          {emailState === 'pending' && <>
+            <p>Your order is safely confirmed. Your email confirmation is still pending.</p>
+            <button type="button" className="mt-2 underline underline-offset-4 text-[#C0132A]" onClick={() => { setEmailState('checking'); setEmailAttempt(value => value + 1); }}>Retry confirmation email</button>
+          </>}
+        </div>
         {/* Order Details */}
         <div className="bg-[#F9F7F5] p-6 mb-8">
           <div className="flex items-center justify-between mb-4">

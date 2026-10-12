@@ -9,6 +9,10 @@ import { pathToFileURL } from 'node:url';
 const dir = await mkdtemp(join(tmpdir(), 'cod-test-'));
 await mkdir(join(dir, '_lib'));
 await mkdir(join(dir, 'payment'));
+await mkdir(join(dir, 'node_modules/nodemailer'), { recursive: true });
+await writeFile(join(dir, 'node_modules/nodemailer/package.json'), '{"type":"module","main":"index.js"}');
+await writeFile(join(dir, 'node_modules/nodemailer/index.js'), `export default { createTransport: () => ({ sendMail: async message => { globalThis.testEmails.push(message); if(globalThis.rejectCustomer && message.to === 'buyer@example.test') throw Object.assign(new Error('Temporary SMTP failure'), {code:'ETIMEDOUT'}); return { accepted: [message.to], messageId: message.messageId }; }, close() {} }) };`);
+globalThis.testEmails = [];
 await writeFile(join(dir, 'package.json'), '{"type":"module"}');
 for (const file of ['_lib/checkout', '_lib/order-email', 'payment/cod']) {
   const source = await readFile(`api/${file}.ts`, 'utf8');
@@ -42,6 +46,14 @@ await test('COD authentication, validation, server pricing, stock and retry prot
     if (url.pathname === '/rest/v1/products') return reply([{ id: 'shirt', name: 'Shirt', price: 1199, category: 'tshirts', is_published: true, stock_quantity: stock }]);
     if (url.pathname === '/rest/v1/notifications') throw new Error('Notifications unavailable');
     if (url.pathname === '/rest/v1/orders') {
+      if (options.method === 'PATCH') {
+        const order = orders.get(url.searchParams.get('id')?.slice(3));
+        const expected = url.searchParams.get('shipping_address->emailDelivery->>attemptId');
+        const current = order?.shipping_address?.emailDelivery?.attemptId;
+        if (!order || (expected === 'is.null' ? Boolean(current) : expected !== `eq.${current}`)) return reply([]);
+        Object.assign(order, JSON.parse(options.body));
+        return reply([order]);
+      }
       if (options.method === 'POST') {
         const order = JSON.parse(options.body);
         if (orders.has(order.id)) return reply({}, 409);
@@ -72,9 +84,11 @@ await test('COD authentication, validation, server pricing, stock and retry prot
     assert.equal(inserts, 1);
     assert.equal((await call()).data.data.order.id, results[0].data.data.order.id);
     assert.equal(inserts, 1);
+    assert.equal(globalThis.testEmails.length, 2);
+    assert.deepEqual(globalThis.testEmails.map(message => message.to).sort(), ['buyer@example.test', 'slugsera@gmail.com']);
   } finally { globalThis.fetch = originalFetch; }
 });
-const { orderEmail } = await import(pathToFileURL(join(dir, '_lib/order-email.js')));
+const { orderEmail, customerOrderEmail, sendOrderEmail } = await import(pathToFileURL(join(dir, '_lib/order-email.js')));
 await test('order emails include the saved ID, items and correct collection status', () => {
   const order = { id: 'order-123', order_number: 'SLG-ABC', total: 1999, items: [{ name: 'Shirt', quantity: 2, size: 'M' }], shipping_address: { paymentMethod: 'COD', fullName: 'Buyer', street: '123 Test Street' } };
   const cod = orderEmail(order);
@@ -85,5 +99,31 @@ await test('order emails include the saved ID, items and correct collection stat
   const paid = orderEmail({ ...order, payment_id: 'pay_123', shipping_address: {} });
   assert.match(paid.text, /Razorpay — paid/);
   assert.doesNotMatch(paid.text, /Collect on delivery/);
+  assert.match(customerOrderEmail(order).subject, /Your Slugsera order is confirmed/);
+  assert.match(customerOrderEmail(order).text, /Amount due on delivery: INR 1999.00/);
+});
+await test('failed customer email can retry without resending the accepted store alert', async () => {
+  let saved = { id: 'retry-order', total: 100, shipping_address: { email: 'buyer@example.test', paymentMethod: 'COD' }, items: [] };
+  const originalFetch = globalThis.fetch;
+  globalThis.testEmails = [];
+  globalThis.rejectCustomer = true;
+  globalThis.fetch = async (input, options = {}) => {
+    if (options.method === 'PATCH') saved = { ...saved, ...JSON.parse(options.body) };
+    return new Response(JSON.stringify([saved]), {status:200});
+  };
+  try {
+    const first = await sendOrderEmail(saved);
+    assert.equal(first.store, true);
+    assert.equal(first.customer, false);
+    assert.equal(saved.shipping_address.emailDelivery.customer.error, 'ETIMEDOUT');
+    globalThis.rejectCustomer = false;
+    const second = await sendOrderEmail(saved);
+    assert.equal(second.store, true);
+    assert.equal(second.customer, true);
+    assert.equal(globalThis.testEmails.filter(message => message.to === 'slugsera@gmail.com').length, 1);
+    assert.equal(globalThis.testEmails.filter(message => message.to === 'buyer@example.test').length, 2);
+    await sendOrderEmail(saved);
+    assert.equal(globalThis.testEmails.length, 3);
+  } finally { globalThis.fetch = originalFetch; }
 });
 await rm(dir, { recursive: true, force: true });

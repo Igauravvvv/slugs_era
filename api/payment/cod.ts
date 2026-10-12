@@ -39,7 +39,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     };
     const respond = (order: Record<string, any>) => res.status(200).json({ success: true, data: { order, orderNumber: order.order_number } });
     const existing = await readOrder();
-    if (existing) return respond(existing);
+    if (existing) { await sendOrderEmail(existing as any); return respond(existing); }
     const checkout = await priceCheckout(req.body.items, { url, serviceKey, userId: user.id, promoCodes: req.body.promoCodes });
     const payload = {
       id, order_number: `SLG-${hash.slice(0, 10).toUpperCase()}`, user_id: user.id,
@@ -56,7 +56,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
     if (response.status === 409) {
       const saved = await readOrder();
-      if (saved) return respond(saved);
+      if (saved) { await sendOrderEmail(saved as any); return respond(saved); }
     }
     if (!response.ok) throw new Error('Your COD order could not be saved. Please retry.');
     const [order] = await response.json();
