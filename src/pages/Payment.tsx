@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { trackPurchase } from '@/lib/analytics';
 import { calculateShipping } from '@/utils/shipping';
 import ProductPrice from '@/components/ProductPrice';
+import CheckoutSteps from '@/components/CheckoutSteps';
 import { api } from '@/lib/api';
 import {
   FIRST_BUYER_DISCOUNT,
@@ -125,6 +126,7 @@ export default function Payment() {
         },
         theme: { color: '#C0132A' },
         handler: async (response: any) => {
+          try {
           // 3. Verify payment on backend
           const verifyData = await api.post<any>('/api/payment/verify', {
               razorpay_order_id: response.razorpay_order_id,
@@ -160,7 +162,11 @@ export default function Payment() {
           } else {
             setPaymentError(verifyData.error || 'Payment verification failed. Contact support.');
           }
-          setIsProcessing(false); submissionLock.current = false;
+          } catch {
+            setPaymentError('We could not confirm your payment status. If money was deducted, please contact slugsera@gmail.com before paying again.');
+          } finally {
+            setIsProcessing(false); submissionLock.current = false;
+          }
         },
         modal: {
           ondismiss: () => { setIsProcessing(false); submissionLock.current = false; },
@@ -187,8 +193,9 @@ export default function Payment() {
   if (!selectedAddress || cart.length === 0) return null;
 
   return (
-    <div className="min-h-screen bg-white py-8">
+    <div className="min-h-screen bg-white py-8 pb-16">
       <div className="max-w-6xl mx-auto px-6 lg:px-8">
+        <CheckoutSteps current={2} />
         {/* Back Button */}
         <button
           onClick={() => navigate('/checkout/address')}
@@ -199,27 +206,34 @@ export default function Payment() {
         </button>
 
         <h1 className="font-display text-[clamp(28px,4vw,42px)] font-light text-[#1A1A1A] mb-8">
-          Payment
+          Complete your order
         </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8 lg:gap-12">
           {/* Payment Methods */}
           <div>
+            <p className="text-[#66665E] mb-6">One last step. Choose how you’d like to pay.</p>
             <fieldset disabled={isProcessing} className="space-y-3 mb-6">
               <legend className="font-medium mb-3">Choose payment method</legend>
-              <label className="flex items-center gap-3 border p-4 cursor-pointer">
-                <input type="radio" name="paymentMethod" checked={paymentMethod === 'online'} onChange={() => setPaymentMethod('online')} />
-                Pay online — UPI, cards or netbanking
-              </label>
-              <label className="flex items-center gap-3 border p-4 cursor-pointer">
-                <input type="radio" name="paymentMethod" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} />
-                Cash on delivery — pay when your order arrives
-              </label>
+              {([
+                { value: 'online', title: 'Pay online', description: 'UPI, debit / credit cards & netbanking', icon: CreditCard },
+                { value: 'cod', title: 'Cash on delivery', description: 'Place your order now. Pay when it arrives.', icon: Banknote },
+              ] as const).map(({ value, title, description, icon: Icon }) => (
+                <label key={value} className={`flex items-start gap-3 rounded-xl border-2 p-5 cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-[#C0132A] focus-within:ring-offset-2 ${paymentMethod === value ? 'border-[#C0132A] bg-[#FFF7F8]' : 'border-[#E8E4E0] hover:border-[#888880]'}`}>
+                  <input className="mt-1 accent-[#C0132A] w-4 h-4" type="radio" name="paymentMethod" checked={paymentMethod === value} onChange={() => { setPaymentMethod(value); setPaymentError(''); }} />
+                  <span className="flex-1"><span className="block font-semibold">{title}</span><span className="block text-sm text-[#66665E] mt-1">{description}</span></span>
+                  <Icon size={22} className="text-[#C0132A] shrink-0" />
+                </label>
+              ))}
             </fieldset>
-            {paymentMethod === 'cod' && <p className="mb-6 text-sm">₹{total.toLocaleString()} due on delivery. No online payment required.</p>}
+            {paymentMethod === 'cod' && <div className="mb-6 rounded-xl bg-[#F9F7F5] p-5 text-sm"><p className="font-semibold">₹{total.toLocaleString('en-IN')} due on delivery</p><p className="mt-1 text-[#66665E]">No advance payment. Your order ID will appear as soon as your order is confirmed.</p></div>}
+            <div className="mb-6 rounded-xl border border-[#E8E4E0] p-5">
+              <p className="text-sm font-semibold">Order updates</p>
+              <p className="mt-1 text-sm text-[#66665E] break-words">Your confirmation will be sent to <span className="font-medium text-[#1A1A1A]">{user?.email}</span>.</p>
+            </div>
             {/* Payment Method Info */}
             <div className="space-y-4 mb-8" hidden={paymentMethod === 'cod'}>
-              <div className="p-6 border border-[#1A1A1A] bg-[#F9F7F5]">
+              <div className="p-6 rounded-xl border border-[#E8E4E0] bg-[#F9F7F5]">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-10 h-10 rounded-full bg-[#1A1A1A] flex items-center justify-center flex-shrink-0">
                     <Shield size={20} className="text-white" />
@@ -251,8 +265,8 @@ export default function Payment() {
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1.1, delay: 0.2 }}
-            className="bg-[#F9F7F5] p-6 lg:p-8 h-fit"
+            transition={{ duration: 0.25 }}
+            className="bg-[#F9F7F5] border border-[#E8E4E0] rounded-2xl p-6 lg:p-8 h-fit lg:sticky lg:top-24"
           >
             <h3 className="font-display text-xl font-medium text-[#1A1A1A] mb-6">
               Order Summary
@@ -265,6 +279,7 @@ export default function Payment() {
                 <span className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880]">
                   Delivering To
                 </span>
+                <button disabled={isProcessing} onClick={() => navigate('/checkout/address')} className="ml-auto text-sm text-[#C0132A] underline underline-offset-4">Change</button>
               </div>
               <div className="text-sm">
                 <p className="font-medium">{selectedAddress.fullName}</p>
@@ -284,7 +299,8 @@ export default function Payment() {
               {cart.map((item) => (
                 <div key={`${item.product.id}-${item.size}-${item.color}`} className="flex justify-between text-sm">
                   <span className="text-[#888880]">
-                    {item.product.name} x {item.quantity}
+                    {item.product.name} × {item.quantity}
+                    <span className="block text-xs mt-1">{item.size} · {item.color}</span>
                   </span>
                   <ProductPrice
                     price={item.product.price}
@@ -335,7 +351,7 @@ export default function Payment() {
 
             <div className="border-t border-[#E8E4E0] pt-4 mb-6">
               <div className="flex justify-between">
-                <span className="font-medium">Total</span>
+                <span className="font-medium">{paymentMethod === 'cod' ? 'Due on delivery' : 'Total to pay'}</span>
                 <span className="font-display text-2xl">₹{total.toLocaleString()}</span>
               </div>
             </div>
@@ -345,7 +361,7 @@ export default function Payment() {
               disabled={isProcessing}
               className={`w-full text-[11px] font-medium tracking-[0.17em] uppercase py-4 flex items-center justify-center gap-2 transition-colors ${
                 !isProcessing
-                  ? 'bg-[#1A1A1A] text-white hover:bg-black'
+                  ? 'bg-[#C0132A] text-white hover:bg-[#A81024]'
                   : 'bg-[#E8E4E0] text-[#888880] cursor-not-allowed'
               }`}
             >
@@ -361,6 +377,7 @@ export default function Payment() {
                 </>
               )}
             </button>
+            <p className="mt-3 text-center text-xs text-[#66665E]">{paymentMethod === 'cod' ? 'Confirm your order with cash on delivery.' : 'Continue to Razorpay to complete payment.'}</p>
             {paymentError && (
               <div role="alert" className="mt-3 border border-red-200 bg-red-50 px-4 py-3 text-sm leading-relaxed text-red-700">
                 {paymentError}

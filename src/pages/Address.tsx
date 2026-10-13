@@ -6,12 +6,14 @@ import { useStore } from '@/store';
 import type { Address } from '@/types';
 import { calculateShipping } from '@/utils/shipping';
 import ProductPrice from '@/components/ProductPrice';
+import CheckoutSteps from '@/components/CheckoutSteps';
 import { getCartCompareAtTotal } from '@/lib/pricing';
 
 export default function AddressPage() {
   const navigate = useNavigate();
   const { cart, getCartTotal, addresses, selectedAddress, addAddress, selectAddress } = useStore();
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(addresses.length === 0);
+  const [formError, setFormError] = useState('');
   const [isLocating, setIsLocating] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
@@ -46,14 +48,19 @@ export default function AddressPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError('');
     // Validate phone
     if (!/^[6-9]\d{9}$/.test(formData.phone)) {
-      alert('Please enter a valid 10-digit Indian mobile number');
+      setFormError('Please enter a valid 10-digit Indian mobile number.');
       return;
     }
     // Validate pincode
-    if (!/^\d{6}$/.test(formData.pincode)) {
-      alert('Please enter a valid 6-digit PIN code');
+    if (!/^[1-9]\d{5}$/.test(formData.pincode)) {
+      setFormError('Please enter a valid 6-digit PIN code.');
+      return;
+    }
+    if ([formData.fullName, formData.addressLine1, formData.city, formData.state].some(value => !value.trim())) {
+      setFormError('Please complete your name and delivery address.');
       return;
     }
     const newAddress: Address = {
@@ -62,6 +69,8 @@ export default function AddressPage() {
     };
     addAddress(newAddress);
     selectAddress(newAddress);
+    navigate('/checkout/payment');
+    window.scrollTo(0, 0);
     setShowForm(false);
     setFormData({
       fullName: '',
@@ -123,8 +132,9 @@ export default function AddressPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white py-8">
+    <div className="min-h-screen bg-white py-8 pb-16">
       <div className="max-w-6xl mx-auto px-6 lg:px-8">
+        <CheckoutSteps current={1} />
         {/* Back Button */}
         <button
           onClick={() => {
@@ -141,7 +151,7 @@ export default function AddressPage() {
           Delivery Address
         </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8 lg:gap-12">
           {/* Address Section */}
           <div>
             {/* Saved Addresses */}
@@ -150,10 +160,14 @@ export default function AddressPage() {
                 <h3 className="text-[11px] font-medium tracking-[0.15em] uppercase text-[#888880] mb-4">
                   Saved Addresses
                 </h3>
-                <div className="space-y-4">
+                <div role="radiogroup" aria-label="Saved delivery addresses" className="space-y-4">
                   {addresses.map((address) => (
                     <div
                       key={address.id}
+                      role="radio"
+                      aria-checked={selectedAddress?.id === address.id}
+                      tabIndex={0}
+                      onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectAddress(address); } }}
                       onClick={() => selectAddress(address)}
                       className={`p-5 border cursor-pointer transition-all ${
                         selectedAddress?.id === address.id
@@ -214,7 +228,7 @@ export default function AddressPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
                 onSubmit={handleSubmit}
-                className="bg-[#F9F7F5] p-6"
+                className="bg-[#F9F7F5] border border-[#E8E4E0] rounded-2xl p-5 sm:p-6"
               >
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="font-display text-lg font-medium">Add New Address</h3>
@@ -249,11 +263,13 @@ export default function AddressPage() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880] mb-2 block">
+                    <label htmlFor="fullName" className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880] mb-2 block">
                       Full Name *
                     </label>
                     <input
                       type="text"
+                      id="fullName"
+                      autoComplete="name"
                       name="fullName"
                       value={formData.fullName}
                       onChange={handleInputChange}
@@ -263,11 +279,15 @@ export default function AddressPage() {
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880] mb-2 block">
+                    <label htmlFor="phone" className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880] mb-2 block">
                       Phone Number *
                     </label>
                     <input
                       type="tel"
+                      id="phone"
+                      autoComplete="tel-national"
+                      inputMode="tel"
+                      maxLength={10}
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
@@ -279,12 +299,14 @@ export default function AddressPage() {
                 </div>
 
                 <div className="mt-4">
-                  <label className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880] mb-2 block">
+                  <label htmlFor="addressLine1" className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880] mb-2 block">
                     Address Line 1 *
                   </label>
                   <input
                     type="text"
-                    name="addressLine1"
+                    id="addressLine1"
+                      autoComplete="address-line1"
+                      name="addressLine1"
                     value={formData.addressLine1}
                     onChange={handleInputChange}
                     required
@@ -294,12 +316,14 @@ export default function AddressPage() {
                 </div>
 
                 <div className="mt-4">
-                  <label className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880] mb-2 block">
+                  <label htmlFor="addressLine2" className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880] mb-2 block">
                     Address Line 2
                   </label>
                   <input
                     type="text"
-                    name="addressLine2"
+                    id="addressLine2"
+                      autoComplete="address-line2"
+                      name="addressLine2"
                     value={formData.addressLine2}
                     onChange={handleInputChange}
                     className="input-field"
@@ -307,13 +331,15 @@ export default function AddressPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 mt-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
                   <div>
-                    <label className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880] mb-2 block">
+                    <label htmlFor="city" className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880] mb-2 block">
                       City *
                     </label>
                     <input
                       type="text"
+                      id="city"
+                      autoComplete="address-level2"
                       name="city"
                       value={formData.city}
                       onChange={handleInputChange}
@@ -323,11 +349,13 @@ export default function AddressPage() {
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880] mb-2 block">
+                    <label htmlFor="state" className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880] mb-2 block">
                       State *
                     </label>
                     <input
                       type="text"
+                      id="state"
+                      autoComplete="address-level1"
                       name="state"
                       value={formData.state}
                       onChange={handleInputChange}
@@ -337,11 +365,15 @@ export default function AddressPage() {
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880] mb-2 block">
+                    <label htmlFor="pincode" className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880] mb-2 block">
                       PIN Code *
                     </label>
                     <input
                       type="text"
+                      id="pincode"
+                      autoComplete="postal-code"
+                      inputMode="numeric"
+                      maxLength={6}
                       name="pincode"
                       value={formData.pincode}
                       onChange={handleInputChange}
@@ -366,11 +398,12 @@ export default function AddressPage() {
                   </label>
                 </div>
 
+                {formError && <p id="address-error" role="alert" className="mt-4 text-sm text-[#C0132A]">{formError}</p>}
                 <button
                   type="submit"
                   className="w-full mt-6 bg-[#1A1A1A] text-white text-[11px] font-medium tracking-[0.17em] uppercase py-4 hover:bg-black transition-colors"
                 >
-                  Save Address
+                  Save & Continue to Payment
                 </button>
               </motion.form>
             )}
@@ -380,8 +413,8 @@ export default function AddressPage() {
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1.1, delay: 0.2 }}
-            className="bg-[#F9F7F5] p-6 lg:p-8 h-fit"
+            transition={{ duration: 0.25 }}
+            className="bg-[#F9F7F5] border border-[#E8E4E0] rounded-2xl p-6 lg:p-8 h-fit lg:sticky lg:top-24"
           >
             <h3 className="font-display text-xl font-medium text-[#1A1A1A] mb-6">
               Order Summary
@@ -392,7 +425,8 @@ export default function AddressPage() {
               {cart.map((item) => (
                 <div key={`${item.product.id}-${item.size}-${item.color}`} className="flex justify-between text-sm">
                   <span className="text-[#888880]">
-                    {item.product.name} x {item.quantity}
+                    {item.product.name} × {item.quantity}
+                    <span className="block text-xs mt-1">{item.size} · {item.color}</span>
                   </span>
                   <ProductPrice
                     price={item.product.price}
@@ -432,10 +466,10 @@ export default function AddressPage() {
 
             <button
               onClick={proceedToPayment}
-              disabled={!selectedAddress}
+              disabled={!selectedAddress || showForm}
               className={`w-full text-[11px] font-medium tracking-[0.17em] uppercase py-4 flex items-center justify-center gap-2 transition-colors ${
-                selectedAddress
-                  ? 'bg-[#1A1A1A] text-white hover:bg-black'
+                selectedAddress && !showForm
+                  ? 'bg-[#C0132A] text-white hover:bg-[#A81024]'
                   : 'bg-[#E8E4E0] text-[#888880] cursor-not-allowed'
               }`}
             >
