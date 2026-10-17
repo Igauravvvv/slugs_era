@@ -10,8 +10,12 @@ const dir = await mkdtemp(join(tmpdir(), 'cod-test-'));
 await mkdir(join(dir, '_lib'));
 await mkdir(join(dir, 'payment'));
 await mkdir(join(dir, 'node_modules/nodemailer'), { recursive: true });
+await mkdir(join(dir, 'node_modules/@vercel/functions'), { recursive: true });
+await writeFile(join(dir, 'node_modules/@vercel/functions/package.json'), '{"type":"module","main":"index.js"}');
+await writeFile(join(dir, 'node_modules/@vercel/functions/index.js'), 'export const waitUntil = task => globalThis.backgroundTasks.push(task);');
+globalThis.backgroundTasks = [];
 await writeFile(join(dir, 'node_modules/nodemailer/package.json'), '{"type":"module","main":"index.js"}');
-await writeFile(join(dir, 'node_modules/nodemailer/index.js'), `export default { createTransport: () => ({ sendMail: async message => { globalThis.testEmails.push(message); if(globalThis.rejectCustomer && message.to === 'buyer@example.test') throw Object.assign(new Error('Temporary SMTP failure'), {code:'ETIMEDOUT'}); return { accepted: [message.to], messageId: message.messageId }; }, close() {} }) };`);
+await writeFile(join(dir, 'node_modules/nodemailer/index.js'), `export default { createTransport: () => ({ sendMail: async message => { if (globalThis.mailGate) await globalThis.mailGate; globalThis.testEmails.push(message); if(globalThis.rejectCustomer && message.to === 'buyer@example.test') throw Object.assign(new Error('Temporary SMTP failure'), {code:'ETIMEDOUT'}); return { accepted: [message.to], messageId: message.messageId }; }, close() {} }) };`);
 globalThis.testEmails = [];
 await writeFile(join(dir, 'package.json'), '{"type":"module"}');
 for (const file of ['_lib/checkout', '_lib/order-email', '_lib/retry-order-emails', 'payment/cod']) {
@@ -73,7 +77,12 @@ await test('COD authentication, validation, server pricing, stock and retry prot
     stock = 1;
     assert.equal((await call()).code, 409);
     stock = 10;
-    const results = await Promise.all([call(), call()]);
+    let releaseEmail;
+    globalThis.mailGate = new Promise(resolve => { releaseEmail = resolve; });
+    const results = await Promise.race([Promise.all([call(), call()]), new Promise((_, reject) => setTimeout(() => reject(new Error('Checkout waited for email')), 500))]);
+    assert.equal(globalThis.testEmails.length, 0, 'Saved order returns before slow SMTP');
+    releaseEmail(); globalThis.mailGate = null;
+    await Promise.all(globalThis.backgroundTasks.splice(0));
     for (const result of results) {
       assert.equal(result.code, 200);
       assert.equal(result.data.data.order.total, 1998);
@@ -84,6 +93,7 @@ await test('COD authentication, validation, server pricing, stock and retry prot
     assert.equal(inserts, 1);
     assert.equal((await call()).data.data.order.id, results[0].data.data.order.id);
     assert.equal(inserts, 1);
+    await Promise.all(globalThis.backgroundTasks.splice(0));
     assert.equal(globalThis.testEmails.length, 2);
     assert.deepEqual(globalThis.testEmails.map(message => message.to).sort(), ['buyer@example.test', 'slugsera@gmail.com']);
   } finally { globalThis.fetch = originalFetch; }
@@ -126,23 +136,13 @@ await test('failed customer email can retry without resending the accepted store
     assert.equal(globalThis.testEmails.length, 3);
   } finally { globalThis.fetch = originalFetch; }
 });
-await test('EOWS01 applies exactly 200 once, normalizes case, rejects stacking and clamps at zero', async () => {
-  const { priceCheckout, parsePromoCodes } = await import(pathToFileURL(join(dir, '_lib/checkout.js')));
-  assert.deepEqual(parsePromoCodes([' eows01 ', 'EOWS01']), ['EOWS01']);
-  assert.throws(() => parsePromoCodes(['EOWS01', '2burpy']), /cannot be combined/);
-  assert.throws(() => parsePromoCodes(['EOWS01', 'maddy']), /cannot be combined/);
+await test('retired EOWS01 is rejected; sale checkout remains 999 per tee', async () => {
+  const {priceCheckout, parsePromoCodes} = await import(pathToFileURL(join(dir, '_lib/checkout.js')));
+  for (const code of ['EOWS01',' eows01 ','AOWS01']) assert.throws(() => parsePromoCodes([code]), /not valid/);
   const originalFetch = globalThis.fetch;
-  let price = 1199;
-  let category = 'tshirts';
-  globalThis.fetch = async () => new Response(JSON.stringify([{id:'shirt',name:'Shirt',price,category,is_published:true,stock_quantity:10}]));
+  globalThis.fetch = async () => new Response(JSON.stringify([{id:'tee',name:'Tee',price:1199,category:'tshirts',stock_quantity:10,is_published:true}]));
   try {
-    const options = {url:'https://db.test',serviceKey:'test',userId:'buyer',promoCodes:['eows01']};
-    assert.equal((await priceCheckout([{productId:'shirt',quantity:1}],options)).total,799);
-    assert.equal((await priceCheckout([{productId:'shirt',quantity:2}],options)).total,1798);
-    category = 'shirts';
-    assert.equal((await priceCheckout([{productId:'shirt',quantity:1}],options)).total,999);
-    price = 100;
-    assert.equal((await priceCheckout([{productId:'shirt',quantity:1}],options)).total,0);
+    assert.equal((await priceCheckout([{productId:'tee',quantity:1}],{url:'https://db.test',serviceKey:'test',userId:'buyer'})).total,999);
   } finally { globalThis.fetch = originalFetch; }
 });
 await test('scheduled recovery selects only recent paid or COD orders with pending emails', async () => {

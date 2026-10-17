@@ -1,3 +1,4 @@
+import { waitUntil } from '@vercel/functions';
 import { sendOrderEmail } from '../_lib/order-email.js';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import crypto from 'crypto';
@@ -39,7 +40,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     };
     const respond = (order: Record<string, any>) => res.status(200).json({ success: true, data: { order, orderNumber: order.order_number } });
     const existing = await readOrder();
-    if (existing) { await sendOrderEmail(existing as any); return respond(existing); }
+    if (existing) { waitUntil(sendOrderEmail(existing as any)); return respond(existing); }
     const checkout = await priceCheckout(req.body.items, { url, serviceKey, userId: user.id, promoCodes: req.body.promoCodes });
     const payload = {
       id, order_number: `SLG-${hash.slice(0, 10).toUpperCase()}`, user_id: user.id,
@@ -57,17 +58,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
     if (response.status === 409) {
       const saved = await readOrder();
-      if (saved) { await sendOrderEmail(saved as any); return respond(saved); }
+      if (saved) { waitUntil(sendOrderEmail(saved as any)); return respond(saved); }
     }
     if (!response.ok) throw new Error('Your COD order could not be saved. Please retry.');
     const [order] = await response.json();
     // Order persistence must not depend on notification availability.
-    await fetch(`${url}/rest/v1/notifications`, {
+    waitUntil(fetch(`${url}/rest/v1/notifications`, {
       method: 'POST', headers, body: JSON.stringify({ type: 'new_order', title: 'You received a COD order',
         message: `Order ${order.order_number} — ₹${order.total} due on delivery`,
         metadata: { order_id: order.id, order_number: order.order_number, total: order.total } }),
-    }).catch(() => undefined);
-    await sendOrderEmail(order);
+    }).catch(() => undefined));
+    waitUntil(sendOrderEmail(order));
     return respond(order);
   } catch (error: unknown) {
     const failure = error as { statusCode?: number; message?: string };

@@ -11,7 +11,7 @@ import CheckoutSteps from '@/components/CheckoutSteps';
 import CheckoutAction from '@/components/CheckoutAction';
 import { api } from '@/lib/api';
 import {
-  FIRST_BUYER_DISCOUNT, EOWS_DISCOUNT, isEowsCode,
+  FIRST_BUYER_DISCOUNT,
   TSHIRT_BUNDLE_CODE,
   calculatePrivateCouponDiscount,
   calculateLaunchSale,
@@ -24,26 +24,28 @@ const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || '';
 
 export default function Payment() {
   const navigate = useNavigate();
-  const { cart, getCartTotal, selectedAddress, clearCart, setLastCompletedOrderId, promoCode, bundlePromoCode } = useStore();
+  const { cart, getCartTotal, selectedAddress, setLastCompletedOrderId, promoCode, bundlePromoCode } = useStore();
   const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'online' | 'cod'>('online');
   const submissionLock = useRef(false);
+  const completed = useRef(false);
   const [paymentError, setPaymentError] = useState('');
 
   const subtotal = getCartTotal();
   const privateCouponApplied = isPrivateCouponCode(promoCode);
-  const launchPricing = calculateLaunchSale(cart, !privateCouponApplied && !isEowsCode(promoCode) && isTshirtBundleCode(bundlePromoCode));
+  const launchPricing = calculateLaunchSale(cart, !privateCouponApplied && isTshirtBundleCode(bundlePromoCode));
   const welcomeDiscount = !privateCouponApplied && isFirstBuyerCode(promoCode)
     ? Math.min(FIRST_BUYER_DISCOUNT, launchPricing.saleSubtotal)
     : 0;
   const privateDiscount = calculatePrivateCouponDiscount(cart, privateCouponApplied);
   const shipping = calculateShipping(subtotal);
   const total = subtotal + shipping;
-  const promoCodes = [isEowsCode(promoCode) ? null : bundlePromoCode, promoCode].filter((code): code is string => Boolean(code));
+  const promoCodes = [bundlePromoCode, promoCode].filter((code): code is string => Boolean(code));
 
   // Redirect if no address or cart
   useEffect(() => {
+    if (completed.current) return;
     if (cart.length === 0) {
       navigate('/cart');
     } else if (!selectedAddress) {
@@ -88,9 +90,9 @@ export default function Payment() {
         const order = result.data?.order;
         if (!result.success || !order?.id) throw new Error('Could not confirm your COD order. Please retry.');
         setLastCompletedOrderId(order.id);
-        clearCart();
-        sessionStorage.removeItem(retryKey);
-        navigate('/order-success', { state: { orderId: order.id, orderNumber: order.order_number, total: order.total, paymentMethod: 'COD' } });
+        completed.current = true;
+        try { sessionStorage.removeItem(retryKey); } catch { /* Confirmed order must still be shown. */ }
+        navigate('/order-success', { replace: true, state: { orderId: order.id, orderNumber: order.order_number, total: order.total, paymentMethod: 'COD' } });
         setIsProcessing(false); submissionLock.current = false;
         return;
       }
@@ -153,13 +155,14 @@ export default function Payment() {
             const orderData = verifyData.data?.order;
             const orderNumber = orderData?.order_number || verifyData.data?.orderNumber;
             const orderId = orderData?.id;
+            if (!orderId || !orderNumber) throw new Error('The saved order reference is missing.');
 
             trackPurchase(response.razorpay_payment_id, total, cart.map(i => ({ id: i.product.id, name: i.product.name, price: i.product.price, quantity: i.quantity })));
             
             // Store order ID so Success page can display it
             if (orderId) setLastCompletedOrderId(orderId);
-            clearCart();
-            navigate('/order-success', { state: { orderNumber, orderId, total } });
+            completed.current = true;
+            navigate('/order-success', { replace: true, state: { orderNumber, orderId, total } });
           } else {
             setPaymentError(verifyData.error || 'Payment verification failed. Contact support.');
           }
@@ -302,7 +305,6 @@ export default function Payment() {
                   <span>−₹{launchPricing.discount.toLocaleString()}</span>
                 </div>
               )}
-              {isEowsCode(promoCode) && <div className="flex justify-between text-sm text-emerald-700"><span>EOWS01</span><span>−₹{Math.min(EOWS_DISCOUNT, launchPricing.retailSubtotal)}</span></div>}
               {welcomeDiscount > 0 && (
                 <div className="flex justify-between text-sm text-emerald-700">
                   <span>First-buyer offer</span>

@@ -174,7 +174,7 @@ function StorefrontLayout({ children, minimal = false, showFooter = true, noPadd
       <a href="#main-content" className="skip-link">Skip to main content</a>
       <Header minimal={minimal} />
       <main id="main-content" tabIndex={-1} className={noPadding ? "" : "pt-[76px]"}>
-        <div className={noPadding ? "pt-[76px]" : ""}><MonsoonBanner /></div>
+        <MonsoonBanner />
         {children}
       </main>
       {showFooter && (

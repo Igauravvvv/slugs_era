@@ -1,3 +1,4 @@
+import { waitUntil } from '@vercel/functions';
 import { sendOrderEmail } from '../_lib/order-email.js';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import crypto from 'crypto';
@@ -137,7 +138,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const existing = await existingResponse.json() as any[];
     if (existing[0]) {
       if (existing[0].user_id !== user.id) return res.status(403).json({ success: false, error: 'This order belongs to another account.' });
-      await sendOrderEmail(existing[0]);
+      waitUntil(sendOrderEmail(existing[0]));
       return res.status(200).json({
         success: true,
         data: { message: 'Order already saved', orderNumber: existing[0].order_number, order: existing[0] },
@@ -216,7 +217,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       throw new Error('Payment succeeded, but the order could not be saved. Please contact support with your payment ID.');
     }
     const inserted = await insertResponse.json() as any[];
-    await Promise.all([ensureOrderNotification(inserted[0], url, dbHeaders), sendOrderEmail(inserted[0])]);
+    waitUntil(Promise.all([ensureOrderNotification(inserted[0], url, dbHeaders), sendOrderEmail(inserted[0])]).catch(error => console.error('Order notifications deferred', error)));
     return res.status(200).json({
       success: true,
       data: { message: 'Payment verified and order saved', orderNumber, order: inserted[0] },

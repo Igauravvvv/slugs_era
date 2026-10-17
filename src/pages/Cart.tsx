@@ -10,7 +10,6 @@ import ProductPrice from '@/components/ProductPrice';
 import CheckoutAction from '@/components/CheckoutAction';
 import { trackAddToCart, trackBeginCheckout, trackRemoveFromCart, trackViewCart } from '@/lib/analytics';
 import {
-  EOWS_CODE, EOWS_DISCOUNT, isEowsCode,
   FIRST_BUYER_CODE,
   FIRST_BUYER_DISCOUNT,
   PRIVATE_COUPON_CODE,
@@ -46,7 +45,7 @@ export default function Cart() {
   const total = subtotal + shipping;
   const itemCount = getCartCount();
   const privateCouponApplied = isPrivateCouponCode(promoCode);
-  const bundleCodeApplied = !privateCouponApplied && !isEowsCode(promoCode) && isTshirtBundleCode(bundlePromoCode);
+  const bundleCodeApplied = !privateCouponApplied && isTshirtBundleCode(bundlePromoCode);
   const launchPricing = calculateLaunchSale(cart, bundleCodeApplied);
   const potentialLaunchPricing = calculateLaunchSale(cart, true);
   const welcomeDiscount = !privateCouponApplied && isFirstBuyerCode(promoCode)
@@ -87,7 +86,6 @@ export default function Cart() {
   };
 
   const applyOfferCode = (code = offerCode) => {
-    if (isEowsCode(code)) { setPromoCode(EOWS_CODE); setBundlePromoCode(null); setOfferCode(''); setOfferMessage('EOWS01 applied — ₹200 off your order.'); return; }
     if (isPrivateCouponCode(code)) {
       setPromoCode(PRIVATE_COUPON_CODE);
       setBundlePromoCode(null);
@@ -96,7 +94,7 @@ export default function Cart() {
       return;
     }
     if (isTshirtBundleCode(code)) {
-      if (isEowsCode(promoCode) || privateCouponApplied) setPromoCode(null);
+      if (privateCouponApplied) setPromoCode(null);
       setBundlePromoCode(TSHIRT_BUNDLE_CODE);
       setOfferCode(TSHIRT_BUNDLE_CODE);
       setOfferMessage('Launch bundle code applied.');
@@ -307,7 +305,6 @@ export default function Cart() {
                 <button type="button" onClick={() => applyOfferCode()} className="rounded-lg bg-[#1A1A1A] px-4 text-sm text-white">Apply</button>
               </div>
               <div className="mt-2 flex flex-wrap gap-2">
-                <button type="button" onClick={() => applyOfferCode(EOWS_CODE)} className="rounded-full border border-[#C0132A] px-3 py-2 text-xs text-[#C0132A]">{isEowsCode(promoCode) ? '✓ EOWS01 applied' : 'Apply EOWS01 · ₹200 off'}</button>
                 {potentialLaunchPricing.discount > 0 && <button type="button" onClick={() => applyOfferCode(TSHIRT_BUNDLE_CODE)} className="rounded-full border border-[#DCD5CF] px-3 py-2 text-xs">{bundleCodeApplied ? '✓ Bundle applied' : `Bundle · save ₹${potentialLaunchPricing.discount}`}</button>}
               </div>
               {(promoCode || bundlePromoCode) && <button onClick={() => { setPromoCode(null); setBundlePromoCode(null); setOfferMessage('Offer removed.'); }} className="mt-2 text-xs underline">Remove offer</button>}
@@ -325,7 +322,6 @@ export default function Cart() {
                   <span>−₹{launchPricing.discount.toLocaleString()}</span>
                 </div>
               )}
-              {isEowsCode(promoCode) && <div className="flex justify-between text-sm text-emerald-700"><span>EOWS01</span><span>−₹{Math.min(EOWS_DISCOUNT, launchPricing.retailSubtotal)}</span></div>}
               {welcomeDiscount > 0 && (
                 <div className="flex justify-between text-sm text-emerald-700">
                   <span>First-buyer offer</span>

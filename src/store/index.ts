@@ -4,7 +4,7 @@ import { persist } from 'zustand/middleware';
 import type { CartItem, Address, User, Product } from '@/types';
 import { calculateShipping } from '@/utils/shipping';
 import {
-  FIRST_BUYER_DISCOUNT, EOWS_DISCOUNT, isEowsCode,
+  FIRST_BUYER_DISCOUNT,
   calculatePrivateCouponDiscount,
   calculateLaunchSale,
   isFirstBuyerCode,
@@ -135,11 +135,11 @@ export const useStore = create<AppState>()(
         const privateCouponApplied = isPrivateCouponCode(state.promoCode);
         const launchPricing = calculateLaunchSale(
           state.cart,
-          !privateCouponApplied && !isEowsCode(state.promoCode) && isTshirtBundleCode(state.bundlePromoCode),
+          !privateCouponApplied && isTshirtBundleCode(state.bundlePromoCode),
         );
         const welcomeDiscount = !privateCouponApplied && isFirstBuyerCode(state.promoCode) ? FIRST_BUYER_DISCOUNT : 0;
         const privateDiscount = calculatePrivateCouponDiscount(state.cart, privateCouponApplied);
-        return Math.max(0, launchPricing.saleSubtotal - welcomeDiscount - privateDiscount - (isEowsCode(state.promoCode) ? EOWS_DISCOUNT : 0));
+        return Math.max(0, launchPricing.saleSubtotal - welcomeDiscount - privateDiscount);
       },
       getCartCount: () => {
         return get().cart.reduce((count, item) => count + item.quantity, 0);
@@ -198,6 +198,7 @@ export const useStore = create<AppState>()(
         ...(persisted || {}),
         // Always start with empty products — they're set fresh from useProducts()
         products: [],
+        promoCode: /^(eows01|aows01)$/i.test(persisted?.promoCode?.trim() || '') ? null : persisted?.promoCode || null,
         cart: (persisted?.cart || []).map((item: CartItem) => ({ ...item, product: withMonsoonPrice(item.product) })),
       }),
     }

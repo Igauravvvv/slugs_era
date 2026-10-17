@@ -112,7 +112,3 @@ export function getBundleProgressMessage(tshirtCount: number) {
   if (tshirtCount === 2) return 'Your 2-tee launch price is ready.';
   return 'Your launch bundle price is ready.';
 }
-
-export const EOWS_CODE = 'EOWS01';
-export const EOWS_DISCOUNT = 200;
-export const isEowsCode = (code?: string | null) => code?.trim().toUpperCase() === EOWS_CODE;

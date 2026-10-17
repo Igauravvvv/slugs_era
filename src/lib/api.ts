@@ -14,29 +14,15 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
   return headers;
 }
 
-async function apiRequest<T>(
+async function performApiRequest<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  signal?: AbortSignal
 ): Promise<T> {
   const headers = await getAuthHeaders();
-  const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), 25_000);
-  let response: Response;
-  try {
-    response = await fetch(`${API_URL}${endpoint}`, {
-      ...options,
-      headers: { ...headers, ...options.headers },
-      signal: controller.signal,
-    });
-  } catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError') {
-      throw new Error('The payment server took too long to respond. Please retry once.');
-    }
-    throw error;
-  } finally {
-    window.clearTimeout(timeout);
-  }
-
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    ...options, headers: { ...headers, ...options.headers }, signal,
+  });
   const body = await response.text();
   let parsedBody: unknown;
 
@@ -58,6 +44,19 @@ async function apiRequest<T>(
 
   // A successful DELETE may deliberately return 204 No Content.
   return parsedBody as T;
+}
+
+async function apiRequest<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  const controller = new AbortController();
+  let timer: ReturnType<typeof setTimeout>;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      reject(new Error('Confirmation is taking longer than expected. Your bag is saved. Retry once to check the same order.'));
+      controller.abort();
+    }, 25_000);
+  });
+  try { return await Promise.race([performApiRequest<T>(endpoint, options, controller.signal), timeout]); }
+  finally { clearTimeout(timer!); }
 }
 
 export const api = {

@@ -31,7 +31,7 @@ export default function CTA() {
   };
 
   // Prices and availability come from the live product catalogue, not old marketing copy.
-  const ctaPrimaryText = buildCollectionCta(ctaPrimaryLink, 'T-Shirts', 'Shop T-Shirts — ₹1,199');
+  const ctaPrimaryText = buildCollectionCta(ctaPrimaryLink, 'T-Shirts', 'Shop T-Shirts — ₹999');
   const ctaSecondaryText = buildCollectionCta(ctaSecondaryLink, 'Shirts', 'Shop Shirts — Coming Soon');
 
   return (

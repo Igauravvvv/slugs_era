@@ -15,7 +15,7 @@ export default function Success() {
   const [emailAttempt, setEmailAttempt] = useState(0);
   const [savedOrder, setSavedOrder] = useState<{ order_number: string; total: number; shipping_address?: { paymentMethod?: string } } | null>(null);
   const location = useLocation();
-  const { lastCompletedOrderId, setLastCompletedOrderId } = useStore();
+  const { lastCompletedOrderId, setLastCompletedOrderId, clearCart } = useStore();
 
   // Try to get order data from navigation state (passed from Payment)
   // or fall back to the store's lastCompletedOrderId
@@ -30,8 +30,9 @@ export default function Success() {
     if (!navState?.orderId || !displayOrderNumber) return;
     const key = `slugsera-celebrated:${navState.orderId}`;
     try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, '1'); } catch { /* Still celebrate if storage is unavailable. */ }
+    clearCart();
     setShowCelebration(true);
-  }, [navState?.orderId, displayOrderNumber]);
+  }, [navState?.orderId, displayOrderNumber, clearCart]);
 
   useEffect(() => {
     if (!orderId) { navigate('/profile', { replace: true }); return; }

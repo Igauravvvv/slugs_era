@@ -448,7 +448,7 @@ export default function Header({ minimal = false }: HeaderProps) {
           {/* Base Header: Red Theme for Light Backgrounds */}
           <header
             ref={redHeaderRef}
-            className="fixed top-0 left-0 right-0 z-[498] pointer-events-auto"
+            className="fixed top-[48px] sm:top-[32px] left-0 right-0 z-[498] pointer-events-auto"
           >
             {renderHeaderContent('red')}
           </header>
@@ -456,13 +456,13 @@ export default function Header({ minimal = false }: HeaderProps) {
           {/* Overlaid Header: White Theme for Dark Backgrounds */}
           <header
             ref={whiteHeaderRef}
-            className="fixed top-0 left-0 right-0 z-[499] pointer-events-auto mix-blend-normal"
+            className="fixed top-[48px] sm:top-[32px] left-0 right-0 z-[499] pointer-events-auto mix-blend-normal"
           >
             {renderHeaderContent('white')}
           </header>
 
           {/* Transparent Layer exclusively for Dropdowns */}
-          <header className="fixed top-0 left-0 right-0 z-[501] pointer-events-none">
+          <header className="fixed top-[48px] sm:top-[32px] left-0 right-0 z-[501] pointer-events-none">
             {renderHeaderContent('transparent')}
           </header>
         </>
