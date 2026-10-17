@@ -97,6 +97,7 @@ for (const product of products) {
       : categoryValue.includes('shirt')
         ? 'Printed Shirt'
         : 'Oversized T-Shirt';
+  if (category === 'Oversized T-Shirt') product.price = 999;
   const description = stripHtml(product.description) || `${product.name}, a premium ${category.toLowerCase()} by Slugsera.`;
   const productImages = (product.images || []).filter((image) => {
     const url = typeof image === 'string' ? image : image?.url || '';

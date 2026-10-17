@@ -35,7 +35,7 @@ export function calculatePrivateCouponDiscount(cart: CartItem[], enabled = true)
   if (!enabled) return 0;
   return cart.reduce((discount, item) => {
     const unitPrice = Number(item.product.price);
-    return isTshirtProduct(item.product) && unitPrice === 1199
+    return isTshirtProduct(item.product) && (unitPrice === 1199 || unitPrice === 999)
       ? discount + (unitPrice - PRIVATE_TSHIRT_PRICE) * item.quantity
       : discount;
   }, 0);

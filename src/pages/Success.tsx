@@ -5,11 +5,13 @@ import { Check, Package, Truck, Mail, ArrowRight } from 'lucide-react';
 import { useStore } from '@/store';
 import { supabase } from '@/lib/supabase';
 import { api } from '@/lib/api';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 export default function Success() {
   const navigate = useNavigate();
   const reduceMotion = useReducedMotion();
   const [emailState, setEmailState] = useState<'checking' | 'sent' | 'pending'>('checking');
+  const [showCelebration, setShowCelebration] = useState(false);
   const [emailAttempt, setEmailAttempt] = useState(0);
   const [savedOrder, setSavedOrder] = useState<{ order_number: string; total: number; shipping_address?: { paymentMethod?: string } } | null>(null);
   const location = useLocation();
@@ -23,6 +25,13 @@ export default function Success() {
   const displayOrderNumber = navState?.orderNumber || savedOrder?.order_number;
   const orderTotal = navState?.total ?? savedOrder?.total;
   const paymentMethod = navState?.paymentMethod || savedOrder?.shipping_address?.paymentMethod;
+
+  useEffect(() => {
+    if (!navState?.orderId || !displayOrderNumber) return;
+    const key = `slugsera-celebrated:${navState.orderId}`;
+    try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, '1'); } catch { /* Still celebrate if storage is unavailable. */ }
+    setShowCelebration(true);
+  }, [navState?.orderId, displayOrderNumber]);
 
   useEffect(() => {
     if (!orderId) { navigate('/profile', { replace: true }); return; }
@@ -48,7 +57,17 @@ export default function Success() {
   if (!orderId || !displayOrderNumber) return <div className="min-h-[60vh] flex items-center justify-center" role="status">Loading your order…</div>;
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-6 py-16">
+    <div className="min-h-screen bg-white flex items-center justify-center px-4 py-8 sm:py-16">
+      <Dialog open={showCelebration} onOpenChange={setShowCelebration}>
+        <DialogContent showCloseButton={false} className="z-[1500] max-w-[calc(100vw_-_2rem)] sm:max-w-md rounded-2xl border-0 bg-[#FFF9F2] p-6 sm:p-8 text-center">
+          <motion.div initial={reduceMotion ? false : { scale: 0.6 }} animate={{ scale: 1 }} className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#C0132A] text-white"><Check size={32} /></motion.div>
+          <DialogTitle className="font-display text-3xl leading-tight">You made the right choice.</DialogTitle>
+          <DialogDescription className="text-sm text-[#66665E]">Your Slugsera order is confirmed. Good style is on its way.</DialogDescription>
+          <p className="text-sm">Order <strong className="text-[#C0132A]">{displayOrderNumber}</strong></p>
+          {paymentMethod === 'COD' && <p className="text-sm">₹{orderTotal?.toLocaleString('en-IN')} due on delivery. Nothing to pay now.</p>}
+          <button onClick={() => setShowCelebration(false)} className="min-h-12 rounded-lg bg-[#C0132A] px-5 text-sm font-semibold text-white">View my order</button>
+        </DialogContent>
+      </Dialog>
       <motion.div
         initial={reduceMotion ? false : { opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}

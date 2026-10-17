@@ -110,7 +110,7 @@ export async function priceCheckout(raw: unknown, options: PriceCheckoutOptions)
   requested.forEach((item) => quantities.set(item.productId, (quantities.get(item.productId) || 0) + item.quantity));
   const items: PricedItem[] = requested.map((item) => {
     const product = byId.get(item.productId);
-    const price = Number(product?.price);
+    const price = product?.category === 'tshirts' ? 999 : Number(product?.price);
     if (!product || !Number.isFinite(price) || price < 0) throw httpError('A product has an invalid price.', 409);
     if (product.is_published === false || (typeof product.stock_quantity === 'number'
       && product.stock_quantity < (quantities.get(item.productId) || 0))) {
@@ -143,12 +143,12 @@ export async function priceCheckout(raw: unknown, options: PriceCheckoutOptions)
     ? Math.min(FIRST_BUYER_DISCOUNT, afterBundle)
     : 0;
   const privateDiscount = privateCouponApplied
-    ? items.reduce((discount, item) => item.category === 'tshirts' && item.price === 1199
+    ? items.reduce((discount, item) => item.category === 'tshirts' && (item.price === 1199 || item.price === 999)
       ? discount + (item.price - PRIVATE_TSHIRT_PRICE) * item.quantity
       : discount, 0)
     : 0;
   if (privateCouponApplied && privateDiscount === 0) {
-    throw httpError('This private offer only applies to eligible ₹1,199 shirts.', 409);
+    throw httpError('This private offer only applies to eligible T-shirts.', 409);
   }
   const couponDiscount = promoCodes.includes(EOWS_CODE) ? Math.min(200, afterBundle) : 0;
   const subtotal = Math.max(0, afterBundle - welcomeDiscount - privateDiscount - couponDiscount);

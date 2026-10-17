@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { withMonsoonPrice } from '@/utils/monsoonSale';
 import { persist } from 'zustand/middleware';
 import type { CartItem, Address, User, Product } from '@/types';
 import { calculateShipping } from '@/utils/shipping';
@@ -100,6 +101,7 @@ export const useStore = create<AppState>()(
       bundlePromoCode: null,
       setBundlePromoCode: (bundlePromoCode) => set({ bundlePromoCode }),
       addToCart: (item) => {
+        item = { ...item, product: withMonsoonPrice(item.product) };
         const { cart } = get();
         const existingIndex = cart.findIndex(
           (i) => i.product.id === item.product.id && i.size === item.size && i.color === item.color
@@ -196,6 +198,7 @@ export const useStore = create<AppState>()(
         ...(persisted || {}),
         // Always start with empty products — they're set fresh from useProducts()
         products: [],
+        cart: (persisted?.cart || []).map((item: CartItem) => ({ ...item, product: withMonsoonPrice(item.product) })),
       }),
     }
   )

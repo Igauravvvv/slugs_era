@@ -79,7 +79,7 @@ function itemXml(product: DbProduct) {
     .map((color) => typeof color === 'string' ? color : color.name || color.hex || '')
     .filter(Boolean)
     .join(', ');
-  const price = Number(product.price) || 0;
+  const price = product.category === 'tshirts' ? 999 : Number(product.price) || 0;
   const name = product.name || 'Slugsera product';
   const description = plainText(product.description) || `${name} by Slugsera.`;
 

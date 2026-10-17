@@ -76,7 +76,7 @@ await test('COD authentication, validation, server pricing, stock and retry prot
     const results = await Promise.all([call(), call()]);
     for (const result of results) {
       assert.equal(result.code, 200);
-      assert.equal(result.data.data.order.total, 1999);
+      assert.equal(result.data.data.order.total, 1998);
       assert.equal(result.data.data.order.payment_id, null);
       assert.equal(result.data.data.order.shipping_address.paymentMethod, 'COD');
       assert.equal(result.data.data.order.shipping_address.paymentStatus, 'Pending');
@@ -133,11 +133,14 @@ await test('EOWS01 applies exactly 200 once, normalizes case, rejects stacking a
   assert.throws(() => parsePromoCodes(['EOWS01', 'maddy']), /cannot be combined/);
   const originalFetch = globalThis.fetch;
   let price = 1199;
-  globalThis.fetch = async () => new Response(JSON.stringify([{id:'shirt',name:'Shirt',price,category:'tshirts',is_published:true,stock_quantity:10}]));
+  let category = 'tshirts';
+  globalThis.fetch = async () => new Response(JSON.stringify([{id:'shirt',name:'Shirt',price,category,is_published:true,stock_quantity:10}]));
   try {
     const options = {url:'https://db.test',serviceKey:'test',userId:'buyer',promoCodes:['eows01']};
+    assert.equal((await priceCheckout([{productId:'shirt',quantity:1}],options)).total,799);
+    assert.equal((await priceCheckout([{productId:'shirt',quantity:2}],options)).total,1798);
+    category = 'shirts';
     assert.equal((await priceCheckout([{productId:'shirt',quantity:1}],options)).total,999);
-    assert.equal((await priceCheckout([{productId:'shirt',quantity:2}],options)).total,2198);
     price = 100;
     assert.equal((await priceCheckout([{productId:'shirt',quantity:1}],options)).total,0);
   } finally { globalThis.fetch = originalFetch; }

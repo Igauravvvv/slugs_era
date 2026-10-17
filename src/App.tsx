@@ -18,6 +18,7 @@ import About from '@/sections/About';
 import CTA from '@/sections/CTA';
 import Newsletter from '@/sections/Newsletter';
 import Footer from '@/sections/Footer';
+import MonsoonBanner from '@/components/MonsoonBanner';
 
 // Components — kept eager (always visible)
 import CustomCursor from '@/components/CustomCursor';
@@ -173,6 +174,7 @@ function StorefrontLayout({ children, minimal = false, showFooter = true, noPadd
       <a href="#main-content" className="skip-link">Skip to main content</a>
       <Header minimal={minimal} />
       <main id="main-content" tabIndex={-1} className={noPadding ? "" : "pt-[76px]"}>
+        <div className={noPadding ? "pt-[76px]" : ""}><MonsoonBanner /></div>
         {children}
       </main>
       {showFooter && (

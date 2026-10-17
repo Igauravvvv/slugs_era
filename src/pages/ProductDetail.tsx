@@ -383,6 +383,8 @@ export default function ProductDetail() {
             </h1>
             <p className="font-display text-base italic text-[#888880] mb-4">{selectedProduct.slogan}</p>
 
+            {selectedProduct.category === 'tshirts' && <p className="mb-2 text-xs font-semibold text-[#C0132A]">END OF MONSOON SALE · ₹999 PER TEE</p>}
+            <p className="mb-3 text-xs text-[#66665E]">Cash on delivery is live · Pay when your order arrives</p>
             {/* Price */}
             <div className="flex items-center gap-3 mb-2">
               {isFullPreBook && selectedProduct.preOrderPrice ? (

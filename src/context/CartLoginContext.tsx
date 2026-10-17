@@ -1,11 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Check, LogIn, X } from 'lucide-react';
+import { LogIn, X } from 'lucide-react';
 import type { CartItem } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import { useStore } from '@/store';
 import { CDN } from '@/lib/cdn';
-import { FIRST_BUYER_CODE, TSHIRT_BUNDLE_CODE, isTshirtProduct } from '@/utils/launchSale';
+import { isTshirtProduct } from '@/utils/launchSale';
 
 const PENDING_CART_ITEM_KEY = 'slugsera-pending-cart-item';
 
@@ -18,8 +18,6 @@ const CartLoginContext = createContext<CartLoginContextValue | null>(null);
 export function CartLoginProvider({ children }: { children: React.ReactNode }) {
   const { user, loading, signingIn, signInWithGoogle } = useAuth();
   const addToCart = useStore((state) => state.addToCart);
-  const setPromoCode = useStore((state) => state.setPromoCode);
-  const setBundlePromoCode = useStore((state) => state.setBundlePromoCode);
   const [showLoginOffer, setShowLoginOffer] = useState(false);
   const [showBundleNudge, setShowBundleNudge] = useState(false);
   const nudgeTimer = useRef<number | null>(null);
@@ -67,10 +65,9 @@ export function CartLoginProvider({ children }: { children: React.ReactNode }) {
 
     if (!pending?.product?.id || !pending.quantity) return;
     addToCart(pending);
-    setPromoCode(FIRST_BUYER_CODE);
     setShowLoginOffer(false);
     window.setTimeout(showNudgeWhenOneTshirt, 50);
-  }, [addToCart, loading, setPromoCode, showNudgeWhenOneTshirt, user]);
+  }, [addToCart, loading, showNudgeWhenOneTshirt, user]);
 
   useEffect(() => () => {
     if (nudgeTimer.current) window.clearTimeout(nudgeTimer.current);
@@ -106,11 +103,11 @@ export function CartLoginProvider({ children }: { children: React.ReactNode }) {
                 <X size={16} />
               </button>
               <img src={CDN.LOGO} alt="Slugs Era mascot" className="mx-auto mb-4 h-20 w-20 object-contain" />
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#C0132A]">First 100 buyers</p>
-              <h2 id="login-offer-title" className="font-display text-3xl font-medium text-[#1A1A1A]">₹99 off your first order</h2>
-              <p className="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-[#6D6862]">Log in to add this tee and claim your welcome offer.</p>
+              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#C0132A]">End of Monsoon Sale</p>
+              <h2 id="login-offer-title" className="font-display text-3xl font-medium text-[#1A1A1A]">All T-shirts. Just ₹999.</h2>
+              <p className="mx-auto mt-3 max-w-xs text-sm leading-relaxed text-[#6D6862]">Log in to save your bag and place your order. Cash on delivery is now available.</p>
               <div className="mx-auto mt-4 inline-flex items-center gap-2 rounded-full border border-dashed border-[#C0132A]/40 bg-white px-4 py-2 text-xs text-[#1A1A1A]">
-                Code <strong>{FIRST_BUYER_CODE}</strong>
+                <strong>COD is live</strong>
               </div>
               <button
                 type="button"
@@ -119,7 +116,7 @@ export function CartLoginProvider({ children }: { children: React.ReactNode }) {
                 className="mt-6 flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#1A1A1A] px-5 text-[11px] font-semibold uppercase tracking-[0.15em] text-white transition-colors hover:bg-[#C0132A] disabled:cursor-wait disabled:opacity-60"
               >
                 <LogIn size={16} />
-                {signingIn ? 'Opening login…' : 'Login to claim ₹99 off'}
+                {signingIn ? 'Opening login…' : 'Continue with Google'}
               </button>
             </motion.div>
           </motion.div>
@@ -136,18 +133,9 @@ export function CartLoginProvider({ children }: { children: React.ReactNode }) {
           >
             <img src={CDN.LOGO} alt="Burpy the slug" className="h-14 w-14 flex-none object-contain" />
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C0132A]">Burpy says</p>
-              <p className="mt-0.5 text-xs leading-snug text-[#3D3935]">Add one more tee and get both for <strong>₹1,999</strong>.</p>
-              <button
-                type="button"
-                onClick={() => {
-                  setBundlePromoCode(TSHIRT_BUNDLE_CODE);
-                  setShowBundleNudge(false);
-                }}
-                className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-[#C0132A]"
-              >
-                <Check size={12} /> Apply code {TSHIRT_BUNDLE_CODE}
-              </button>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C0132A]">Added to your bag</p>
+              <p className="mt-0.5 text-xs leading-snug text-[#3D3935]">End of Monsoon Sale · <strong>All tees ₹999</strong>. COD is live!</p>
+              <a href="/cart" onClick={() => setShowBundleNudge(false)} className="mt-2 inline-flex min-h-9 items-center text-xs font-bold text-[#C0132A]">View bag & checkout →</a>
             </div>
             <button type="button" aria-label="Dismiss offer" onClick={() => setShowBundleNudge(false)} className="self-start text-[#8B837B]">
               <X size={14} />

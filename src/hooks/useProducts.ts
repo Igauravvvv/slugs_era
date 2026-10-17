@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { withMonsoonPrice } from '@/utils/monsoonSale';
 import type { Product, SizeStock } from '@/types';
 
 // ─── DB ↔ Frontend Mapping ───────────────────────────────────
@@ -180,7 +181,7 @@ export function useProducts() {
         return [];
       }
 
-      return data.map(mapDbToProduct);
+      return data.map(row => withMonsoonPrice(mapDbToProduct(row)));
     },
     // Realtime is a convenience, not the source of truth. Refetch on each
     // storefront mount/focus so published description edits never remain stale.
