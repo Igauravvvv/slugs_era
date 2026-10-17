@@ -14,7 +14,7 @@ await writeFile(join(dir, 'node_modules/nodemailer/package.json'), '{"type":"mod
 await writeFile(join(dir, 'node_modules/nodemailer/index.js'), `export default { createTransport: () => ({ sendMail: async message => { globalThis.testEmails.push(message); if(globalThis.rejectCustomer && message.to === 'buyer@example.test') throw Object.assign(new Error('Temporary SMTP failure'), {code:'ETIMEDOUT'}); return { accepted: [message.to], messageId: message.messageId }; }, close() {} }) };`);
 globalThis.testEmails = [];
 await writeFile(join(dir, 'package.json'), '{"type":"module"}');
-for (const file of ['_lib/checkout', '_lib/order-email', 'payment/cod']) {
+for (const file of ['_lib/checkout', '_lib/order-email', '_lib/retry-order-emails', 'payment/cod']) {
   const source = await readFile(`api/${file}.ts`, 'utf8');
   await writeFile(join(dir, `${file}.js`), ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText);
 }
@@ -124,6 +124,37 @@ await test('failed customer email can retry without resending the accepted store
     assert.equal(globalThis.testEmails.filter(message => message.to === 'buyer@example.test').length, 2);
     await sendOrderEmail(saved);
     assert.equal(globalThis.testEmails.length, 3);
+  } finally { globalThis.fetch = originalFetch; }
+});
+await test('EOWS01 applies exactly 200 once, normalizes case, rejects stacking and clamps at zero', async () => {
+  const { priceCheckout, parsePromoCodes } = await import(pathToFileURL(join(dir, '_lib/checkout.js')));
+  assert.deepEqual(parsePromoCodes([' eows01 ', 'EOWS01']), ['EOWS01']);
+  assert.throws(() => parsePromoCodes(['EOWS01', '2burpy']), /cannot be combined/);
+  assert.throws(() => parsePromoCodes(['EOWS01', 'maddy']), /cannot be combined/);
+  const originalFetch = globalThis.fetch;
+  let price = 1199;
+  globalThis.fetch = async () => new Response(JSON.stringify([{id:'shirt',name:'Shirt',price,category:'tshirts',is_published:true,stock_quantity:10}]));
+  try {
+    const options = {url:'https://db.test',serviceKey:'test',userId:'buyer',promoCodes:['eows01']};
+    assert.equal((await priceCheckout([{productId:'shirt',quantity:1}],options)).total,999);
+    assert.equal((await priceCheckout([{productId:'shirt',quantity:2}],options)).total,2198);
+    price = 100;
+    assert.equal((await priceCheckout([{productId:'shirt',quantity:1}],options)).total,0);
+  } finally { globalThis.fetch = originalFetch; }
+});
+await test('scheduled recovery selects only recent paid or COD orders with pending emails', async () => {
+  const {retryOrderEmails} = await import(pathToFileURL(join(dir, '_lib/retry-order-emails.js')));
+  const originalFetch = globalThis.fetch;
+  let query;
+  globalThis.fetch = async input => { query = new URL(input); return new Response('[]'); };
+  try {
+    assert.deepEqual(await retryOrderEmails(), {checked:0,complete:0});
+    assert.match(query.searchParams.get('and'), /paymentMethod.eq.COD/);
+    assert.match(query.searchParams.get('and'), /store->>sentAt.is.null/);
+    assert.match(query.searchParams.get('and'), /customer->>sentAt.is.null/);
+    assert.equal(query.searchParams.get('status'), 'neq.Cancelled');
+    assert.equal(query.searchParams.get('limit'), '10');
+    assert.match(query.searchParams.get('created_at'), /^gte\./);
   } finally { globalThis.fetch = originalFetch; }
 });
 await rm(dir, { recursive: true, force: true });

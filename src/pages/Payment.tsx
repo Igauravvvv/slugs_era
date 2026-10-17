@@ -1,16 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, CreditCard, Wallet, Banknote, Shield, Lock } from 'lucide-react';
+import { ArrowLeft, CreditCard, Banknote, Shield, Lock } from 'lucide-react';
 import { useStore } from '@/store';
 import { useAuth } from '@/context/AuthContext';
 import { trackPurchase } from '@/lib/analytics';
 import { calculateShipping } from '@/utils/shipping';
 import ProductPrice from '@/components/ProductPrice';
 import CheckoutSteps from '@/components/CheckoutSteps';
+import CheckoutAction from '@/components/CheckoutAction';
 import { api } from '@/lib/api';
 import {
-  FIRST_BUYER_DISCOUNT,
+  FIRST_BUYER_DISCOUNT, EOWS_DISCOUNT, isEowsCode,
   TSHIRT_BUNDLE_CODE,
   calculatePrivateCouponDiscount,
   calculateLaunchSale,
@@ -32,14 +33,14 @@ export default function Payment() {
 
   const subtotal = getCartTotal();
   const privateCouponApplied = isPrivateCouponCode(promoCode);
-  const launchPricing = calculateLaunchSale(cart, !privateCouponApplied && isTshirtBundleCode(bundlePromoCode));
+  const launchPricing = calculateLaunchSale(cart, !privateCouponApplied && !isEowsCode(promoCode) && isTshirtBundleCode(bundlePromoCode));
   const welcomeDiscount = !privateCouponApplied && isFirstBuyerCode(promoCode)
     ? Math.min(FIRST_BUYER_DISCOUNT, launchPricing.saleSubtotal)
     : 0;
   const privateDiscount = calculatePrivateCouponDiscount(cart, privateCouponApplied);
   const shipping = calculateShipping(subtotal);
   const total = subtotal + shipping;
-  const promoCodes = [bundlePromoCode, promoCode].filter((code): code is string => Boolean(code));
+  const promoCodes = [isEowsCode(promoCode) ? null : bundlePromoCode, promoCode].filter((code): code is string => Boolean(code));
 
   // Redirect if no address or cart
   useEffect(() => {
@@ -193,72 +194,48 @@ export default function Payment() {
   if (!selectedAddress || cart.length === 0) return null;
 
   return (
-    <div className="min-h-screen bg-white py-8 pb-16">
-      <div className="max-w-6xl mx-auto px-6 lg:px-8">
+    <div className="min-h-screen bg-white pt-4 pb-28 sm:pt-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <CheckoutSteps current={2} />
         {/* Back Button */}
         <button
           onClick={() => navigate('/checkout/address')}
-          className="flex items-center gap-2 text-sm text-[#888880] hover:text-[#1A1A1A] transition-colors mb-8"
+          className="flex items-center gap-2 text-sm text-[#888880] hover:text-[#1A1A1A] transition-colors mb-4"
         >
           <ArrowLeft size={16} />
           Back to Address
         </button>
 
-        <h1 className="font-display text-[clamp(28px,4vw,42px)] font-light text-[#1A1A1A] mb-8">
+        <h1 className="font-display text-[clamp(28px,4vw,42px)] font-light text-[#1A1A1A] mb-4">
           Complete your order
         </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-5 lg:gap-8">
           {/* Payment Methods */}
           <div>
-            <p className="text-[#66665E] mb-6">One last step. Choose how you’d like to pay.</p>
-            <fieldset disabled={isProcessing} className="space-y-3 mb-6">
+            <p className="text-[#66665E] mb-4">One last step. Choose how you’d like to pay.</p>
+            <fieldset disabled={isProcessing} className="space-y-3 mb-4">
               <legend className="font-medium mb-3">Choose payment method</legend>
               {([
                 { value: 'online', title: 'Pay online', description: 'UPI, debit / credit cards & netbanking', icon: CreditCard },
                 { value: 'cod', title: 'Cash on delivery', description: 'Place your order now. Pay when it arrives.', icon: Banknote },
               ] as const).map(({ value, title, description, icon: Icon }) => (
-                <label key={value} className={`flex items-start gap-3 rounded-xl border-2 p-5 cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-[#C0132A] focus-within:ring-offset-2 ${paymentMethod === value ? 'border-[#C0132A] bg-[#FFF7F8]' : 'border-[#E8E4E0] hover:border-[#888880]'}`}>
+                <label key={value} className={`flex items-start gap-3 rounded-xl border-2 p-4 cursor-pointer transition-colors focus-within:ring-2 focus-within:ring-[#C0132A] focus-within:ring-offset-2 ${paymentMethod === value ? 'border-[#C0132A] bg-[#FFF7F8]' : 'border-[#E8E4E0] hover:border-[#888880]'}`}>
                   <input className="mt-1 accent-[#C0132A] w-4 h-4" type="radio" name="paymentMethod" checked={paymentMethod === value} onChange={() => { setPaymentMethod(value); setPaymentError(''); }} />
                   <span className="flex-1"><span className="block font-semibold">{title}</span><span className="block text-sm text-[#66665E] mt-1">{description}</span></span>
                   <Icon size={22} className="text-[#C0132A] shrink-0" />
                 </label>
               ))}
             </fieldset>
-            {paymentMethod === 'cod' && <div className="mb-6 rounded-xl bg-[#F9F7F5] p-5 text-sm"><p className="font-semibold">₹{total.toLocaleString('en-IN')} due on delivery</p><p className="mt-1 text-[#66665E]">No advance payment. Your order ID will appear as soon as your order is confirmed.</p></div>}
-            <div className="mb-6 rounded-xl border border-[#E8E4E0] p-5">
+            {paymentMethod === 'cod' && <div className="mb-4 rounded-xl bg-[#F9F7F5] p-5 text-sm"><p className="font-semibold">₹{total.toLocaleString('en-IN')} due on delivery</p><p className="mt-1 text-[#66665E]">No advance payment. Your order ID will appear as soon as your order is confirmed.</p></div>}
+            <div className="mb-4 rounded-xl border border-[#E8E4E0] p-5">
               <p className="text-sm font-semibold">Order updates</p>
-              <p className="mt-1 text-sm text-[#66665E] break-words">Your confirmation will be sent to <span className="font-medium text-[#1A1A1A]">{user?.email}</span>.</p>
+              <p className="mt-1 text-sm text-[#66665E] break-words">Your confirmation will be sent to <span className="font-medium text-[#1A1A1A]">{user?.email || 'your signed-in email address'}</span>.</p>
             </div>
-            {/* Payment Method Info */}
-            <div className="space-y-4 mb-8" hidden={paymentMethod === 'cod'}>
-              <div className="p-6 rounded-xl border border-[#E8E4E0] bg-[#F9F7F5]">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-[#1A1A1A] flex items-center justify-center flex-shrink-0">
-                    <Shield size={20} className="text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-lg text-[#1A1A1A]">Secure Checkout</h3>
-                    <p className="text-sm text-[#888880]">Powered by Razorpay</p>
-                  </div>
-                </div>
-                <p className="text-sm text-[#1A1A1A] mb-4">
-                  You will be securely redirected to Razorpay to complete your purchase. We accept all major payment methods:
-                </p>
-                <div className="flex flex-wrap gap-4 text-sm font-medium text-[#888880]">
-                  <div className="flex items-center gap-2"><CreditCard size={16} /> Cards</div>
-                  <div className="flex items-center gap-2"><Wallet size={16} /> UPI</div>
-                  <div className="flex items-center gap-2"><Banknote size={16} /> Netbanking</div>
-                </div>
-              </div>
-            </div>
+            <p className="flex items-center gap-2 text-xs text-[#66665E]"><Lock size={14} /> {paymentMethod === 'cod' ? 'No payment details needed for COD.' : 'Payment is processed securely by Razorpay.'}</p>
+            <p className="mt-3 text-xs text-[#66665E]">Need help? <a className="underline" href="mailto:slugsera@gmail.com">slugsera@gmail.com</a></p>
+            {paymentError && <p role="alert" className="mt-3 rounded-lg bg-red-50 p-3 text-sm text-red-700">{paymentError}</p>}
 
-            {/* Security Note */}
-            <div className="flex items-center gap-2 text-sm text-[#888880]">
-              <Lock size={14} />
-              <span>Your payment information is secure and encrypted</span>
-            </div>
           </div>
 
           {/* Order Summary */}
@@ -266,14 +243,14 @@ export default function Payment() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.25 }}
-            className="bg-[#F9F7F5] border border-[#E8E4E0] rounded-2xl p-6 lg:p-8 h-fit lg:sticky lg:top-24"
+            className="bg-[#F9F7F5] border border-[#E8E4E0] rounded-xl p-4 lg:p-5 h-fit lg:sticky lg:top-24"
           >
-            <h3 className="font-display text-xl font-medium text-[#1A1A1A] mb-6">
+            <h3 className="font-display text-xl font-medium text-[#1A1A1A] mb-4">
               Order Summary
             </h3>
 
             {/* Delivery Address */}
-            <div className="mb-6 pb-6 border-b border-[#E8E4E0]">
+            <div className="mb-4 pb-6 border-b border-[#E8E4E0]">
               <div className="flex items-center gap-2 mb-3">
                 <Shield size={14} className="text-[#C0132A]" />
                 <span className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880]">
@@ -294,8 +271,8 @@ export default function Payment() {
               </div>
             </div>
 
-            {/* Items */}
-            <div className="space-y-3 mb-6 pb-6 border-b border-[#E8E4E0]">
+            <details className="mb-4"><summary className="cursor-pointer text-sm font-semibold">View items & price breakdown ({cart.reduce((n, item) => n + item.quantity, 0)} items)</summary><div className="mt-3">
+            <div className="space-y-3 mb-4 pb-6 border-b border-[#E8E4E0]">
               {cart.map((item) => (
                 <div key={`${item.product.id}-${item.size}-${item.color}`} className="flex justify-between text-sm">
                   <span className="text-[#888880]">
@@ -314,7 +291,7 @@ export default function Payment() {
               ))}
             </div>
 
-            <div className="space-y-4 mb-6">
+            <div className="space-y-4 mb-4">
               <div className="flex justify-between text-sm">
                 <span className="text-[#888880]">Items subtotal</span>
                 <span>₹{launchPricing.retailSubtotal.toLocaleString()}</span>
@@ -325,6 +302,7 @@ export default function Payment() {
                   <span>−₹{launchPricing.discount.toLocaleString()}</span>
                 </div>
               )}
+              {isEowsCode(promoCode) && <div className="flex justify-between text-sm text-emerald-700"><span>EOWS01</span><span>−₹{Math.min(EOWS_DISCOUNT, launchPricing.retailSubtotal)}</span></div>}
               {welcomeDiscount > 0 && (
                 <div className="flex justify-between text-sm text-emerald-700">
                   <span>First-buyer offer</span>
@@ -349,40 +327,16 @@ export default function Payment() {
               </div>
             </div>
 
-            <div className="border-t border-[#E8E4E0] pt-4 mb-6">
+            </div></details>
+            <div className="border-t border-[#E8E4E0] pt-4 mb-4">
               <div className="flex justify-between">
                 <span className="font-medium">{paymentMethod === 'cod' ? 'Due on delivery' : 'Total to pay'}</span>
                 <span className="font-display text-2xl">₹{total.toLocaleString()}</span>
               </div>
             </div>
 
-            <button
-              onClick={handlePayment}
-              disabled={isProcessing}
-              className={`w-full text-[11px] font-medium tracking-[0.17em] uppercase py-4 flex items-center justify-center gap-2 transition-colors ${
-                !isProcessing
-                  ? 'bg-[#C0132A] text-white hover:bg-[#A81024]'
-                  : 'bg-[#E8E4E0] text-[#888880] cursor-not-allowed'
-              }`}
-            >
-              {isProcessing ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  {paymentMethod === 'cod' ? 'Place COD order' : `Pay ₹${total.toLocaleString()}`}
-                  <ArrowRight size={14} />
-                </>
-              )}
-            </button>
-            <p className="mt-3 text-center text-xs text-[#66665E]">{paymentMethod === 'cod' ? 'Confirm your order with cash on delivery.' : 'Continue to Razorpay to complete payment.'}</p>
-            {paymentError && (
-              <div role="alert" className="mt-3 border border-red-200 bg-red-50 px-4 py-3 text-sm leading-relaxed text-red-700">
-                {paymentError}
-              </div>
-            )}
+            <CheckoutAction total={total} label={paymentMethod === 'cod' ? 'Place COD order' : `Pay ₹${total.toLocaleString('en-IN')}`} onClick={handlePayment} busy={isProcessing} note={paymentMethod === 'cod' ? 'Due on delivery' : 'Total · incl. taxes'} />
+
           </motion.div>
         </div>
       </div>

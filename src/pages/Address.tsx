@@ -1,490 +1,79 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Plus, Check, Navigation, Loader2 } from 'lucide-react';
+import { ArrowLeft, Plus, Check, Pencil } from 'lucide-react';
 import { useStore } from '@/store';
 import type { Address } from '@/types';
 import { calculateShipping } from '@/utils/shipping';
-import ProductPrice from '@/components/ProductPrice';
 import CheckoutSteps from '@/components/CheckoutSteps';
-import { getCartCompareAtTotal } from '@/lib/pricing';
+import CheckoutAction from '@/components/CheckoutAction';
 
+const emptyAddress = { fullName: '', phone: '', addressLine1: '', addressLine2: '', city: '', state: '', pincode: '', isDefault: false };
 export default function AddressPage() {
   const navigate = useNavigate();
   const { cart, getCartTotal, addresses, selectedAddress, addAddress, selectAddress } = useStore();
   const [showForm, setShowForm] = useState(addresses.length === 0);
+  const [formData, setFormData] = useState(emptyAddress);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [formError, setFormError] = useState('');
-  const [isLocating, setIsLocating] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: '',
-    phone: '',
-    addressLine1: '',
-    addressLine2: '',
-    city: '',
-    state: '',
-    pincode: '',
-    isDefault: false,
-  });
-
   const subtotal = getCartTotal();
-  const compareAtSubtotal = getCartCompareAtTotal(cart);
-  const shipping = calculateShipping(subtotal);
-  const total = subtotal + shipping;
-
-  // Redirect if cart is empty
-  useEffect(() => {
-    if (cart.length === 0) {
-      navigate('/cart');
-    }
-  }, [cart, navigate]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+  const total = subtotal + calculateShipping(subtotal);
+  useEffect(() => { if (!cart.length) navigate('/cart'); }, [cart.length, navigate]);
+  const proceed = () => { navigate('/checkout/payment'); window.scrollTo(0, 0); };
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    const clean = Object.fromEntries(Object.entries(formData).map(([key, value]) => [key, typeof value === 'string' ? value.trim() : value])) as typeof emptyAddress;
+    clean.phone = clean.phone.replace(/[\s()-]/g, '').replace(/^(\+91|91)(?=\d{10}$)/, '');
+    if (!/^[6-9]\d{9}$/.test(clean.phone)) { setFormError('Enter a valid 10-digit Indian mobile number.'); return; }
+    if (!/^[1-9]\d{5}$/.test(clean.pincode)) { setFormError('Enter a valid 6-digit PIN code.'); return; }
+    if (clean.fullName.length < 2 || clean.addressLine1.length < 5 || clean.city.length < 2 || clean.state.length < 2) { setFormError('Complete your name, street address, city and state.'); return; }
+    const address: Address = { ...clean, id: editingId || crypto.randomUUID() };
+    addAddress(address); selectAddress(address); proceed();
   };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError('');
-    // Validate phone
-    if (!/^[6-9]\d{9}$/.test(formData.phone)) {
-      setFormError('Please enter a valid 10-digit Indian mobile number.');
-      return;
-    }
-    // Validate pincode
-    if (!/^[1-9]\d{5}$/.test(formData.pincode)) {
-      setFormError('Please enter a valid 6-digit PIN code.');
-      return;
-    }
-    if ([formData.fullName, formData.addressLine1, formData.city, formData.state].some(value => !value.trim())) {
-      setFormError('Please complete your name and delivery address.');
-      return;
-    }
-    const newAddress: Address = {
-      id: Date.now().toString(),
-      ...formData,
-    };
-    addAddress(newAddress);
-    selectAddress(newAddress);
-    navigate('/checkout/payment');
-    window.scrollTo(0, 0);
-    setShowForm(false);
-    setFormData({
-      fullName: '',
-      phone: '',
-      addressLine1: '',
-      addressLine2: '',
-      city: '',
-      state: '',
-      pincode: '',
-      isDefault: false,
-    });
-  };
-
-  const getCurrentLocation = () => {
-    setIsLocating(true);
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          try {
-            // Reverse geocoding using OpenStreetMap Nominatim
-            const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`
-            );
-            const data = await response.json();
-            
-            if (data.address) {
-              setFormData(prev => ({
-                ...prev,
-                addressLine1: data.address.road || data.address.street || '',
-                city: data.address.city || data.address.town || data.address.village || '',
-                state: data.address.state || '',
-                pincode: data.address.postcode || '',
-              }));
-            }
-          } catch (error) {
-            console.error('Error fetching location:', error);
-            alert('Could not fetch location details. Please enter manually.');
-          } finally {
-            setIsLocating(false);
-          }
-        },
-        (error) => {
-          console.error('Geolocation error:', error);
-          alert('Could not access your location. Please ensure location services are enabled.');
-          setIsLocating(false);
-        }
-      );
-    } else {
-      alert('Geolocation is not supported by your browser.');
-      setIsLocating(false);
-    }
-  };
-
-  const proceedToPayment = () => {
-    if (selectedAddress) {
-      navigate('/checkout/payment');
-      window.scrollTo(0, 0);
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-white py-8 pb-16">
-      <div className="max-w-6xl mx-auto px-6 lg:px-8">
-        <CheckoutSteps current={1} />
-        {/* Back Button */}
-        <button
-          onClick={() => {
-            navigate('/cart');
-            window.scrollTo(0, 0);
-          }}
-          className="flex items-center gap-2 text-sm text-[#888880] hover:text-[#1A1A1A] transition-colors mb-8"
-        >
-          <ArrowLeft size={16} />
-          Back to Cart
-        </button>
-
-        <h1 className="font-display text-[clamp(28px,4vw,42px)] font-light text-[#1A1A1A] mb-8">
-          Delivery Address
-        </h1>
-
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8 lg:gap-12">
-          {/* Address Section */}
-          <div>
-            {/* Saved Addresses */}
-            {addresses.length > 0 && !showForm && (
-              <div className="mb-8">
-                <h3 className="text-[11px] font-medium tracking-[0.15em] uppercase text-[#888880] mb-4">
-                  Saved Addresses
-                </h3>
-                <div role="radiogroup" aria-label="Saved delivery addresses" className="space-y-4">
-                  {addresses.map((address) => (
-                    <div
-                      key={address.id}
-                      role="radio"
-                      aria-checked={selectedAddress?.id === address.id}
-                      tabIndex={0}
-                      onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectAddress(address); } }}
-                      onClick={() => selectAddress(address)}
-                      className={`p-5 border cursor-pointer transition-all ${
-                        selectedAddress?.id === address.id
-                          ? 'border-[#1A1A1A] bg-[#F9F7F5]'
-                          : 'border-[#E8E4E0] hover:border-[#1A1A1A]'
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className={`w-5 h-5 rounded-full border flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                          selectedAddress?.id === address.id
-                            ? 'border-[#1A1A1A] bg-[#1A1A1A]'
-                            : 'border-[#E8E4E0]'
-                        }`}>
-                          {selectedAddress?.id === address.id && (
-                            <Check size={12} className="text-white" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium">{address.fullName}</span>
-                            {address.isDefault && (
-                              <span className="text-[10px] bg-[#1A1A1A] text-white px-2 py-0.5">
-                                Default
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-sm text-[#888880]">{address.phone}</p>
-                          <p className="text-sm text-[#888880] mt-1">
-                            {address.addressLine1}
-                            {address.addressLine2 && `, ${address.addressLine2}`}
-                          </p>
-                          <p className="text-sm text-[#888880]">
-                            {address.city}, {address.state} - {address.pincode}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Add New Address Button */}
-            {!showForm && (
-              <button
-                onClick={() => setShowForm(true)}
-                className="w-full py-4 border border-dashed border-[#E8E4E0] flex items-center justify-center gap-2 text-sm text-[#888880] hover:border-[#1A1A1A] hover:text-[#1A1A1A] transition-colors"
-              >
-                <Plus size={18} />
-                Add New Address
-              </button>
-            )}
-
-            {/* Address Form */}
-            {showForm && (
-              <motion.form
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                onSubmit={handleSubmit}
-                className="bg-[#F9F7F5] border border-[#E8E4E0] rounded-2xl p-5 sm:p-6"
-              >
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="font-display text-lg font-medium">Add New Address</h3>
-                  <button
-                    type="button"
-                    onClick={() => setShowForm(false)}
-                    className="text-sm text-[#888880] hover:text-[#1A1A1A]"
-                  >
-                    Cancel
-                  </button>
-                </div>
-
-                {/* Use Current Location */}
-                <button
-                  type="button"
-                  onClick={getCurrentLocation}
-                  disabled={isLocating}
-                  className="w-full mb-6 py-3 border border-[#C0132A] text-[#C0132A] flex items-center justify-center gap-2 text-sm hover:bg-[#C0132A] hover:text-white transition-colors"
-                >
-                  {isLocating ? (
-                    <>
-                      <Loader2 size={16} className="animate-spin" />
-                      Getting Location...
-                    </>
-                  ) : (
-                    <>
-                      <Navigation size={16} />
-                      Use Current Location
-                    </>
-                  )}
-                </button>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="fullName" className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880] mb-2 block">
-                      Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      id="fullName"
-                      autoComplete="name"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
-                      required
-                      className="input-field"
-                      placeholder="Enter your full name"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="phone" className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880] mb-2 block">
-                      Phone Number *
-                    </label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      autoComplete="tel-national"
-                      inputMode="tel"
-                      maxLength={10}
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      required
-                      className="input-field"
-                      placeholder="10-digit mobile number"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <label htmlFor="addressLine1" className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880] mb-2 block">
-                    Address Line 1 *
-                  </label>
-                  <input
-                    type="text"
-                    id="addressLine1"
-                      autoComplete="address-line1"
-                      name="addressLine1"
-                    value={formData.addressLine1}
-                    onChange={handleInputChange}
-                    required
-                    className="input-field"
-                    placeholder="House/Flat No., Building, Street"
-                  />
-                </div>
-
-                <div className="mt-4">
-                  <label htmlFor="addressLine2" className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880] mb-2 block">
-                    Address Line 2
-                  </label>
-                  <input
-                    type="text"
-                    id="addressLine2"
-                      autoComplete="address-line2"
-                      name="addressLine2"
-                    value={formData.addressLine2}
-                    onChange={handleInputChange}
-                    className="input-field"
-                    placeholder="Area, Landmark (optional)"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
-                  <div>
-                    <label htmlFor="city" className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880] mb-2 block">
-                      City *
-                    </label>
-                    <input
-                      type="text"
-                      id="city"
-                      autoComplete="address-level2"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleInputChange}
-                      required
-                      className="input-field"
-                      placeholder="City"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="state" className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880] mb-2 block">
-                      State *
-                    </label>
-                    <input
-                      type="text"
-                      id="state"
-                      autoComplete="address-level1"
-                      name="state"
-                      value={formData.state}
-                      onChange={handleInputChange}
-                      required
-                      className="input-field"
-                      placeholder="State"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="pincode" className="text-[11px] font-medium tracking-[0.1em] uppercase text-[#888880] mb-2 block">
-                      PIN Code *
-                    </label>
-                    <input
-                      type="text"
-                      id="pincode"
-                      autoComplete="postal-code"
-                      inputMode="numeric"
-                      maxLength={6}
-                      name="pincode"
-                      value={formData.pincode}
-                      onChange={handleInputChange}
-                      required
-                      className="input-field"
-                      placeholder="6-digit PIN"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-4 flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    name="isDefault"
-                    checked={formData.isDefault}
-                    onChange={handleInputChange}
-                    id="isDefault"
-                    className="w-4 h-4 accent-[#1A1A1A]"
-                  />
-                  <label htmlFor="isDefault" className="text-sm text-[#888880]">
-                    Set as default address
-                  </label>
-                </div>
-
-                {formError && <p id="address-error" role="alert" className="mt-4 text-sm text-[#C0132A]">{formError}</p>}
-                <button
-                  type="submit"
-                  className="w-full mt-6 bg-[#1A1A1A] text-white text-[11px] font-medium tracking-[0.17em] uppercase py-4 hover:bg-black transition-colors"
-                >
-                  Save & Continue to Payment
-                </button>
-              </motion.form>
-            )}
-          </div>
-
-          {/* Order Summary */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.25 }}
-            className="bg-[#F9F7F5] border border-[#E8E4E0] rounded-2xl p-6 lg:p-8 h-fit lg:sticky lg:top-24"
-          >
-            <h3 className="font-display text-xl font-medium text-[#1A1A1A] mb-6">
-              Order Summary
-            </h3>
-
-            {/* Items */}
-            <div className="space-y-3 mb-6 pb-6 border-b border-[#E8E4E0]">
-              {cart.map((item) => (
-                <div key={`${item.product.id}-${item.size}-${item.color}`} className="flex justify-between text-sm">
-                  <span className="text-[#888880]">
-                    {item.product.name} × {item.quantity}
-                    <span className="block text-xs mt-1">{item.size} · {item.color}</span>
-                  </span>
-                  <ProductPrice
-                    price={item.product.price}
-                    compareAtPrice={item.product.originalPrice}
-                    quantity={item.quantity}
-                    className="justify-end gap-2"
-                    priceClassName="text-sm text-[#1A1A1A]"
-                    compareClassName="text-xs text-[#888880] line-through"
-                  />
-                </div>
-              ))}
+  const fields = [
+    { name: 'fullName', label: 'Full name', autoComplete: 'name', placeholder: 'Name of the recipient', wide: false },
+    { name: 'phone', label: 'Mobile number', autoComplete: 'tel', placeholder: '10-digit mobile number', wide: false },
+    { name: 'addressLine1', label: 'House / flat, building & street', autoComplete: 'address-line1', placeholder: 'House number, building and street', wide: true },
+    { name: 'addressLine2', label: 'Area / landmark (optional)', autoComplete: 'address-line2', placeholder: 'Help us find your address', wide: true },
+    { name: 'pincode', label: 'PIN code', autoComplete: 'postal-code', placeholder: '6-digit PIN', wide: false },
+    { name: 'city', label: 'City', autoComplete: 'address-level2', placeholder: 'City', wide: false },
+    { name: 'state', label: 'State / union territory', autoComplete: 'address-level1', placeholder: 'State', wide: true },
+  ] as const;
+  return <div className="min-h-screen bg-white pt-4 pb-28 sm:pt-8">
+    <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <CheckoutSteps current={1} />
+      <button onClick={() => navigate('/cart')} className="mb-4 flex items-center gap-2 text-sm text-[#66665E]"><ArrowLeft size={15} /> Back to bag</button>
+      <h1 className="font-display text-3xl mb-2">Where should we deliver?</h1>
+      <p className="text-sm text-[#66665E] mb-5">Add your address once. We’ll save it for next time.</p>
+      <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+        <div>
+          {!showForm && <>
+            <div role="radiogroup" aria-label="Delivery address" className="space-y-3">
+              {addresses.map(address => <label key={address.id} className={`flex cursor-pointer gap-3 rounded-xl border p-4 ${selectedAddress?.id === address.id ? 'border-[#C0132A] bg-[#FFF7F8]' : 'border-[#E8E4E0]'}`}>
+                <input type="radio" name="deliveryAddress" checked={selectedAddress?.id === address.id} onChange={() => selectAddress(address)} className="mt-1 accent-[#C0132A]" />
+                <span className="flex-1 text-sm"><span className="block font-semibold">{address.fullName}</span><span className="block mt-1 text-[#66665E]">{[address.addressLine1, address.addressLine2, address.city, address.state, address.pincode].filter(Boolean).join(', ')}</span><span className="block mt-1">{address.phone}</span></span>
+                <button type="button" aria-label={`Edit address for ${address.fullName}`} onClick={event => { event.preventDefault(); setEditingId(address.id); setFormData({ ...address, addressLine2: address.addressLine2 || '', isDefault: Boolean(address.isDefault) }); setShowForm(true); }}><Pencil size={16} /></button>
+              </label>)}
             </div>
-
-            <div className="space-y-4 mb-6">
-              <div className="flex justify-between text-sm">
-                <span className="text-[#888880]">Subtotal</span>
-                <ProductPrice
-                  price={subtotal}
-                  compareAtPrice={compareAtSubtotal}
-                  className="justify-end gap-2"
-                  priceClassName="text-sm text-[#1A1A1A]"
-                  compareClassName="text-xs text-[#888880] line-through"
-                />
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-[#888880]">Shipping</span>
-                <span>{shipping === 0 ? 'Free' : `₹${shipping}`}</span>
-              </div>
+            <button onClick={() => { setEditingId(null); setFormData(emptyAddress); setShowForm(true); }} className="mt-3 flex min-h-11 items-center gap-2 text-sm text-[#C0132A]"><Plus size={17} /> Add another address</button>
+          </>}
+          {showForm && <form id="delivery-address" onSubmit={handleSubmit} className="rounded-xl border border-[#E8E4E0] p-4 sm:p-5">
+            <div className="mb-4 flex items-center justify-between"><h2 className="font-semibold">Delivery details</h2>{addresses.length > 0 && <button type="button" onClick={() => setShowForm(false)} className="text-sm underline">Use saved address</button>}</div>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-4">
+              {fields.map(field => <div key={field.name} className={field.wide ? 'col-span-2' : field.name === 'city' || field.name === 'pincode' ? 'col-span-1' : 'col-span-2 sm:col-span-1'}>
+                <label htmlFor={field.name} className="mb-1.5 block text-sm font-medium">{field.label}</label>
+                <input id={field.name} name={field.name} autoComplete={field.autoComplete} type={field.name === 'phone' ? 'tel' : 'text'} inputMode={field.name === 'pincode' ? 'numeric' : undefined} maxLength={field.name === 'pincode' ? 6 : field.name === 'phone' ? 16 : 150} required={field.name !== 'addressLine2'} value={formData[field.name]} onChange={event => { setFormData(previous => ({ ...previous, [field.name]: event.target.value })); setFormError(''); }} placeholder={field.placeholder} className="min-h-12 w-full rounded-lg border border-[#DCD5CF] bg-white px-3 text-base outline-none focus:border-[#C0132A] focus:ring-1 focus:ring-[#C0132A]" />
+              </div>)}
             </div>
-
-            <div className="border-t border-[#E8E4E0] pt-4 mb-6">
-              <div className="flex justify-between">
-                <span className="font-medium">Total</span>
-                <span className="font-display text-2xl">₹{total.toLocaleString()}</span>
-              </div>
-            </div>
-
-            <button
-              onClick={proceedToPayment}
-              disabled={!selectedAddress || showForm}
-              className={`w-full text-[11px] font-medium tracking-[0.17em] uppercase py-4 flex items-center justify-center gap-2 transition-colors ${
-                selectedAddress && !showForm
-                  ? 'bg-[#C0132A] text-white hover:bg-[#A81024]'
-                  : 'bg-[#E8E4E0] text-[#888880] cursor-not-allowed'
-              }`}
-            >
-              Proceed to Payment
-              <ArrowRight size={14} />
-            </button>
-
-            {!selectedAddress && (
-              <p className="text-xs text-[#C0132A] text-center mt-3">
-                Please select or add a delivery address
-              </p>
-            )}
-          </motion.div>
+            <label className="mt-4 flex items-center gap-2 text-sm text-[#66665E]"><input type="checkbox" checked={formData.isDefault} onChange={event => setFormData(prev => ({ ...prev, isDefault: event.target.checked }))} className="accent-[#C0132A]" /> Make this my default address</label>
+            {formError && <p role="alert" className="mt-3 text-sm text-red-700">{formError}</p>}
+          </form>}
         </div>
+        <aside className="h-fit rounded-xl bg-[#F9F7F5] p-4 lg:sticky lg:top-24">
+          <details className="mb-4"><summary className="cursor-pointer text-sm font-semibold">Your bag · {cart.reduce((n, item) => n + item.quantity, 0)} items <span className="float-right">₹{total.toLocaleString('en-IN')}</span></summary><div className="mt-3 space-y-2">{cart.map(item => <p key={`${item.product.id}-${item.size}-${item.color}`} className="text-sm text-[#66665E]">{item.product.name} · {item.size} · {item.color} × {item.quantity}</p>)}<p className="mt-2 text-xs text-[#66665E]">Total includes applied offers and shipping.</p></div></details>
+          <p className="mb-4 flex items-center gap-2 text-xs text-[#66665E]"><Check size={15} /> Choose COD or pay online on the next step.</p>
+          <CheckoutAction total={total} label={showForm ? 'Save & continue' : 'Continue to payment'} form={showForm ? 'delivery-address' : undefined} onClick={showForm ? undefined : proceed} disabled={!showForm && !selectedAddress} />
+        </aside>
       </div>
     </div>
-  );
+  </div>;
 }

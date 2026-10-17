@@ -10,7 +10,7 @@ export default function WhatsAppButton() {
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(DEFAULT_MESSAGE)}`;
 
   // Hide on admin pages
-  if (location.pathname.startsWith('/admin')) return null;
+  if (location.pathname.startsWith('/admin') || location.pathname.startsWith('/checkout') || location.pathname === '/cart') return null;
 
   return (
     <motion.a

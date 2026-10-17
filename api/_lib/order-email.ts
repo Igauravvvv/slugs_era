@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-type Delivery = { sentAt?: string; error?: string };
+type Delivery = { sentAt?: string; error?: string; smtpResponse?: string };
 type DeliveryState = { attemptId?: string; leaseUntil?: number; store?: Delivery; customer?: Delivery };
 export type EmailOrder = {
   id: string; order_number?: string; total: number; payment_id?: string | null;
@@ -91,7 +91,7 @@ export async function sendOrderEmail(input: EmailOrder): Promise<EmailResult> {
           ...(recipient === 'store' ? orderEmail(order) : customerOrderEmail(order)),
         });
         if (!result.accepted?.length) throw Object.assign(new Error('Message rejected'), { code: 'REJECTED' });
-        state[recipient] = { sentAt: new Date().toISOString() };
+        state[recipient] = { sentAt: new Date().toISOString(), smtpResponse: String(result.response || '').slice(0, 300) };
         console.info('[order-email] Accepted', { orderId: order.id, recipient, messageId: result.messageId });
       } catch (error) {
         state[recipient] = { error: (error as { code?: string }).code || 'EMAIL_FAILED' };

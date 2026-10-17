@@ -1,6 +1,7 @@
 export const FIRST_BUYER_CODE = 'TheOneOfHundred';
 export const TSHIRT_BUNDLE_CODE = '2burpy';
 export const PRIVATE_COUPON_CODE = 'maddy';
+export const EOWS_CODE = 'EOWS01';
 const FIRST_BUYER_DISCOUNT = 99;
 const TWO_TSHIRT_PRICE = 1999;
 const THREE_TSHIRT_PRICE = 2699;
@@ -36,9 +37,11 @@ export function parsePromoCodes(raw: unknown): string[] {
     if (code.toLowerCase() === TSHIRT_BUNDLE_CODE.toLowerCase()) codes.add(TSHIRT_BUNDLE_CODE);
     else if (code.toLowerCase() === FIRST_BUYER_CODE.toLowerCase()) codes.add(FIRST_BUYER_CODE);
     else if (code.toLowerCase() === PRIVATE_COUPON_CODE.toLowerCase()) codes.add(PRIVATE_COUPON_CODE);
+    else if (code.toUpperCase() === EOWS_CODE) codes.add(EOWS_CODE);
     else throw httpError('This offer code is not valid.', 400);
   }
-  return [TSHIRT_BUNDLE_CODE, FIRST_BUYER_CODE, PRIVATE_COUPON_CODE].filter((code) => codes.has(code));
+  if (codes.has(EOWS_CODE) && codes.size > 1) throw httpError('EOWS01 cannot be combined with another offer.', 400);
+  return [TSHIRT_BUNDLE_CODE, FIRST_BUYER_CODE, PRIVATE_COUPON_CODE, EOWS_CODE].filter((code) => codes.has(code));
 }
 
 function calculateTshirtBundle(unitPrices: number[]) {
@@ -147,12 +150,14 @@ export async function priceCheckout(raw: unknown, options: PriceCheckoutOptions)
   if (privateCouponApplied && privateDiscount === 0) {
     throw httpError('This private offer only applies to eligible ₹1,199 shirts.', 409);
   }
-  const subtotal = Math.max(0, afterBundle - welcomeDiscount - privateDiscount);
+  const couponDiscount = promoCodes.includes(EOWS_CODE) ? Math.min(200, afterBundle) : 0;
+  const subtotal = Math.max(0, afterBundle - welcomeDiscount - privateDiscount - couponDiscount);
   return {
     items,
     retailSubtotal,
     launchDiscount,
     welcomeDiscount,
+    couponDiscount,
     privateDiscount,
     subtotal,
     shippingFee: 0,

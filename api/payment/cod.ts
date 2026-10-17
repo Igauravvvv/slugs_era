@@ -48,6 +48,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         pincode: address.pincode, country: 'India', fullName: customerName.trim(), phone: customerPhone.trim(), email: user.email || null,
         paymentMethod: 'COD', paymentStatus: 'Pending', promoCodes: checkout.promoCodes,
         launchDiscount: checkout.launchDiscount, welcomeDiscount: checkout.welcomeDiscount, privateDiscount: checkout.privateDiscount,
+        couponDiscount: checkout.couponDiscount,
       },
       items: checkout.items, subtotal: checkout.subtotal, total: checkout.total, status: 'Pending', payment_id: null,
     };

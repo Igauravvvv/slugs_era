@@ -1,22 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag, ArrowRight, Truck, RotateCcw, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useStore } from '@/store';
 import { calculateShipping } from '@/utils/shipping';
 import { getSizeStock } from '@/types';
 import { generateSlug } from '@/types';
 import ProductPrice from '@/components/ProductPrice';
-import InstagramFeed from '@/components/InstagramFeed';
+import CheckoutAction from '@/components/CheckoutAction';
 import { trackAddToCart, trackBeginCheckout, trackRemoveFromCart, trackViewCart } from '@/lib/analytics';
 import {
+  EOWS_CODE, EOWS_DISCOUNT, isEowsCode,
   FIRST_BUYER_CODE,
   FIRST_BUYER_DISCOUNT,
   PRIVATE_COUPON_CODE,
   TSHIRT_BUNDLE_CODE,
   calculatePrivateCouponDiscount,
   calculateLaunchSale,
-  getBundleProgressMessage,
   isFirstBuyerCode,
   isPrivateCouponCode,
   isTshirtBundleCode,
@@ -46,7 +46,7 @@ export default function Cart() {
   const total = subtotal + shipping;
   const itemCount = getCartCount();
   const privateCouponApplied = isPrivateCouponCode(promoCode);
-  const bundleCodeApplied = !privateCouponApplied && isTshirtBundleCode(bundlePromoCode);
+  const bundleCodeApplied = !privateCouponApplied && !isEowsCode(promoCode) && isTshirtBundleCode(bundlePromoCode);
   const launchPricing = calculateLaunchSale(cart, bundleCodeApplied);
   const potentialLaunchPricing = calculateLaunchSale(cart, true);
   const welcomeDiscount = !privateCouponApplied && isFirstBuyerCode(promoCode)
@@ -86,27 +86,34 @@ export default function Cart() {
     return sizeStock?.stock ?? (item.product.inStock ? 10 : 0);
   };
 
-  const applyOfferCode = () => {
-    if (isPrivateCouponCode(offerCode)) {
+  const applyOfferCode = (code = offerCode) => {
+    if (isEowsCode(code)) { setPromoCode(EOWS_CODE); setBundlePromoCode(null); setOfferCode(''); setOfferMessage('EOWS01 applied — ₹200 off your order.'); return; }
+    if (isPrivateCouponCode(code)) {
       setPromoCode(PRIVATE_COUPON_CODE);
       setBundlePromoCode(null);
       setOfferCode('');
       setOfferMessage('Private offer applied.');
       return;
     }
-    if (isTshirtBundleCode(offerCode)) {
+    if (isTshirtBundleCode(code)) {
+      if (isEowsCode(promoCode) || privateCouponApplied) setPromoCode(null);
       setBundlePromoCode(TSHIRT_BUNDLE_CODE);
       setOfferCode(TSHIRT_BUNDLE_CODE);
       setOfferMessage('Launch bundle code applied.');
       return;
     }
-    if (isFirstBuyerCode(offerCode)) {
+    if (isFirstBuyerCode(code)) {
       setPromoCode(FIRST_BUYER_CODE);
       setOfferCode(FIRST_BUYER_CODE);
       setOfferMessage('₹99 first-buyer offer applied.');
       return;
     }
     setOfferMessage('That code is not part of the current launch offers.');
+  };
+
+  const proceed = () => {
+    trackBeginCheckout(total, cart.map(item => ({ id: item.product.id, name: item.product.name, price: item.product.price, quantity: item.quantity })));
+    navigate('/checkout/address'); window.scrollTo(0, 0);
   };
 
   if (cart.length === 0) {
@@ -122,7 +129,7 @@ export default function Cart() {
           <h2 className="font-display text-3xl font-light text-[#1A1A1A] mb-3">
             Your bag is empty
           </h2>
-          <p className="text-[#888880] mb-8">
+          <p className="text-[#888880] mb-4">
             Discover our collection and add something special.
           </p>
           <button
@@ -141,10 +148,10 @@ export default function Cart() {
   }
 
   return (
-    <div className="min-h-screen bg-white py-5 sm:py-8">
+    <div className="min-h-screen bg-white pt-4 pb-28 sm:pt-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-4 mb-4">
           <button
             onClick={() => {
               navigate('/');
@@ -157,7 +164,7 @@ export default function Cart() {
           </button>
         </div>
 
-        <h1 className="font-display text-[clamp(28px,4vw,42px)] font-light text-[#1A1A1A] mb-6 sm:mb-8">
+        <h1 className="font-display text-[clamp(28px,4vw,42px)] font-light text-[#1A1A1A] mb-6 sm:mb-4">
           Shopping Bag ({itemCount})
         </h1>
 
@@ -280,7 +287,88 @@ export default function Cart() {
               </motion.div>
             ))}
 
-            {recommendationGroups.map((group) => (
+
+          </div>
+
+          {/* Order Summary */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.2 }}
+            className="bg-[#F9F7F5] rounded-xl p-4 sm:p-5 h-fit lg:sticky lg:top-6 border border-[#E8E4E0]"
+          >
+            <h3 className="font-display text-xl font-medium text-[#1A1A1A] mb-3">
+              Order summary
+            </h3>
+
+            <div className="mb-4">
+              <div className="flex gap-2">
+                <input value={offerCode} onChange={e => setOfferCode(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') applyOfferCode(); }} aria-label="Offer code" placeholder="Have a coupon?" className="min-w-0 flex-1 rounded-lg border border-[#DCD5CF] bg-white px-3 py-2.5 text-sm" />
+                <button type="button" onClick={() => applyOfferCode()} className="rounded-lg bg-[#1A1A1A] px-4 text-sm text-white">Apply</button>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <button type="button" onClick={() => applyOfferCode(EOWS_CODE)} className="rounded-full border border-[#C0132A] px-3 py-2 text-xs text-[#C0132A]">{isEowsCode(promoCode) ? '✓ EOWS01 applied' : 'Apply EOWS01 · ₹200 off'}</button>
+                {potentialLaunchPricing.discount > 0 && <button type="button" onClick={() => applyOfferCode(TSHIRT_BUNDLE_CODE)} className="rounded-full border border-[#DCD5CF] px-3 py-2 text-xs">{bundleCodeApplied ? '✓ Bundle applied' : `Bundle · save ₹${potentialLaunchPricing.discount}`}</button>}
+              </div>
+              {(promoCode || bundlePromoCode) && <button onClick={() => { setPromoCode(null); setBundlePromoCode(null); setOfferMessage('Offer removed.'); }} className="mt-2 text-xs underline">Remove offer</button>}
+              {offerMessage && <p role="status" className="mt-2 text-xs text-[#66665E]">{offerMessage}</p>}
+            </div>
+            <details className="mb-3"><summary className="cursor-pointer text-xs text-[#66665E]">View price breakdown</summary>
+            <div className="space-y-2 mt-3 mb-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-[#888880]">Items subtotal</span>
+                <span>₹{launchPricing.retailSubtotal.toLocaleString()}</span>
+              </div>
+              {launchPricing.discount > 0 && (
+                <div className="flex justify-between text-sm text-emerald-700">
+                  <span>{TSHIRT_BUNDLE_CODE} bundle savings</span>
+                  <span>−₹{launchPricing.discount.toLocaleString()}</span>
+                </div>
+              )}
+              {isEowsCode(promoCode) && <div className="flex justify-between text-sm text-emerald-700"><span>EOWS01</span><span>−₹{Math.min(EOWS_DISCOUNT, launchPricing.retailSubtotal)}</span></div>}
+              {welcomeDiscount > 0 && (
+                <div className="flex justify-between text-sm text-emerald-700">
+                  <span>First-buyer offer</span>
+                  <span>−₹{welcomeDiscount.toLocaleString()}</span>
+                </div>
+              )}
+              {privateDiscount > 0 && (
+                <div className="flex justify-between text-sm text-emerald-700">
+                  <span>Private offer</span>
+                  <span>−₹{privateDiscount.toLocaleString()}</span>
+                </div>
+              )}
+              {(launchPricing.discount > 0 || welcomeDiscount > 0 || privateDiscount > 0) && (
+                <div className="flex justify-between text-sm font-medium">
+                  <span>Discounted subtotal</span>
+                  <span>₹{subtotal.toLocaleString()}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm">
+                <span className="text-[#888880]">Shipping</span>
+                <span>{shipping === 0 ? 'Free' : `₹${shipping}`}</span>
+              </div>
+
+            </div>
+
+            </details>
+            <div className="border-t border-[#E8E4E0] pt-3 mb-3">
+              <div className="flex justify-between">
+                <span className="font-medium">Total</span>
+                <span className="font-display text-2xl">₹{total.toLocaleString()}</span>
+              </div>
+              <p className="text-xs text-[#888880] mt-1">
+                Including all taxes
+              </p>
+            </div>
+
+            <button onClick={proceed} className="mb-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#C0132A] px-4 text-sm font-semibold text-white lg:hidden">Proceed to checkout <ArrowRight size={16} /></button>
+            <CheckoutAction total={total} label="Proceed to checkout" onClick={proceed} />
+            <p className="mt-3 text-center text-xs text-[#66665E]">COD available · Online payments via Razorpay</p>
+
+          </motion.div>
+        </div>
+        <div className="mt-8">            {recommendationGroups.map((group) => (
               <section key={group.category} className="pt-8 sm:pt-10 border-t border-[#E8E4E0]">
                 <div className="bg-[#F9F7F5] p-4 sm:p-6">
                 <div className="flex items-end justify-between gap-4 mb-5 sm:mb-6">
@@ -323,165 +411,7 @@ export default function Cart() {
                 </div>
                 </div>
               </section>
-            ))}
-          </div>
-
-          {/* Order Summary */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1.1, delay: 0.2 }}
-            className="bg-[#F9F7F5] p-5 sm:p-6 lg:p-8 h-fit lg:sticky lg:top-6 border border-[#E8E4E0]"
-          >
-            <h3 className="font-display text-xl font-medium text-[#1A1A1A] mb-6">
-              Order Summary
-            </h3>
-
-            {launchPricing.eligibleTshirtCount > 0 && (
-              <div className="mb-4 rounded-2xl border border-[#E8D7CB] bg-[#FFF9F2] p-4">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C0132A]">New launch sale</p>
-                <p className="mt-1 text-sm font-medium text-[#1A1A1A]">2 tees ₹1,999 · 3 tees ₹2,699</p>
-                <p className="mt-1 text-xs leading-relaxed text-[#706961]">{getBundleProgressMessage(launchPricing.eligibleTshirtCount)}</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setBundlePromoCode(TSHIRT_BUNDLE_CODE);
-                    setOfferCode(TSHIRT_BUNDLE_CODE);
-                    setOfferMessage('Launch bundle code applied.');
-                  }}
-                  className={`mt-3 rounded-full px-4 py-2 text-[10px] font-bold uppercase tracking-[0.12em] transition-colors ${
-                    bundleCodeApplied ? 'bg-[#1A1A1A] text-white' : 'border border-[#C0132A] text-[#C0132A] hover:bg-[#C0132A] hover:text-white'
-                  }`}
-                >
-                  {bundleCodeApplied ? `✓ ${TSHIRT_BUNDLE_CODE} applied` : `Apply code ${TSHIRT_BUNDLE_CODE}`}
-                </button>
-                {potentialLaunchPricing.discount > 0 && !bundleCodeApplied && (
-                  <p className="mt-2 text-[11px] font-medium text-emerald-700">Apply now to save ₹{potentialLaunchPricing.discount.toLocaleString()}.</p>
-                )}
-              </div>
-            )}
-
-            <div className="mb-6 rounded-2xl border border-[#E8E4E0] bg-white p-4">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C0132A]">First 100 buyers · ₹99 off</p>
-              <p className="mt-1 text-xs text-[#706961]">Welcome code: <strong className="text-[#1A1A1A]">{FIRST_BUYER_CODE}</strong></p>
-              <div className="mt-3 flex gap-2">
-                <input
-                  value={offerCode}
-                  onChange={(event) => { setOfferCode(event.target.value); setOfferMessage(''); }}
-                  onKeyDown={(event) => { if (event.key === 'Enter') applyOfferCode(); }}
-                  aria-label="Offer code"
-                  placeholder="Enter offer code"
-                  className="min-w-0 flex-1 rounded-full border border-[#DCD5CF] bg-[#F9F7F5] px-4 py-2 text-xs outline-none focus:border-[#C0132A]"
-                />
-                <button type="button" onClick={applyOfferCode} className="rounded-full bg-[#1A1A1A] px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-white">Apply</button>
-              </div>
-              {offerMessage && <p className="mt-2 text-[11px] text-[#706961]">{offerMessage}</p>}
-            </div>
-
-            <div className="space-y-4 mb-6">
-              <div className="flex justify-between text-sm">
-                <span className="text-[#888880]">Items subtotal</span>
-                <span>₹{launchPricing.retailSubtotal.toLocaleString()}</span>
-              </div>
-              {launchPricing.discount > 0 && (
-                <div className="flex justify-between text-sm text-emerald-700">
-                  <span>{TSHIRT_BUNDLE_CODE} bundle savings</span>
-                  <span>−₹{launchPricing.discount.toLocaleString()}</span>
-                </div>
-              )}
-              {welcomeDiscount > 0 && (
-                <div className="flex justify-between text-sm text-emerald-700">
-                  <span>First-buyer offer</span>
-                  <span>−₹{welcomeDiscount.toLocaleString()}</span>
-                </div>
-              )}
-              {privateDiscount > 0 && (
-                <div className="flex justify-between text-sm text-emerald-700">
-                  <span>Private offer</span>
-                  <span>−₹{privateDiscount.toLocaleString()}</span>
-                </div>
-              )}
-              {(launchPricing.discount > 0 || welcomeDiscount > 0 || privateDiscount > 0) && (
-                <div className="flex justify-between text-sm font-medium">
-                  <span>Discounted subtotal</span>
-                  <span>₹{subtotal.toLocaleString()}</span>
-                </div>
-              )}
-              <div className="flex justify-between text-sm">
-                <span className="text-[#888880]">Shipping</span>
-                <span>{shipping === 0 ? 'Free' : `₹${shipping}`}</span>
-              </div>
-              {shipping === 0 && (
-                <p className="text-xs text-green-600">
-                  You qualify for free shipping!
-                </p>
-              )}
-            </div>
-
-            <div className="border-t border-[#E8E4E0] pt-4 mb-6">
-              <div className="flex justify-between">
-                <span className="font-medium">Total</span>
-                <span className="font-display text-2xl">₹{total.toLocaleString()}</span>
-              </div>
-              <p className="text-xs text-[#888880] mt-1">
-                Including all taxes
-              </p>
-            </div>
-
-            <button
-              onClick={() => {
-                trackBeginCheckout(total, cart.map((item) => ({
-                  id: item.product.id,
-                  name: item.product.name,
-                  price: item.product.price,
-                  quantity: item.quantity,
-                })));
-                navigate('/checkout/address');
-                window.scrollTo(0, 0);
-              }}
-              className="w-full min-h-13 bg-[#1A1A1A] text-white text-[11px] font-medium tracking-[0.17em] uppercase py-4 flex items-center justify-center gap-2 hover:bg-black transition-colors touch-manipulation"
-            >
-              Proceed to Checkout
-              <ArrowRight size={14} />
-            </button>
-
-            <div className="grid grid-cols-3 gap-2 py-5 border-b border-[#E8E4E0] text-center">
-              <div className="flex flex-col items-center gap-1 text-[9px] uppercase tracking-[0.08em] text-[#888880]">
-                <Truck size={15} className="text-[#C0132A]" /> Free shipping
-              </div>
-              <div className="flex flex-col items-center gap-1 text-[9px] uppercase tracking-[0.08em] text-[#888880]">
-                <RotateCcw size={15} className="text-[#C0132A]" /> Easy returns
-              </div>
-              <div className="flex flex-col items-center gap-1 text-[9px] uppercase tracking-[0.08em] text-[#888880]">
-                <ShieldCheck size={15} className="text-[#C0132A]" /> Secure pay
-              </div>
-            </div>
-
-            <div className="mt-5 text-center">
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/349/349221.png"
-                alt="Visa"
-                className="h-6 inline-block mx-1 opacity-50"
-              />
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/349/349228.png"
-                alt="Mastercard"
-                className="h-6 inline-block mx-1 opacity-50"
-              />
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/349/349230.png"
-                alt="Amex"
-                className="h-6 inline-block mx-1 opacity-50"
-              />
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/349/349219.png"
-                alt="PayPal"
-                className="h-6 inline-block mx-1 opacity-50"
-              />
-            </div>
-          </motion.div>
-        </div>
-        <InstagramFeed className="mt-14 sm:mt-20" />
+            ))}</div>
       </div>
     </div>
   );

@@ -43,6 +43,7 @@
     { "source": "/dashboard/(.*)", "destination": "/index" },
     { "source": "/admin/(.*)", "destination": "/index" }
   ],
+  "functions": { "api/cron.js": { "maxDuration": 60 } },
   "crons": [
     {
       "path": "/api/cron",

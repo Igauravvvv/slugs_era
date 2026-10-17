@@ -26,7 +26,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const target = new URL(`${url}/rest/v1/orders`);
     target.searchParams.set('select','id,order_number,created_at,total,payment_id,shipping_address');
     target.searchParams.set('order','created_at.desc'); target.searchParams.set('limit','10');
-    target.searchParams.set('shipping_address->>email','eq.slugsera@gmail.com');
     const response = await fetch(target,{headers:adminDbHeaders()});
     if(!response.ok) throw new Error('Could not read orders');
     const orders=await response.json();

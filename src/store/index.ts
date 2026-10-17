@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import type { CartItem, Address, User, Product } from '@/types';
 import { calculateShipping } from '@/utils/shipping';
 import {
-  FIRST_BUYER_DISCOUNT,
+  FIRST_BUYER_DISCOUNT, EOWS_DISCOUNT, isEowsCode,
   calculatePrivateCouponDiscount,
   calculateLaunchSale,
   isFirstBuyerCode,
@@ -133,11 +133,11 @@ export const useStore = create<AppState>()(
         const privateCouponApplied = isPrivateCouponCode(state.promoCode);
         const launchPricing = calculateLaunchSale(
           state.cart,
-          !privateCouponApplied && isTshirtBundleCode(state.bundlePromoCode),
+          !privateCouponApplied && !isEowsCode(state.promoCode) && isTshirtBundleCode(state.bundlePromoCode),
         );
         const welcomeDiscount = !privateCouponApplied && isFirstBuyerCode(state.promoCode) ? FIRST_BUYER_DISCOUNT : 0;
         const privateDiscount = calculatePrivateCouponDiscount(state.cart, privateCouponApplied);
-        return Math.max(0, launchPricing.saleSubtotal - welcomeDiscount - privateDiscount);
+        return Math.max(0, launchPricing.saleSubtotal - welcomeDiscount - privateDiscount - (isEowsCode(state.promoCode) ? EOWS_DISCOUNT : 0));
       },
       getCartCount: () => {
         return get().cart.reduce((count, item) => count + item.quantity, 0);
@@ -161,7 +161,7 @@ export const useStore = create<AppState>()(
         const updated = address.isDefault
           ? addresses.map((a) => ({ ...a, isDefault: false }))
           : addresses;
-        set({ addresses: [...updated, address] });
+        set({ addresses: [...updated.filter(a => a.id !== address.id), address] });
       },
       selectAddress: (address) => set({ selectedAddress: address }),
       removeAddress: (id) => {
