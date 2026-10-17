@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '@/store';
@@ -12,15 +12,11 @@ interface HeaderProps {
 
 export default function Header({ minimal = false }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isTop, setIsTop] = useState(true);
   const [isPastHero, setIsPastHero] = useState(false);
-  const redHeaderRef = useRef<HTMLElement>(null);
-  const whiteHeaderRef = useRef<HTMLElement>(null);
   const { getCartCount, setCollectionFilter, setAboutMobileVisible } = useStore();
   const navigate = useNavigate();
   const location = useLocation();
   const isHomePage = location.pathname === '/';
-  const currentView = isHomePage ? 'home' : location.pathname.slice(1);
   const { user, signInWithGoogle } = useAuth();
   const cartCount = getCartCount();
   const customerFirstName = user
@@ -43,91 +39,10 @@ export default function Header({ minimal = false }: HeaderProps) {
     let ticking = false;
 
     const updateHeader = () => {
-      const scrollY = window.scrollY;
-      setIsTop(scrollY < 50);
-
-      // Detect if we've scrolled past the hero section
-      const heroSection = document.querySelector('#hero, section:first-of-type') as HTMLElement | null;
-      const heroBottom = heroSection ? heroSection.getBoundingClientRect().bottom : 0;
-      const pastHero = heroBottom <= 76; // 76px = header height
-      setIsPastHero(pastHero);
-
-      if (!whiteHeaderRef.current || !redHeaderRef.current) {
-        ticking = false;
-        return;
-      }
-
-      // Once past the hero (or on non-home pages), disable clip-path and use solid bg
-      if (!isHomePage || pastHero) {
-        whiteHeaderRef.current.style.clipPath = 'none';
-        redHeaderRef.current.style.clipPath = 'circle(0px at 0 0)';
-        ticking = false;
-        return;
-      }
-
-      // On home page within the hero — use the smart clip-path color-split logic
-      const elements = Array.from(document.querySelectorAll('section, footer'));
-      const darkRects: { top: number; bottom: number }[] = [];
-
-      elements.forEach((el) => {
-        const className = el.className || '';
-        const isLight = className.includes('bg-white') || className.includes('bg-[#F9F7F5]');
-
-        if (!isLight) {
-          const rect = el.getBoundingClientRect();
-          if (rect.bottom > 0 && rect.top < window.innerHeight) {
-            darkRects.push({
-              top: Math.max(0, rect.top),
-              bottom: Math.min(window.innerHeight, rect.bottom)
-            });
-          }
-        }
-      });
-
-      darkRects.sort((a, b) => a.top - b.top);
-      const mergedDark: { top: number; bottom: number }[] = [];
-      darkRects.forEach((r) => {
-        if (mergedDark.length === 0) {
-          mergedDark.push({ ...r });
-        } else {
-          const last = mergedDark[mergedDark.length - 1];
-          if (r.top <= last.bottom) {
-            last.bottom = Math.max(last.bottom, r.bottom);
-          } else {
-            mergedDark.push({ ...r });
-          }
-        }
-      });
-
-      let darkPath = '';
-      mergedDark.forEach((r) => {
-        darkPath += `M 0 ${r.top} H ${window.innerWidth} V ${r.bottom} H 0 Z `;
-      });
-
-      let lightPath = '';
-      let currentY = 0;
-      mergedDark.forEach((r) => {
-        if (r.top > currentY) {
-          lightPath += `M 0 ${currentY} H ${window.innerWidth} V ${r.top} H 0 Z `;
-        }
-        currentY = r.bottom;
-      });
-      if (currentY < window.innerHeight) {
-        lightPath += `M 0 ${currentY} H ${window.innerWidth} V ${window.innerHeight} H 0 Z `;
-      }
-
-      if (darkPath) {
-        whiteHeaderRef.current.style.clipPath = `path('${darkPath.trim()}')`;
-      } else {
-        whiteHeaderRef.current.style.clipPath = `circle(0px at 0 0)`;
-      }
-
-      if (lightPath) {
-        redHeaderRef.current.style.clipPath = `path('${lightPath.trim()}')`;
-      } else {
-        redHeaderRef.current.style.clipPath = `circle(0px at 0 0)`;
-      }
-
+      // Switch the entire navbar theme together; never slice icons across sections.
+      const hero = document.getElementById('hero');
+      const bannerOffset = window.innerWidth < 640 ? 48 : 32;
+      setIsPastHero(Boolean(hero && hero.getBoundingClientRect().bottom <= 76 + bannerOffset));
       ticking = false;
     };
 
@@ -141,8 +56,7 @@ export default function Header({ minimal = false }: HeaderProps) {
     window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('resize', handleScroll);
 
-    setTimeout(updateHeader, 100);
-    setTimeout(updateHeader, 500);
+    updateHeader();
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -172,11 +86,6 @@ export default function Header({ minimal = false }: HeaderProps) {
       }, 50);
     }
     setIsMobileMenuOpen(false);
-  };
-
-  const goHome = () => {
-    navigate('/');
-    setAboutMobileVisible(false);
   };
 
   const goToCart = () => {
@@ -224,8 +133,8 @@ export default function Header({ minimal = false }: HeaderProps) {
                   )}
                 </button>
 
-                {/* Dropdown Menu - ONLY render in the transparent (unclipped) layer to overcome clip-path z-index bug */}
-                {isTransparent && (
+                {/* This single header layer leaves dropdowns unclipped. */}
+                {(
                   <div className="absolute top-full left-0 pt-4 opacity-0 pointer-events-none group-hover/nav:opacity-100 group-hover/nav:pointer-events-auto transition-all duration-300 z-[502]">
                     <div className="bg-white border border-[#E8E4E0] shadow-xl rounded-sm p-4 w-48 flex flex-col gap-3">
                       <button onClick={() => { setCollectionFilter('shirts', null); navigate('/collections/shirts'); }} className="text-left text-xs uppercase tracking-wider text-[#1A1A1A] hover:text-[#C0132A] transition-colors">Shirts</button>
@@ -443,29 +352,9 @@ export default function Header({ minimal = false }: HeaderProps) {
           </div>
         </header>
       ) : (
-        /* ── HERO CLIP-PATH SYSTEM: only on home page while hero is visible ── */
-        <>
-          {/* Base Header: Red Theme for Light Backgrounds */}
-          <header
-            ref={redHeaderRef}
-            className="fixed top-[48px] sm:top-[32px] left-0 right-0 z-[498] pointer-events-auto"
-          >
-            {renderHeaderContent('red')}
-          </header>
-
-          {/* Overlaid Header: White Theme for Dark Backgrounds */}
-          <header
-            ref={whiteHeaderRef}
-            className="fixed top-[48px] sm:top-[32px] left-0 right-0 z-[499] pointer-events-auto mix-blend-normal"
-          >
-            {renderHeaderContent('white')}
-          </header>
-
-          {/* Transparent Layer exclusively for Dropdowns */}
-          <header className="fixed top-[48px] sm:top-[32px] left-0 right-0 z-[501] pointer-events-none">
-            {renderHeaderContent('transparent')}
-          </header>
-        </>
+        <header className="fixed top-[48px] sm:top-[32px] left-0 right-0 z-[501]">
+          {renderHeaderContent('white')}
+        </header>
       )}
 
       {/* Mobile Menu */}
@@ -481,7 +370,7 @@ export default function Header({ minimal = false }: HeaderProps) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.24 }}
-              className="fixed inset-x-0 bottom-0 top-[76px] z-[499] bg-black/20 backdrop-blur-[1px] lg:hidden"
+              className={`fixed inset-x-0 bottom-0 ${isSolid ? 'top-[76px]' : 'top-[124px] sm:top-[108px]'} z-[499] bg-black/20 backdrop-blur-[1px] lg:hidden`}
             />
             <motion.div
               key="mobile-menu-panel"
@@ -489,7 +378,7 @@ export default function Header({ minimal = false }: HeaderProps) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.99 }}
               transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-              className="fixed inset-x-2 top-[76px] z-[500] max-h-[calc(100dvh-92px)] overflow-y-auto rounded-b-[28px] bg-[#F9F7F5] shadow-[0_24px_60px_rgba(26,26,26,0.20)] lg:hidden"
+              className={`fixed inset-x-2 ${isSolid ? 'top-[76px] max-h-[calc(100dvh-92px)]' : 'top-[124px] sm:top-[108px] max-h-[calc(100dvh-140px)]'} z-[500] overflow-y-auto rounded-b-[28px] bg-[#F9F7F5] shadow-[0_24px_60px_rgba(26,26,26,0.20)] lg:hidden`}
             >
             <nav className="mx-auto w-full max-w-lg px-5 pb-5 pt-6">
               <div className="mb-6">
