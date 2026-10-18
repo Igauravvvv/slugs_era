@@ -8,6 +8,8 @@ interface InstagramPost {
   mediaType?: string;
   thumbnailUrl?: string;
   mediaUrl?: string;
+  caption?: string;
+  sizes?: { medium?: { mediaUrl?: string }; large?: { mediaUrl?: string } };
 }
 
 interface InstagramFeedProps {
@@ -26,7 +28,10 @@ export default function InstagramFeed({ className = '' }: InstagramFeedProps) {
     let isCurrent = true;
 
     fetch(BEHOLD_FEED_URL)
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) throw new Error('Instagram feed unavailable');
+        return response.json();
+      })
       .then((data) => {
         if (!isCurrent) return;
         const feed = Array.isArray(data) ? data : data.posts || [];
@@ -60,7 +65,7 @@ export default function InstagramFeed({ className = '' }: InstagramFeedProps) {
       {posts.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
           {posts.map((post, index) => {
-            const imageSource = post.thumbnailUrl || post.mediaUrl;
+            const imageSource = post.sizes?.medium?.mediaUrl || post.sizes?.large?.mediaUrl || post.thumbnailUrl || (post.mediaType !== 'VIDEO' ? post.mediaUrl : undefined);
             return (
               <motion.a
                 key={post.id || index}
