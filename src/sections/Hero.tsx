@@ -30,7 +30,7 @@ export default function Hero() {
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black/45 to-transparent" />
       <motion.div
-        className="absolute bottom-10 left-6 right-6 z-20 sm:bottom-12 sm:left-12 md:bottom-16 md:left-24"
+        className="absolute bottom-20 left-5 right-5 z-20 sm:bottom-20 sm:left-8 md:bottom-16 md:left-12"
         initial={reduceMotion ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.15 }}
@@ -38,18 +38,21 @@ export default function Hero() {
         <motion.div
           animate={reduceMotion ? undefined : { y: [0, -5, 0] }}
           transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
-          className="flex items-center gap-4 text-white drop-shadow-md sm:gap-6"
+          className="flex flex-col items-start gap-3 text-left text-white drop-shadow-md"
         >
+          <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
+            <p className="whitespace-nowrap font-display text-[22px] leading-none tracking-tight sm:text-2xl lg:text-[30px]">
+              <span className="font-semibold">MOVEMENT.</span>{' '}
+              <span className="font-light italic">NOT MERCH.</span>
+            </p>
+            <span className="text-[9px] font-medium uppercase tracking-[0.2em] text-white/85 sm:text-[10px]">End of Season</span>
+          </div>
           <motion.span
             aria-hidden="true"
-            className="h-px w-9 origin-left bg-white/80 sm:w-14"
+            className="h-px w-12 origin-left bg-white/80"
             animate={reduceMotion ? undefined : { scaleX: [0.6, 1, 0.6], opacity: [0.6, 1, 0.6] }}
             transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
           />
-          <p className="font-display text-[clamp(24px,4vw,52px)] leading-none tracking-tight">
-            <span className="font-semibold">MOVEMENT.</span>{' '}
-            <span className="font-light italic">NOT MERCH.</span>
-          </p>
         </motion.div>
         <h1 className="sr-only">Slugsera premium oversized streetwear made in India</h1>
       </motion.div>
