@@ -382,10 +382,15 @@ export default function ProductDetail() {
             </h1>
             <p className="font-display text-base italic text-[#888880] mb-4">{selectedProduct.slogan}</p>
 
-            {selectedProduct.category === 'tshirts' && <p className="mb-2 text-xs font-semibold text-[#C0132A]">END OF MONSOON SALE · ₹999 PER TEE</p>}
-            <p className="mb-3 text-xs text-[#66665E]">Cash on delivery is live · Pay when your order arrives</p>
+            {selectedProduct.category === 'tshirts' && (
+              <div className="mb-2">
+                <span className="inline-flex bg-[#C0132A] py-2 pl-3 pr-5 text-[10px] font-semibold uppercase tracking-[0.08em] text-white sm:text-[11px]" style={{ clipPath: 'polygon(0 0, 100% 0, calc(100% - 8px) 50%, 100% 100%, 0 100%)' }}>
+                  End of Monsoon Sale
+                </span>
+              </div>
+            )}
             {/* Price */}
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center gap-3 mb-2">
               {isFullPreBook && selectedProduct.preOrderPrice ? (
                 <>
                   <ProductPrice
@@ -405,6 +410,8 @@ export default function ProductDetail() {
                 />
               )}
             </div>
+
+            <p className="mb-6 text-xs text-[#66665E]">Cash on delivery is live · Pay when your order arrives</p>
 
             {/* Launch date for pre-book */}
             {isFullPreBook && selectedProduct.launchDate && (

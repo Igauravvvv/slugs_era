@@ -1,10 +1,10 @@
-import { useSiteSection } from '@/context/SiteContentContext';
+import { motion, useReducedMotion } from 'framer-motion';
 
 const BLUE_TURTLE_DESKTOP_SRCSET = '/images/cdn/hero-blue-turtle-desktop-640.webp 640w, /images/cdn/hero-blue-turtle-desktop-1280.webp 1280w, /images/cdn/hero-blue-turtle-desktop-1920.webp 1920w';
 const BLUE_TURTLE_MOBILE_SRCSET = '/images/cdn/hero-blue-turtle-mobile-640.webp 640w, /images/cdn/hero-blue-turtle-mobile-960.webp 960w, /images/cdn/hero-blue-turtle-mobile-1440.webp 1440w';
 
 export default function Hero() {
-  const { section } = useSiteSection('hero');
+  const reduceMotion = useReducedMotion();
 
   return (
     <section
@@ -28,13 +28,31 @@ export default function Hero() {
       </picture>
       <div className="absolute inset-0 bg-black/10 mix-blend-overlay pointer-events-none" />
 
-      <div className="absolute top-[100px] left-5 right-auto sm:top-32 sm:left-12 md:top-48 md:left-24 lg:left-40 z-20 flex w-[calc(100%-3rem)] max-w-2xl flex-col items-start text-left">
-        <div className="mb-2 flex items-center gap-2 text-[8px] uppercase tracking-[0.15em] text-white opacity-80 sm:mb-4 sm:gap-4 sm:text-[10px] sm:tracking-[0.2em] md:mb-6 md:text-xs">
-          <span className="w-6 sm:w-8 md:w-12 h-[1px] bg-white/60 hidden sm:block" />
-          <span>{section?.subtitle || 'MOVEMENT. NOT MERCH — NEW SEASON'}</span>
-        </div>
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black/45 to-transparent" />
+      <motion.div
+        className="absolute bottom-10 left-6 right-6 z-20 sm:bottom-12 sm:left-12 md:bottom-16 md:left-24"
+        initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.15 }}
+      >
+        <motion.div
+          animate={reduceMotion ? undefined : { y: [0, -5, 0] }}
+          transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+          className="flex items-center gap-4 text-white drop-shadow-md sm:gap-6"
+        >
+          <motion.span
+            aria-hidden="true"
+            className="h-px w-9 origin-left bg-white/80 sm:w-14"
+            animate={reduceMotion ? undefined : { scaleX: [0.6, 1, 0.6], opacity: [0.6, 1, 0.6] }}
+            transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <p className="font-display text-[clamp(24px,4vw,52px)] leading-none tracking-tight">
+            <span className="font-semibold">MOVEMENT.</span>{' '}
+            <span className="font-light italic">NOT MERCH.</span>
+          </p>
+        </motion.div>
         <h1 className="sr-only">Slugsera premium oversized streetwear made in India</h1>
-      </div>
+      </motion.div>
     </section>
   );
 }
