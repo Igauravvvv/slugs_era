@@ -7,6 +7,7 @@ import { calculateShipping } from '@/utils/shipping';
 import { getSizeStock } from '@/types';
 import { generateSlug } from '@/types';
 import ProductPrice from '@/components/ProductPrice';
+import { optimizedProductImageUrl, optimizedProductImageSrcSet } from '@/lib/cdn';
 import CheckoutAction from '@/components/CheckoutAction';
 import { trackAddToCart, trackBeginCheckout, trackRemoveFromCart, trackViewCart } from '@/lib/analytics';
 import {
@@ -178,11 +179,16 @@ export default function Cart() {
                 className="flex gap-3 sm:gap-6 pb-5 sm:pb-6 border-b border-[#E8E4E0]"
               >
                 {/* Image */}
-                <div className="w-28 h-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 bg-[#F9F7F5] flex-shrink-0">
+                <div className="w-[38%] max-w-36 sm:w-44 sm:max-w-none lg:w-48 aspect-[4/5] self-start overflow-hidden rounded-xl border border-[#E8E4E0] bg-[#F9F7F5] flex-shrink-0">
                   <img
-                    src={item.product.image}
+                    src={optimizedProductImageUrl(item.product.image, 640)}
+                    srcSet={optimizedProductImageSrcSet(item.product.image)}
+                    sizes="(min-width: 1024px) 192px, (min-width: 640px) 176px, 38vw"
+                    width="640"
+                    height="640"
+                    decoding="async"
                     alt={item.product.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain p-1.5"
                   />
                 </div>
 
@@ -255,7 +261,7 @@ export default function Cart() {
                     </div>
 
                     {/* Price & Remove */}
-                    <div className="flex items-center gap-3 sm:gap-4 ml-auto">
+                    <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3 ml-auto">
                       <ProductPrice
                         price={item.product.price}
                         compareAtPrice={item.product.originalPrice}
