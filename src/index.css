@@ -437,3 +437,27 @@
     font-style: normal;
   }
 }
+
+/* Identical halves keep the announcement messages moving without a gap. */
+@keyframes monsoon-banner-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.monsoon-banner-track {
+  animation: monsoon-banner-scroll 32s linear infinite;
+}
+
+.monsoon-banner:hover .monsoon-banner-track,
+.monsoon-banner:focus-visible .monsoon-banner-track {
+  animation-play-state: paused;
+}
+
+.monsoon-banner-static {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .monsoon-banner-track { display: none; }
+  .monsoon-banner-static { display: block; }
+}

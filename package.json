@@ -10,7 +10,8 @@
     "build": "vite build && node scripts/generate-seo-pages.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
-    "audit:site": "node scripts/audit-site.mjs"
+    "audit:site": "node scripts/audit-site.mjs",
+    "prebuild": "node scripts/prepare-catalog.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

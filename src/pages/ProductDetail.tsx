@@ -12,6 +12,7 @@ import { supabase } from '@/lib/supabase';
 import ProductPrice from '@/components/ProductPrice';
 import { isVideoMedia, optimizedProductImageSrcSet, optimizedProductImageUrl, preloadProductImage } from '@/lib/cdn';
 import { useCartLogin } from '@/context/CartLoginContext';
+import { TSHIRT_PRINTING } from '@/data/tshirtDetails';
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -27,7 +28,6 @@ export default function ProductDetail() {
     || null;
   
   const [selectedSize, setSelectedSize] = useState('');
-  const [selectedColor, setSelectedColor] = useState('');
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isAdded, setIsAdded] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
@@ -54,7 +54,6 @@ export default function ProductDetail() {
       // Select first available size
       const firstAvailable = selectedProduct.sizeStock?.find(s => s.stock > 0 || s.preOrder);
       setSelectedSize(firstAvailable?.size || selectedProduct.sizes[0]);
-      setSelectedColor(selectedProduct.colors[0]);
       setQuantity(1);
       setCurrentImageIndex(0);
     }
@@ -159,15 +158,15 @@ export default function ProductDetail() {
     });
   };
 
-  const handleAddToCart = () => {
-    if (isOutOfStock || isComingSoon || isSoldOut) return;
+  const handleAddToCart = (buyNow = false) => {
+    if (!selectedSize || isOutOfStock || isComingSoon || isSoldOut) return;
     const added = addToCartWithLogin({
       product: selectedProduct,
       quantity,
       size: selectedSize,
-      color: selectedColor,
+      color: selectedProduct.colors[0] || '',
       isPreOrder: isPreOrder || false,
-    });
+    }, { checkout: buyNow });
     if (!added) return;
     trackAddToCart({
       id: selectedProduct.id,
@@ -386,7 +385,7 @@ export default function ProductDetail() {
             {selectedProduct.category === 'tshirts' && <p className="mb-2 text-xs font-semibold text-[#C0132A]">END OF MONSOON SALE · ₹999 PER TEE</p>}
             <p className="mb-3 text-xs text-[#66665E]">Cash on delivery is live · Pay when your order arrives</p>
             {/* Price */}
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-6">
               {isFullPreBook && selectedProduct.preOrderPrice ? (
                 <>
                   <ProductPrice
@@ -422,41 +421,6 @@ export default function ProductDetail() {
               </div>
             )}
 
-            {/* Description */}
-            <p className="text-[15px] font-light leading-[1.8] text-[#888880] mb-6">{selectedProduct.description}</p>
-
-            {/* Material & Fit */}
-            {(selectedProduct.material || selectedProduct.fit) && (
-              <div className="flex gap-6 mb-6">
-                {selectedProduct.material && (
-                  <div>
-                    <span className="text-[10px] font-medium tracking-[0.15em] uppercase text-[#1A1A1A] block mb-1">Material</span>
-                    <span className="text-xs text-[#888880]">{selectedProduct.material}</span>
-                  </div>
-                )}
-                {selectedProduct.fit && (
-                  <div>
-                    <span className="text-[10px] font-medium tracking-[0.15em] uppercase text-[#1A1A1A] block mb-1">Fit</span>
-                    <span className="text-xs text-[#888880]">{selectedProduct.fit}</span>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Color Selection */}
-            <div className="mb-6">
-              <label className="text-[11px] font-medium tracking-[0.15em] uppercase text-[#1A1A1A] mb-3 block">
-                Color
-              </label>
-              <div className="flex gap-3">
-                {selectedProduct.colors.map((color) => (
-                  <button key={color} onClick={() => setSelectedColor(color)}
-                    className={`w-8 h-8 rounded-full border transition-all duration-200 ${selectedColor === color ? 'ring-2 ring-[#1A1A1A] ring-offset-2' : 'border-[#E8E4E0] hover:scale-110'}`}
-                    style={{ backgroundColor: color }} />
-                ))}
-              </div>
-            </div>
-
             {/* Size Selection with stock indicators */}
             {!isComingSoon && (
               <div className="mb-6">
@@ -477,6 +441,8 @@ export default function ProductDetail() {
                       <div key={size} className="relative">
                         <button
                           onClick={() => handleSizeSelect(size)}
+                          aria-pressed={isSelected}
+                          aria-label={`Size ${size}${info.outOfStock ? ", out of stock" : ""}`}
                           className={`w-14 h-14 border flex flex-col items-center justify-center transition-all duration-200 relative ${
                             info.outOfStock && isSelected
                               ? 'border-red-400 bg-red-50 text-red-500'
@@ -551,16 +517,9 @@ export default function ProductDetail() {
               </div>
             )}
 
-            {/* Features */}
-            <div className="flex flex-wrap gap-2 mb-6">
-              {selectedProduct.features.map((feature) => (
-                <span key={feature} className="text-[10px] font-medium tracking-[0.1em] uppercase text-[#888880] border border-[#E8E4E0] px-3 py-1.5">{feature}</span>
-              ))}
-            </div>
-
             {/* Quantity + Add to Cart */}
             {!isComingSoon && !isSoldOut && (
-              <div className="flex gap-3 mb-4">
+              <div className="flex flex-wrap gap-3 mb-3">
                 {/* Quantity Selector */}
                 {!isOutOfStock && (
                   <div className="flex items-center border border-[#E8E4E0]">
@@ -580,10 +539,10 @@ export default function ProductDetail() {
 
                 {/* Add to Cart / Pre-Order / Out of Stock Button */}
                 <motion.button
-                  onClick={handleAddToCart}
+                  onClick={() => handleAddToCart()}
                   disabled={isAdded || isOutOfStock}
                   whileTap={!isAdded && !isOutOfStock ? { scale: 0.97 } : {}}
-                  className={`flex-1 lg:flex-none inline-flex items-center justify-center gap-3 px-10 py-4 text-[11px] font-medium tracking-[0.17em] uppercase transition-all duration-300 ${
+                  className={`flex-1 inline-flex items-center justify-center gap-3 px-5 py-4 text-[11px] font-medium tracking-[0.17em] uppercase transition-all duration-300 ${
                     isAdded ? 'bg-green-600 text-white' :
                     isOutOfStock ? 'bg-gray-200 text-gray-400 cursor-not-allowed border border-gray-300' :
                     isPreOrder ? 'bg-[#C0132A] text-white hover:bg-[#a81024]' :
@@ -595,6 +554,14 @@ export default function ProductDetail() {
                    isPreOrder || isFullPreBook ? (<><Clock size={16} /> Pre-Order Now</>) :
                    (<><ShoppingBag size={16} /> Add to Bag</>)}
                 </motion.button>
+                <button
+                  type="button"
+                  onClick={() => handleAddToCart(true)}
+                  disabled={!selectedSize || isOutOfStock || isAdded}
+                  className="inline-flex min-h-12 w-full items-center justify-center gap-3 border border-[#C0132A] bg-[#C0132A] px-6 py-4 text-[11px] font-semibold uppercase tracking-[0.17em] text-white transition-colors hover:bg-[#a81024] disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-200 disabled:text-gray-400"
+                >
+                  {isPreOrder || isFullPreBook ? 'Pre-Order & Checkout' : 'Buy Now'} <ArrowRight size={16} />
+                </button>
               </div>
             )}
 
@@ -671,6 +638,45 @@ export default function ProductDetail() {
                 </AnimatePresence>
               </div>
             </div>
+
+            <section aria-labelledby="product-description-title" className="mt-8 border-t border-[#E8E4E0] pt-6">
+              <h2 id="product-description-title" className="mb-3 text-[11px] font-medium uppercase tracking-[0.15em] text-[#1A1A1A]">The Details</h2>
+              {/* Description */}
+              <p className="text-[15px] font-light leading-[1.8] text-[#888880] mb-6">{selectedProduct.description}</p>
+
+              {/* Material & Fit */}
+              {(selectedProduct.material || selectedProduct.fit) && (
+                <div className="grid gap-5 sm:grid-cols-2 mb-6">
+                  {selectedProduct.material && (
+                    <div>
+                      <span className="text-[10px] font-medium tracking-[0.15em] uppercase text-[#1A1A1A] block mb-1">{selectedProduct.category === 'tshirts' ? 'Fabric' : 'Material'}</span>
+                      <span className="text-xs text-[#888880]">{selectedProduct.material}</span>
+                    </div>
+                  )}
+                  {selectedProduct.fit && (
+                    <div>
+                      <span className="text-[10px] font-medium tracking-[0.15em] uppercase text-[#1A1A1A] block mb-1">Fit</span>
+                      <span className="text-xs text-[#888880]">{selectedProduct.fit}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {selectedProduct.category === 'tshirts' && (
+                <div className="mb-6">
+                  <h3 className="mb-2 text-[10px] font-medium uppercase tracking-[0.15em] text-[#1A1A1A]">Printing</h3>
+                  <p className="text-sm font-light leading-relaxed text-[#888880]">{TSHIRT_PRINTING}</p>
+                </div>
+              )}
+
+              {/* Features */}
+              <div className="flex flex-wrap gap-2 mb-6">
+                {selectedProduct.features.map((feature) => (
+                  <span key={feature} className="text-[10px] font-medium tracking-[0.1em] uppercase text-[#888880] border border-[#E8E4E0] px-3 py-1.5">{feature}</span>
+                ))}
+              </div>
+
+            </section>
 
             {/* Care Instructions Accordion */}
             {selectedProduct.careInstructions && selectedProduct.careInstructions.length > 0 && (
@@ -759,6 +765,7 @@ export default function ProductDetail() {
             >
               <button 
                 onClick={() => setShowSizeGuide(false)}
+                aria-label="Close size guide"
                 className="absolute top-4 right-4 w-8 h-8 bg-black/5 rounded-full flex items-center justify-center hover:bg-black/10 transition-colors z-20"
               >
                 <X size={16} />

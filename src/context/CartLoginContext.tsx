@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { LogIn, X } from 'lucide-react';
@@ -8,15 +9,17 @@ import { CDN } from '@/lib/cdn';
 import { isTshirtProduct } from '@/utils/launchSale';
 
 const PENDING_CART_ITEM_KEY = 'slugsera-pending-cart-item';
+const PENDING_CHECKOUT_KEY = 'slugsera-pending-checkout';
 
 type CartLoginContextValue = {
-  addToCartWithLogin: (item: CartItem) => boolean;
+  addToCartWithLogin: (item: CartItem, options?: { checkout?: boolean }) => boolean;
 };
 
 const CartLoginContext = createContext<CartLoginContextValue | null>(null);
 
 export function CartLoginProvider({ children }: { children: React.ReactNode }) {
   const { user, loading, signingIn, signInWithGoogle } = useAuth();
+  const navigate = useNavigate();
   const addToCart = useStore((state) => state.addToCart);
   const [showLoginOffer, setShowLoginOffer] = useState(false);
   const [showBundleNudge, setShowBundleNudge] = useState(false);
@@ -33,10 +36,12 @@ export function CartLoginProvider({ children }: { children: React.ReactNode }) {
     nudgeTimer.current = window.setTimeout(() => setShowBundleNudge(false), 9000);
   }, []);
 
-  const addToCartWithLogin = useCallback((item: CartItem) => {
+  const addToCartWithLogin = useCallback((item: CartItem, options?: { checkout?: boolean }) => {
     if (!user) {
       try {
         window.sessionStorage.setItem(PENDING_CART_ITEM_KEY, JSON.stringify(item));
+        if (options?.checkout) window.sessionStorage.setItem(PENDING_CHECKOUT_KEY, 'true');
+        else window.sessionStorage.removeItem(PENDING_CHECKOUT_KEY);
       } catch {
         // The login prompt still works if storage is unavailable.
       }
@@ -45,19 +50,23 @@ export function CartLoginProvider({ children }: { children: React.ReactNode }) {
     }
 
     addToCart(item);
-    showNudgeWhenOneTshirt();
+    if (options?.checkout) navigate('/checkout/address');
+    else showNudgeWhenOneTshirt();
     return true;
-  }, [addToCart, showNudgeWhenOneTshirt, user]);
+  }, [addToCart, navigate, showNudgeWhenOneTshirt, user]);
 
   useEffect(() => {
     if (loading || !user) return;
 
     let pending: CartItem | null = null;
+    let checkout = false;
     try {
       const stored = window.sessionStorage.getItem(PENDING_CART_ITEM_KEY);
       if (stored) {
         window.sessionStorage.removeItem(PENDING_CART_ITEM_KEY);
         pending = JSON.parse(stored) as CartItem;
+        checkout = window.sessionStorage.getItem(PENDING_CHECKOUT_KEY) === 'true';
+        window.sessionStorage.removeItem(PENDING_CHECKOUT_KEY);
       }
     } catch {
       pending = null;
@@ -66,8 +75,9 @@ export function CartLoginProvider({ children }: { children: React.ReactNode }) {
     if (!pending?.product?.id || !pending.quantity) return;
     addToCart(pending);
     setShowLoginOffer(false);
-    window.setTimeout(showNudgeWhenOneTshirt, 50);
-  }, [addToCart, loading, showNudgeWhenOneTshirt, user]);
+    if (checkout) navigate('/checkout/address');
+    else window.setTimeout(showNudgeWhenOneTshirt, 50);
+  }, [addToCart, loading, navigate, showNudgeWhenOneTshirt, user]);
 
   useEffect(() => () => {
     if (nudgeTimer.current) window.clearTimeout(nudgeTimer.current);

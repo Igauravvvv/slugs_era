@@ -1,49 +1,32 @@
-import { useEffect, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
 const messages = [
   'END OF MONSOON SALE · ALL TEES ₹999',
-  'CASH ON DELIVERY AVAILABLE · PAY WHEN IT ARRIVES',
+  'CASH ON DELIVERY LIVE · PAY WHEN IT ARRIVES',
 ];
 
 export default function MonsoonBanner() {
-  const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const reduceMotion = useReducedMotion();
-
-  useEffect(() => {
-    if (paused || reduceMotion) return;
-    const timer = window.setInterval(() => setActive(index => (index + 1) % messages.length), 4500);
-    return () => window.clearInterval(timer);
-  }, [paused, reduceMotion]);
-
   return (
     <Link
       to="/collections/tshirts"
-      aria-label="Shop all tees at ₹999 in the End of Monsoon Sale. Cash on delivery available."
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocus={() => setPaused(true)}
-      onBlur={() => setPaused(false)}
-      className="relative flex h-12 items-center justify-center overflow-hidden bg-[#C0132A] px-3 text-center text-[10px] font-semibold tracking-[0.02em] text-white sm:h-8 sm:text-xs"
+      aria-label="Shop all tees at ₹999 in the End of Monsoon Sale. Cash on Delivery Live — pay when it arrives."
+      className="monsoon-banner relative flex h-12 items-center overflow-hidden bg-[#C0132A] text-[10px] font-semibold tracking-[0.02em] text-white sm:h-8 sm:text-xs"
     >
-      {reduceMotion ? (
-        <span aria-hidden="true">ALL TEES ₹999 · CASH ON DELIVERY AVAILABLE</span>
-      ) : (
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.span
-            key={active}
-            aria-hidden="true"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.25 }}
-          >
-            {messages[active]}
-          </motion.span>
-        </AnimatePresence>
-      )}
+      <div className="monsoon-banner-track flex w-max" aria-hidden="true">
+        {[0, 1].map(copy => (
+          <div key={copy} className="flex min-w-[100vw] shrink-0 items-center justify-around">
+            {[...messages, ...messages].map((message, index) => (
+              <span key={index} className="flex shrink-0 items-center whitespace-nowrap">
+                <span className="px-8 sm:px-12">{message}</span>
+                <span aria-hidden="true">✦</span>
+              </span>
+            ))}
+          </div>
+        ))}
+      </div>
+      <span className="monsoon-banner-static w-full px-3 text-center" aria-hidden="true">
+        END OF MONSOON SALE · ALL TEES ₹999 · CASH ON DELIVERY LIVE
+      </span>
     </Link>
   );
 }

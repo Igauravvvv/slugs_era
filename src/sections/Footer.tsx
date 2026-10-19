@@ -2,7 +2,6 @@ import { Instagram } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CDN } from '@/lib/cdn';
-import { useAuth } from '@/context/AuthContext';
 
 const footerLinks = {
   shop: [
@@ -30,8 +29,6 @@ const socialLinks = [
 ];
 
 export default function Footer() {
-  const { user } = useAuth();
-
   return (
     <footer className="bg-black pt-12 lg:pt-20 pb-6 lg:pb-10 px-5 lg:px-20 relative overflow-hidden">
       {/* Scrolling Background Logo */}
@@ -165,14 +162,7 @@ export default function Footer() {
           <Link to="/privacy-policy" className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">Privacy Policy</Link>
           <Link to="/terms" className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">Terms</Link>
           <Link to="/privacy-policy#cookie-settings" className="text-[10px] lg:text-[11px] font-light text-white transition-colors duration-200 hover:text-gray-300">Cookie Settings</Link>
-          {user && (
-            <Link
-              to="/dashboard"
-              className="text-[10px] lg:text-[11px] font-light text-white/40 transition-colors duration-200 hover:text-[#C0132A]"
-            >
-              Admin
-            </Link>
-          )}
+
         </div>
       </div>
     </footer>

@@ -1,3 +1,7 @@
+import catalogImages from '@/data/catalog-images.json';
+
+const preparedProductImages: Record<string, string> = catalogImages;
+
 /**
  * Supabase Storage CDN URLs
  *
@@ -22,12 +26,22 @@ export function cdnUrl(filename: string): string {
  */
 export function optimizedProductImageUrl(source: string, width = 640, quality = 72): string {
   if (isVideoMedia(source)) return source;
+  if (preparedProductImages[source]) {
+    const size = width <= 320 ? 320 : width <= 640 ? 640 : 960;
+    return `${preparedProductImages[source]}-${size}.webp`;
+  }
+  // Vite does not run the Vercel image function during local previews.
+  if (import.meta.env.DEV) return source;
   if (!source.includes('usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/')) return source;
   return `/api/image?src=${encodeURIComponent(source)}&w=${width}&q=${quality}`;
 }
 
 export function optimizedProductImageSrcSet(source: string): string | undefined {
   if (isVideoMedia(source)) return undefined;
+  if (preparedProductImages[source]) {
+    return [320, 640, 960].map(width => `${preparedProductImages[source]}-${width}.webp ${width}w`).join(', ');
+  }
+  if (import.meta.env.DEV) return undefined;
   if (!source.includes('usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/')) return undefined;
   return [320, 640, 960]
     .map((width) => `${optimizedProductImageUrl(source, width)} ${width}w`)

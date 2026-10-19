@@ -178,7 +178,7 @@ export default function Cart() {
                 className="flex gap-3 sm:gap-6 pb-5 sm:pb-6 border-b border-[#E8E4E0]"
               >
                 {/* Image */}
-                <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 bg-[#F9F7F5] flex-shrink-0">
+                <div className="w-28 h-28 sm:w-36 sm:h-36 lg:w-40 lg:h-40 bg-[#F9F7F5] flex-shrink-0">
                   <img
                     src={item.product.image}
                     alt={item.product.name}
@@ -187,7 +187,7 @@ export default function Cart() {
                 </div>
 
                 {/* Details */}
-                <div className="flex-1 flex flex-col justify-between">
+                <div className="min-w-0 flex-1 flex flex-col justify-between">
                   <div>
                     <h3 className="font-display text-base sm:text-lg font-medium text-[#1A1A1A] line-clamp-1">
                       {item.product.name}
@@ -204,9 +204,11 @@ export default function Cart() {
                   <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-3 mt-3 sm:mt-0">
                     {/* Quantity */}
                     <div className="flex items-center border border-[#E8E4E0]">
+                      {item.quantity > 1 && (
                       <button
                         aria-label={`Decrease quantity of ${item.product.name}`}
                         onClick={() => {
+                          if (item.quantity <= 1) return;
                           trackRemoveFromCart({
                             id: item.product.id,
                             name: item.product.name,
@@ -215,14 +217,14 @@ export default function Cart() {
                             quantity: 1,
                             size: item.size,
                           });
-                          if (item.quantity > 1) updateQuantity(item.product.id, item.size, item.color, item.quantity - 1);
-                          else removeFromCart(item.product.id, item.size, item.color);
+                          updateQuantity(item.product.id, item.size, item.color, item.quantity - 1);
                         }}
                         type="button"
                         className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center hover:bg-[#F9F7F5] transition-colors touch-manipulation"
                       >
                         <Minus size={14} />
                       </button>
+                      )}
                       <span className="w-10 sm:w-10 text-center text-sm">{item.quantity}</span>
                       <button
                         aria-label={`Increase quantity of ${item.product.name}`}
@@ -263,6 +265,7 @@ export default function Cart() {
                         compareClassName="text-sm text-[#888880] line-through"
                       />
                       <button
+                        aria-label={`Delete ${item.product.name} from bag`}
                         onClick={() => {
                           trackRemoveFromCart({
                             id: item.product.id,

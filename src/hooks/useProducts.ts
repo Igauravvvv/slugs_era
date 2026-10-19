@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { withMonsoonPrice } from '@/utils/monsoonSale';
 import type { Product, SizeStock } from '@/types';
+import catalogSnapshot from '@/data/catalog-snapshot.json';
 
 // ─── DB ↔ Frontend Mapping ───────────────────────────────────
 
@@ -139,6 +140,31 @@ function mapProductToDb(p: Partial<Product> & { stock?: number }) {
 // ─── React Query Key ─────────────────────────────────────────
 export const PRODUCTS_QUERY_KEY = ['products'];
 
+// Seed the storefront immediately; live data still refreshes on mount/focus.
+export const initialProducts = catalogSnapshot.map(row => withMonsoonPrice(mapDbToProduct(row)));
+
+export const productQueryOptions = {
+  queryKey: PRODUCTS_QUERY_KEY,
+  initialData: initialProducts,
+  initialDataUpdatedAt: 0,
+  queryFn: async (): Promise<Product[]> => {
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      return initialProducts;
+    }
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('is_published', true)
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return (data || []).map(row => withMonsoonPrice(mapDbToProduct(row)));
+  },
+  staleTime: 0,
+  refetchOnMount: 'always' as const,
+  refetchOnWindowFocus: 'always' as const,
+};
+
 // ─── Main Hook: Fetch All Products from Supabase ─────────────
 export function useProducts() {
   const queryClient = useQueryClient();
@@ -162,33 +188,7 @@ export function useProducts() {
     };
   }, [queryClient]);
 
-  return useQuery({
-    queryKey: PRODUCTS_QUERY_KEY,
-    queryFn: async (): Promise<Product[]> => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('is_published', true)
-        .order('sort_order', { ascending: true })
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Failed to fetch products:', error.message);
-        return [];
-      }
-
-      if (!data || data.length === 0) {
-        return [];
-      }
-
-      return data.map(row => withMonsoonPrice(mapDbToProduct(row)));
-    },
-    // Realtime is a convenience, not the source of truth. Refetch on each
-    // storefront mount/focus so published description edits never remain stale.
-    staleTime: 0,
-    refetchOnMount: 'always',
-    refetchOnWindowFocus: 'always',
-  });
+  return useQuery(productQueryOptions);
 }
 
 // ─── Create Product ──────────────────────────────────────────

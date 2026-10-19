@@ -5,6 +5,8 @@ import { HelmetProvider } from 'react-helmet-async'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './index.css'
 import App from './App.tsx'
+import { initialProducts, productQueryOptions } from './hooks/useProducts'
+import { useStore } from './store'
 import { AuthProvider } from './context/AuthContext'
 import { SiteContentProvider } from './context/SiteContentContext'
 import ErrorBoundary from './components/ErrorBoundary'
@@ -18,6 +20,10 @@ const queryClient = new QueryClient({
     },
   },
 })
+
+// Start the request before mounting providers; the shelf is populated on its first render.
+useStore.getState().setProducts(initialProducts);
+void queryClient.prefetchQuery(productQueryOptions);
 
 const rootElement = document.getElementById('root')!;
 // Build-generated route HTML gives non-JavaScript crawlers useful semantic

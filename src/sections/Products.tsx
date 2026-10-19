@@ -18,17 +18,6 @@ export default function Products() {
   // card when only one item happens to be marked as featured.
   const homeProducts = products.filter((p) => p.category === 'tshirts' && p.status !== 'sold_out');
 
-  const getCardVariants = (index: number) => {
-    return {
-      hidden: { opacity: 0, y: 30 },
-      visible: { 
-        opacity: 1, 
-        y: 0, 
-        transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: index * 0.1 } 
-      }
-    };
-  };
-
   return (
     <section id="products" className="py-14 lg:py-[100px] px-4 lg:px-8 bg-white overflow-hidden">
       {/* Header */}
@@ -62,9 +51,9 @@ export default function Products() {
 
       {/* Products Grid - Desktop & Mobile */}
       <div className="max-w-[1800px] mx-auto grid grid-cols-2 lg:grid-cols-5 gap-2 lg:gap-3">
-        {homeProducts.slice(0, 5).map((product, index) => (
+        {homeProducts.slice(0, 5).map((product) => (
           <div key={product.id} className="w-full" style={{ willChange: 'transform, opacity' }}>
-            <ProductCard product={product} index={index} customVariants={getCardVariants(index)} />
+            <ProductCard priority product={product} />
           </div>
         ))}
       </div>

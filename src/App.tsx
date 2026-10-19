@@ -289,7 +289,7 @@ function App() {
   const setProducts = useStore(s => s.setProducts);
 
   useEffect(() => {
-    if (dbProducts && dbProducts.length > 0) {
+    if (dbProducts) {
       setProducts(dbProducts);
     }
   }, [dbProducts, setProducts]);

@@ -89,7 +89,7 @@ export default function CTA() {
           </Link>
           <Link
             to={`/collections/${ctaSecondaryLink}`}
-            className="inline-flex items-center gap-3 bg-white/15 text-white text-[10px] lg:text-[11px] font-medium tracking-[0.17em] uppercase px-6 lg:px-8 py-3.5 lg:py-4 transition-all duration-300 hover:bg-white/25 hover:-translate-y-0.5"
+            className="inline-flex items-center gap-3 bg-white text-black text-[10px] lg:text-[11px] font-medium tracking-[0.17em] uppercase px-6 lg:px-8 py-3.5 lg:py-4 transition-all duration-300 hover:bg-gray-100 hover:-translate-y-0.5"
           >
             {ctaSecondaryText}
           </Link>

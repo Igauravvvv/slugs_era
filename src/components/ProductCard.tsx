@@ -15,9 +15,10 @@ interface ProductCardProps {
   index?: number;
   onQuickView?: (product: Product) => void;
   customVariants?: Variants;
+  priority?: boolean;
 }
 
-export default function ProductCard({ product, index = 0, onQuickView, customVariants }: ProductCardProps) {
+export default function ProductCard({ product, index = 0, onQuickView, customVariants, priority = false }: ProductCardProps) {
   const { addToCartWithLogin } = useCartLogin();
   const navigate = useNavigate();
   const [imageIndex, setImageIndex] = useState(0);
@@ -32,12 +33,12 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
   const productUrl = `/product/${generateSlug(product.name)}`;
 
   useEffect(() => {
-    if (images.length < 2) return;
+    if (priority || images.length < 2) return;
     const nextIndex = imageIndex === images.length - 1 ? 0 : imageIndex + 1;
     const previousIndex = imageIndex === 0 ? images.length - 1 : imageIndex - 1;
     preloadProductImage(images[nextIndex], '(min-width: 1024px) 20vw, 50vw');
     if (previousIndex !== nextIndex) preloadProductImage(images[previousIndex], '(min-width: 1024px) 20vw, 50vw');
-  }, [imageIndex, images]);
+  }, [imageIndex, images, priority]);
 
   const showPreviousImage = () => {
     setImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
@@ -139,8 +140,8 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
   return (
     <motion.article
       variants={customVariants || defaultVariants}
-      initial={customVariants ? "hidden" : "hidden"}
-      whileInView={customVariants ? "visible" : "visible"}
+      initial={priority ? false : "hidden"}
+      whileInView={priority ? undefined : "visible"}
       viewport={{ once: true, margin: '-20px' }}
       className={`product-card group relative ${isComingSoon ? 'bg-white border border-[#E8E4E0] p-3' : ''}`}
     >
@@ -186,7 +187,8 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
               srcSet={optimizedProductImageSrcSet(images[imageIndex])}
               sizes="(min-width: 1024px) 20vw, 50vw"
               alt={product.name}
-              loading="lazy"
+              loading={priority ? "eager" : "lazy"}
+              fetchPriority={priority ? "high" : "auto"}
               decoding="async"
               width="640"
               height="640"
@@ -294,7 +296,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
           </div>
         ) : (
           <>
-            <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_auto_auto] lg:items-end lg:gap-x-3">
+            <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-x-3">
               <div className="min-w-0">
                 <p className="font-display text-[12px] lg:text-[13px] italic font-light text-[#888880] mb-1.5 lg:mb-2 line-clamp-1 leading-tight">
                   {product.slogan}
@@ -315,18 +317,7 @@ export default function ProductCard({ product, index = 0, onQuickView, customVar
               >
                 Quick Add
               </button>
-              <div className="hidden gap-1.5 pb-1 lg:flex">
-                {product.colors.slice(0, 3).map((color, i) => (
-                  <button
-                    type="button"
-                    aria-label={`Colour option ${i + 1}: ${color}`}
-                    key={i}
-                    className="h-2.5 w-2.5 cursor-pointer rounded-full border border-[#E8E4E0] transition-transform duration-200 hover:scale-130"
-                    style={{ backgroundColor: color }}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                ))}
-              </div>
+
             </div>
             <button
               type="button"

@@ -1,0 +1,825 @@
+[
+  {
+    "id": "588b08c2-0478-44eb-81ac-55a7734671b9",
+    "name": "Emotionally Unavailable",
+    "slug": "hd-new-6",
+    "description": "Bold Statement. Vibrant red hoodie that makes a bold statement. Ultimate comfort in our signature striking color.",
+    "price": 1499,
+    "compare_price": 0.0,
+    "category": "hoodies",
+    "subcategory": null,
+    "images": [
+      {
+        "alt": "Emotionally Unavailable",
+        "url": "/images/red_hoodie_f.webp",
+        "isPrimary": true
+      }
+    ],
+    "colors": [
+      "#C0132A"
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "size_stock": [],
+    "stock_quantity": 50,
+    "status": "active",
+    "is_published": true,
+    "is_featured": false,
+    "tags": [
+      "Bold Color",
+      "Brushed Fleece",
+      "True to Size"
+    ]
+  },
+  {
+    "id": "d73cfcbe-19e4-4fc2-8967-969fe985b82b",
+    "name": "Couple Heart Patch (EVER)",
+    "slug": "hd-new-5",
+    "description": "Better Together. The second half of the Couple Heart Patch set. Featuring \"EVER\" on the back. Matches perfectly with the \"FOR\" edition.",
+    "price": 2199,
+    "compare_price": null,
+    "category": "hoodies",
+    "subcategory": null,
+    "images": [
+      {
+        "alt": "Couple Heart Patch (EVER)",
+        "url": "/images/couple_for_ever_f.webp",
+        "isPrimary": true
+      },
+      {
+        "alt": "Couple Heart Patch (EVER)",
+        "url": "/images/couple_ever_b.webp",
+        "isPrimary": false
+      }
+    ],
+    "colors": [
+      "#1A1A1A"
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "size_stock": [],
+    "stock_quantity": 35,
+    "status": "active",
+    "is_published": true,
+    "is_featured": false,
+    "tags": [
+      "Couple Edition",
+      "Couple Match",
+      "Premium Finish",
+      "Relaxed Fit"
+    ]
+  },
+  {
+    "id": "1f56101c-e17e-4e0b-8f9d-a92d461070cf",
+    "name": "Couple Heart Patch (FOR)",
+    "slug": "hd-new-4",
+    "description": "Better Together. The first half of the Couple Heart Patch set. Featuring \"FOR\" on the back. Matches perfectly with the \"EVER\" edition.",
+    "price": 2199,
+    "compare_price": null,
+    "category": "hoodies",
+    "subcategory": null,
+    "images": [
+      {
+        "alt": "Couple Heart Patch (FOR)",
+        "url": "/images/couple_for_ever_f.webp",
+        "isPrimary": true
+      },
+      {
+        "alt": "Couple Heart Patch (FOR)",
+        "url": "/images/couple_for_b.webp",
+        "isPrimary": false
+      }
+    ],
+    "colors": [
+      "#1A1A1A"
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "size_stock": [],
+    "stock_quantity": 35,
+    "status": "active",
+    "is_published": true,
+    "is_featured": false,
+    "tags": [
+      "Couple Edition",
+      "Couple Match",
+      "Premium Finish",
+      "Relaxed Fit"
+    ]
+  },
+  {
+    "id": "158bef50-3bba-401d-8d47-35291e50a22e",
+    "name": "Brown Patch",
+    "slug": "hd-new-3",
+    "description": "Earthy Tones. Rich brown hoodie featuring unique patch detailing. Earthy, grounded, and incredibly comfortable.",
+    "price": 1999,
+    "compare_price": null,
+    "category": "hoodies",
+    "subcategory": null,
+    "images": [
+      {
+        "alt": "Brown Patch",
+        "url": "/images/brown_patch_f.webp",
+        "isPrimary": true
+      },
+      {
+        "alt": "Brown Patch",
+        "url": "/images/brown_patch_b.webp",
+        "isPrimary": false
+      }
+    ],
+    "colors": [
+      "#8B4513"
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "size_stock": [],
+    "stock_quantity": 29,
+    "status": "active",
+    "is_published": true,
+    "is_featured": false,
+    "tags": [
+      "Custom Patch",
+      "Brushed Fleece",
+      "True to Size"
+    ]
+  },
+  {
+    "id": "afeced4e-d4ad-484f-80db-c7f5aaeb9ef9",
+    "name": "Cherry Blossom",
+    "slug": "hd-new-2",
+    "description": "Floral Edition. Beautiful white hoodie featuring a delicate cherry blossom back print. A perfect blend of nature and streetwear.",
+    "price": 2999,
+    "compare_price": null,
+    "category": "hoodies",
+    "subcategory": null,
+    "images": [
+      {
+        "alt": "Cherry Blossom",
+        "url": "/images/cherry_blossom_f.webp",
+        "isPrimary": true
+      },
+      {
+        "alt": "Cherry Blossom",
+        "url": "/images/cherry_blossom_b.webp",
+        "isPrimary": false
+      }
+    ],
+    "colors": [
+      "#F5F5F3"
+    ],
+    "sizes": [
+      "M",
+      "L",
+      "XL"
+    ],
+    "size_stock": [],
+    "stock_quantity": 6,
+    "status": "active",
+    "is_published": true,
+    "is_featured": false,
+    "tags": [
+      "Limited",
+      "Premium Blend",
+      "Detailed Graphic",
+      "Oversized"
+    ]
+  },
+  {
+    "id": "b33f4e6c-66bb-4ea1-81eb-14cd93fd90e9",
+    "name": "Owns The Game",
+    "slug": "hd-new-1",
+    "description": "Premium Essential. Black oversized hoodie featuring the \"Owns the Game\" graphic on the back. Premium comfort meets bold design.",
+    "price": 3499,
+    "compare_price": null,
+    "category": "hoodies",
+    "subcategory": null,
+    "images": [
+      {
+        "alt": "Owns The Game",
+        "url": "/images/owns_the_game_f.webp",
+        "isPrimary": true
+      },
+      {
+        "alt": "Owns The Game",
+        "url": "/images/owns_the_game_b.webp",
+        "isPrimary": false
+      }
+    ],
+    "colors": [
+      "#1A1A1A"
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "size_stock": [],
+    "stock_quantity": 17,
+    "status": "active",
+    "is_published": true,
+    "is_featured": false,
+    "tags": [
+      "New",
+      "Heavyweight Cotton",
+      "Graphic Back Print",
+      "Relaxed Fit"
+    ]
+  },
+  {
+    "id": "263f932a-a9d5-4f1a-85ac-fe228ca370fb",
+    "name": "SUNLIGHT & WAVES",
+    "slug": "sh-new-2",
+    "description": "Golden Hour Coastline. A vibrant button-up shirt capturing the essence of golden hour waves shining under the warmth of the sun.",
+    "price": 2299,
+    "compare_price": null,
+    "category": "shirts",
+    "subcategory": null,
+    "images": [
+      {
+        "alt": "SUNLIGHT & WAVES",
+        "url": "/images/SUNLIGHT-and-WAVES.webp",
+        "isPrimary": true
+      }
+    ],
+    "colors": [
+      "#D4A574"
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "size_stock": [],
+    "stock_quantity": 0,
+    "status": "coming_soon",
+    "is_published": true,
+    "is_featured": false,
+    "tags": [
+      "Coming Soon",
+      "Premium Rayon",
+      "Relaxed Fit",
+      "Graphic Print"
+    ]
+  },
+  {
+    "id": "f9af8508-d0e1-448b-8435-ed9e9289017c",
+    "name": "NYT & WAVES",
+    "slug": "sh-new-1",
+    "description": "Midnight Oceanic State. A striking button-up shirt featuring dark midnight waves intertwined with NYT artistic graphics. Perfect for late night outings.",
+    "price": 2299,
+    "compare_price": null,
+    "category": "shirts",
+    "subcategory": null,
+    "images": [
+      {
+        "alt": "NYT & WAVES",
+        "url": "/images/NYT-and-WAVES.webp",
+        "isPrimary": true
+      }
+    ],
+    "colors": [
+      "#0A192F"
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL"
+    ],
+    "size_stock": [],
+    "stock_quantity": 0,
+    "status": "coming_soon",
+    "is_published": true,
+    "is_featured": false,
+    "tags": [
+      "Coming Soon",
+      "Premium Rayon",
+      "Relaxed Fit",
+      "Graphic Print"
+    ]
+  },
+  {
+    "id": "e12c7b12-ad94-4cfa-8960-e794d4f9bc9f",
+    "name": "Seedhe Pahad Se",
+    "slug": "ts-new-4",
+    "description": "A Collection Of Himalayan Region Of India. Black oversized tee featuring \"THE SLOW CLUB\" typography filled with diverse character imagery. A cinematic tribute for the ones who know.",
+    "price": 1199,
+    "compare_price": 2000.0,
+    "category": "tshirts",
+    "subcategory": "Essential T-Shirts",
+    "images": [
+      {
+        "alt": "IMG 5732",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787813438947-nm1khogz.webp",
+        "isPrimary": true,
+        "mediaType": "image"
+      },
+      {
+        "alt": "IMG 5727",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787813504915-fo7dje7p.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "IMG 5773",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787813446347-9evlhwm8.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "IMG 5759",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787813473210-8n4yxwz8.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "IMG 5772",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787813446347-86p0rzj4.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "IMG 5770",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787813456167-g4imqhlc.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "IMG 5768",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787813456167-vvifabfl.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "IMG 5723",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787813499573-695yd1hj.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      }
+    ],
+    "colors": [
+      {
+        "hex": "#fffffa",
+        "name": "Off-White"
+      }
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "size_stock": [
+      {
+        "size": "S",
+        "stock": 8
+      },
+      {
+        "size": "M",
+        "stock": 17
+      },
+      {
+        "size": "L",
+        "stock": 17
+      },
+      {
+        "size": "XL",
+        "stock": 8
+      }
+    ],
+    "stock_quantity": 50,
+    "status": "active",
+    "is_published": true,
+    "is_featured": true,
+    "tags": [
+      "Limited",
+      "Premium Cotton",
+      "Oversized Fit",
+      "Typography Print"
+    ]
+  },
+  {
+    "id": "8cf65d3e-145f-40c4-8784-c36f348a733f",
+    "name": "Slow Down",
+    "slug": "ts-new-3",
+    "description": "You're Doing Fine. Forest green oversized tee with a relaxed sloth resting on bamboo. A gentle reminder to slow down, you're doing fine.",
+    "price": 1199,
+    "compare_price": 2000.0,
+    "category": "tshirts",
+    "subcategory": "Essential T-Shirts",
+    "images": [
+      {
+        "alt": "IMG 5861",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787814319619-0nhe4zzg.webp",
+        "isPrimary": true,
+        "mediaType": "image"
+      },
+      {
+        "alt": "IMG 5834",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787814379057-nkt91qs4.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "IMG 5828",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787814319621-8ebyiz34.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "xenwdzme0qbmpkgv2yoo",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787814332746-k6c0d96d.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "xdb7azpxfmgmaufj0pm8",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787814332746-6chvtg25.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "b7pwwlqclypevbvoncy4",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787814346098-o1i28swn.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "y5lbovylwskzerqbddkb",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787814362312-yl4bkx22.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      }
+    ],
+    "colors": [
+      {
+        "hex": "#0da510",
+        "name": "Dark Green"
+      }
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "size_stock": [
+      {
+        "size": "S",
+        "stock": 8
+      },
+      {
+        "size": "M",
+        "stock": 17
+      },
+      {
+        "size": "L",
+        "stock": 17
+      },
+      {
+        "size": "XL",
+        "stock": 8
+      }
+    ],
+    "stock_quantity": 50,
+    "status": "active",
+    "is_published": true,
+    "is_featured": true,
+    "tags": [
+      "New Arrival",
+      "Premium Cotton",
+      "Oversized Fit",
+      "Graphic Back Print"
+    ]
+  },
+  {
+    "id": "cae3056a-964b-49ae-81fb-8275e0b312d1",
+    "name": "Savage Tortoise",
+    "slug": "ts-new-2",
+    "description": "<p>Always Finishes. Light blue relaxed tee featuring a beautifully patterned sea turtle graphic and the steady motivation: \"The Tortoise Always FINISHES\".</p>",
+    "price": 1199,
+    "compare_price": 2000.0,
+    "category": "tshirts",
+    "subcategory": null,
+    "images": [
+      {
+        "alt": "IMG 5903",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787814929470-dhvbtawj.webp",
+        "isPrimary": true,
+        "mediaType": "image"
+      },
+      {
+        "alt": "IMG 5896",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787814929471-1hujghtj.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "IMG 5902",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787814929471-o71ixdq8.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "IMG 5901",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787814929471-9ya423tm.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "IMG 5889",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787814929471-3qfs8y6c.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "IMG 5788",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787814929471-s48klzll.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "IMG 5906",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787815029722-ektdsx5p.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "IMG 5904",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787815029724-b0zery4o.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      }
+    ],
+    "colors": [
+      {
+        "hex": "#24c8ff",
+        "name": "Obsidian Blue"
+      }
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "size_stock": [
+      {
+        "size": "S",
+        "stock": 7
+      },
+      {
+        "size": "M",
+        "stock": 17
+      },
+      {
+        "size": "L",
+        "stock": 16
+      },
+      {
+        "size": "XL",
+        "stock": 8
+      }
+    ],
+    "stock_quantity": 48,
+    "status": "active",
+    "is_published": true,
+    "is_featured": true,
+    "tags": [
+      "Bestseller",
+      "Relaxed Fit",
+      "Graphic Back Print"
+    ]
+  },
+  {
+    "id": "df7f08b6-06b7-478e-8f61-2febe817823e",
+    "name": "Let The Moment Play",
+    "slug": "ts-new-1",
+    "description": "Vinyl teaches patience. Black oversized tee featuring a vintage vinyl record graphic. \"Vinyl teaches patience. You don't skip life, you listen to it. Every groove holds a moment.\"",
+    "price": 1199,
+    "compare_price": 2000.0,
+    "category": "tshirts",
+    "subcategory": "Essential T-Shirts",
+    "images": [
+      {
+        "alt": "ChatGPT Image Aug 20, 2026, 06_10_34 PM",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787232650790-to32jiz8.png",
+        "isPrimary": true,
+        "mediaType": "image"
+      },
+      {
+        "alt": "ChatGPT Image Aug 20, 2026, 06_28_30 PM",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787232662417-g4ao8vnk.png",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "ChatGPT Image Aug 20, 2026, 06_20_30 PM",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787232678979-jpxflh90.png",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "ChatGPT Image Aug 20, 2026, 06_47_28 PM",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787232602407-m3m97vsg.png",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "3 (2)",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787232778126-31fhao66.png",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "ChatGPT Image Aug 20, 2026, 06_35_39 PM",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787232305694-ouwmy7e3.png",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "5 (2)",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787232784494-12cnhxao.png",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "ChatGPT Image Aug 20, 2026, 06_42_07 PM",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1787232628243-hw26j7xr.png",
+        "isPrimary": false,
+        "mediaType": "image"
+      }
+    ],
+    "colors": [
+      {
+        "hex": "#000000",
+        "name": "Space Black"
+      }
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "size_stock": [
+      {
+        "size": "S",
+        "stock": 8
+      },
+      {
+        "size": "M",
+        "stock": 17
+      },
+      {
+        "size": "L",
+        "stock": 17
+      },
+      {
+        "size": "XL",
+        "stock": 8
+      }
+    ],
+    "stock_quantity": 50,
+    "status": "active",
+    "is_published": true,
+    "is_featured": true,
+    "tags": [
+      "New Arrival",
+      "Premium Cotton",
+      "Oversized Fit",
+      "Graphic Back Print"
+    ]
+  },
+  {
+    "id": "4a8b3487-99f4-497d-8788-ec8f87c318e6",
+    "name": "Creator",
+    "slug": "ts-new-5",
+    "description": "Dusty pink oversized polo with a contrast cream collar and sleeve stripes, an embroidered Slugsera chest mark, and a large CREATOR 1 back graphic.",
+    "price": 1199,
+    "compare_price": 0.0,
+    "category": "tshirts",
+    "subcategory": "Polo T-Shirts",
+    "images": [
+      {
+        "alt": "Slugsera Creator dusty pink oversized polo \u2014 floating front view",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1788677775059-mkptfodq.webp",
+        "isPrimary": true,
+        "mediaType": "image"
+      },
+      {
+        "alt": "Slugsera Creator dusty pink oversized polo \u2014 model front view",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1788677775059-u3rfihl2.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "Slugsera Creator dusty pink oversized polo \u2014 model back view by the coast",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1788677775059-82cl7al6.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "Slugsera Creator dusty pink oversized polo \u2014 collar and label detail",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1788677775059-mdo02fb8.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "Slugsera Creator dusty pink oversized polo \u2014 model back view in theatre",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1788677775059-tphgw05g.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "Slugsera Creator dusty pink oversized polo \u2014 model back view outdoors",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1788677775059-0nntxi46.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "Slugsera Creator dusty pink oversized polo \u2014 model back view with horse",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1788677775058-no2lggxp.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      },
+      {
+        "alt": "Slugsera Creator dusty pink oversized polo \u2014 model back view at petrol station",
+        "url": "https://usymwbefimqcsxbbojyt.supabase.co/storage/v1/object/public/product-images/1788677833809-xpxlj8ry.webp",
+        "isPrimary": false,
+        "mediaType": "image"
+      }
+    ],
+    "colors": [
+      {
+        "hex": "#C9828F",
+        "name": "Dusty Pink"
+      }
+    ],
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "XXL",
+      "XS"
+    ],
+    "size_stock": [
+      {
+        "size": "S",
+        "stock": 0
+      },
+      {
+        "size": "M",
+        "stock": 0
+      },
+      {
+        "size": "L",
+        "stock": 0
+      },
+      {
+        "size": "XL",
+        "stock": 0
+      },
+      {
+        "size": "XXL",
+        "stock": 0
+      },
+      {
+        "size": "XS",
+        "stock": 0
+      }
+    ],
+    "stock_quantity": 0,
+    "status": "active",
+    "is_published": true,
+    "is_featured": false,
+    "tags": [
+      "Oversized Polo",
+      "Contrast Collar",
+      "Creator Back Graphic",
+      "Embroidered Chest Mark"
+    ]
+  }
+]
