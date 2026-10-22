@@ -5,11 +5,11 @@ export default function MonsoonBanner() {
     <Link
       to="/collections/tshirts"
       aria-label="Shop all tees at ₹999 in the End of Monsoon Sale. Cash on Delivery Live — pay when it arrives."
-      className="flex h-12 flex-col items-center justify-center gap-0.5 bg-[#C0132A] px-3 text-center text-[10px] font-semibold leading-tight tracking-[0.02em] text-white sm:h-8 sm:flex-row sm:gap-3 sm:text-xs"
+      className="flex h-8 flex-row items-center justify-center gap-2 whitespace-nowrap bg-[#C0132A] px-2 text-center text-[9px] font-semibold leading-tight tracking-[0.02em] text-white sm:gap-3 sm:px-3 sm:text-xs"
     >
-      <span>END OF MONSOON SALE · ALL TEES ₹999</span>
-      <span aria-hidden="true" className="hidden sm:inline">·</span>
-      <span>CASH ON DELIVERY LIVE · PAY WHEN IT ARRIVES</span>
+      <span>END OF MONSOON SALE<span className="hidden sm:inline"> · ALL TEES ₹999</span></span>
+      <span aria-hidden="true">·</span>
+      <span>CASH ON DELIVERY LIVE<span className="hidden sm:inline"> · PAY WHEN IT ARRIVES</span></span>
     </Link>
   );
 }
